@@ -182,14 +182,12 @@ namespace Dalichrome.RandomGenerator
             lastGeneration = generationInfo;
             lastGeneratedConfigs = generatingConfigs.DeepClone();
             CheckUngeneratedChanges();
-            events.RaiseGenerationEnd(lastGeneration);
 
-            Debug.Log("TEST");
             if (tilemapCreator != null)
             {
-                Debug.Log("TEST2");
                 tilemapCreator.SetTileGrid(lastGeneration.Grid);
             }
+            events.RaiseGenerationEnd(lastGeneration);
         }
 
         private GenerationInfo CreateGenerationInfo(CancellationToken token)
