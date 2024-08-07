@@ -24,6 +24,8 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private LayerDatabase layerDatabase;
         [SerializeField] private NumberSpriteDatabase numberSpriteDatabase;
 
+        [SerializeField] private bool generateOnStart = true;
+
         private TileInfoGrabber tileGrabber = new();
         private LayerInfoGrabber layerGrabber = new();
 
@@ -117,11 +119,16 @@ namespace Dalichrome.RandomGenerator
         private void Awake()
         {
             last = this;
-            if(tilemapCreator != null) tilemapCreator.SetRandomGenerator(this);
+            if (tilemapCreator != null) tilemapCreator.SetRandomGenerator(this);
             ThreadSafeRandom.InitState();
 
             tileGrabber.SetDatabase(tileDatabase, numberSpriteDatabase);
             layerGrabber.SetDatabase(layerDatabase);
+        }
+
+        private void Start()
+        {
+            if (generateOnStart) GenerateAsync();
         }
 
         private async void Generate(CancellationToken token)
@@ -177,8 +184,10 @@ namespace Dalichrome.RandomGenerator
             CheckUngeneratedChanges();
             events.RaiseGenerationEnd(lastGeneration);
 
+            Debug.Log("TEST");
             if (tilemapCreator != null)
             {
+                Debug.Log("TEST2");
                 tilemapCreator.SetTileGrid(lastGeneration.Grid);
             }
         }
