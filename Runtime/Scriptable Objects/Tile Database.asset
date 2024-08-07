@@ -1,0 +1,499 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfad2d65c8e5fca46af5cb0637df2d8d, type: 3}
+  m_Name: Tile Database
+  m_EditorClassIdentifier: 
+  list:
+  - Key: 0
+    Value:
+      layer: 0
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: -584376407, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 1, g: 0, b: 0.98475456, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 100
+    Value:
+      layer: 2
+      sprite_16: {fileID: 101242483, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1592629343, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -3069109885215926765, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 532781276, guid: 95fe5b7f676a9e8428c4d58da33eba0e, type: 3}
+      color: {r: 0.27058825, g: 0.15686275, b: 0.23529413, a: 1}
+      tile_16: {fileID: 11400000, guid: f739705da2795184f8124514229b738c, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 200
+    Value:
+      layer: 2
+      sprite_16: {fileID: 907711611, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1839652151, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1665936206, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 532781276, guid: 14e7b742940c5954f8e99a909214f2f9, type: 3}
+      color: {r: 0.40000004, g: 0.22352943, b: 0.19215688, a: 1}
+      tile_16: {fileID: 11400000, guid: e1163e27d4b74fb4abbfea15c9a3244b, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1300
+    Value:
+      layer: 1
+      sprite_16: {fileID: 1268946203, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1956775416, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 2000080060, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.85098046, g: 0.627451, b: 0.40000004, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1400
+    Value:
+      layer: 1
+      sprite_16: {fileID: 1995096398, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1096847318, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 549819997, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.5411765, g: 0.43529415, b: 0.18823531, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1500
+    Value:
+      layer: 1
+      sprite_16: {fileID: -1185534207, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 2064135206, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1500067534, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.29411766, g: 0.41176474, b: 0.18431373, a: 1}
+      tile_16: {fileID: 11400000, guid: 6cf393898bac95946936e0896a86c3f4, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 2600
+    Value:
+      layer: 3
+      sprite_16: {fileID: -1723375627, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1947658923, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 660780718, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.4431373, g: 0.42352945, b: 0.43921572, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 2700
+    Value:
+      layer: 3
+      sprite_16: {fileID: -1663439966, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1018774483, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 842485651, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.46274513, g: 0.25882354, b: 0.5411765, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 2800
+    Value:
+      layer: 3
+      sprite_16: {fileID: 1810740491, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -234230115, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -1348035634, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.56078434, g: 0.3372549, b: 0.23137257, a: 1}
+      tile_16: {fileID: 11400000, guid: 07beafa369021194daac8aa41557bac3, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 2900
+    Value:
+      layer: 3
+      sprite_16: {fileID: -1059956042, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1028483962, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -1784169790, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.56078434, g: 0.5921569, b: 0.2901961, a: 1}
+      tile_16: {fileID: 11400000, guid: a6f3e1840df69f4448add39eda2e4423, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3000
+    Value:
+      layer: 3
+      sprite_16: {fileID: 1712858909, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1238159101, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1764486517, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.7960785, g: 0.8588236, b: 0.98823535, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3100
+    Value:
+      layer: 3
+      sprite_16: {fileID: 867036374, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 391061434, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -910355319, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.7830189, g: 0.3895308, b: 0.2031417, a: 1}
+      tile_16: {fileID: 11400000, guid: f60d831c6bdcadd4e9a21066ad69240a, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9200
+    Value:
+      layer: 4
+      sprite_16: {fileID: -1818469091, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1549616884, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -264705127, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0, g: 0.5137255, b: 1, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9210
+    Value:
+      layer: 4
+      sprite_16: {fileID: 1313916107, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1036391370, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 2117556630, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0.43137258, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9220
+    Value:
+      layer: 4
+      sprite_16: {fileID: -1984614674, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1438992988, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1468044047, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.03529412, g: 0.8862746, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9230
+    Value:
+      layer: 4
+      sprite_16: {fileID: -1439020098, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1164124839, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 695657988, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.9686275, g: 0.8235295, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9400
+    Value:
+      layer: 4
+      sprite_16: {fileID: 1495307129, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1386120077, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -704143159, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0, g: 0.5137255, b: 1, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9410
+    Value:
+      layer: 4
+      sprite_16: {fileID: 1866327619, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1199370152, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 302698320, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0.43137258, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9420
+    Value:
+      layer: 4
+      sprite_16: {fileID: -827705982, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1657717139, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 704652523, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.03529412, g: 0.8862746, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9430
+    Value:
+      layer: 4
+      sprite_16: {fileID: 1955033420, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 235655123, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -602751506, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.9686275, g: 0.8235295, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9600
+    Value:
+      layer: 4
+      sprite_16: {fileID: -910863397, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1436916973, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -963365860, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0, g: 0.5137255, b: 1, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9610
+    Value:
+      layer: 4
+      sprite_16: {fileID: 671125179, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1252776132, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 352516807, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0.43137258, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9620
+    Value:
+      layer: 4
+      sprite_16: {fileID: -1761548381, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 269601675, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 2018562131, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.03529412, g: 0.8862746, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9630
+    Value:
+      layer: 4
+      sprite_16: {fileID: 1957914388, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -296965802, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -1619182183, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.9686275, g: 0.8235295, b: 0, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9996
+    Value:
+      layer: 2
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 1872029650, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9997
+    Value:
+      layer: 1
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 829153909, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9998
+    Value:
+      layer: 3
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: -900828922, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9999
+    Value:
+      layer: 4
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 1236796828, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9800
+    Value:
+      layer: 4
+      sprite_16: {fileID: 45350172, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1337435832, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 35342539, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3300
+    Value:
+      layer: 3
+      sprite_16: {fileID: 1406200680, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1420280675, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -1780539491, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.15496778, g: 1, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3200
+    Value:
+      layer: 3
+      sprite_16: {fileID: -265273922, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1740805679, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1700628649, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 250
+    Value:
+      layer: 2
+      sprite_16: {fileID: -506187419, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 8009841, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -976437589, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 532781276, guid: 23f883b0ba0398a4dae91c614b6bf1f3, type: 3}
+      color: {r: 0.5176471, g: 0.49411768, b: 0.5294118, a: 1}
+      tile_16: {fileID: 11400000, guid: 714a7191923090347811066c2bf0f44d, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1600
+    Value:
+      layer: 1
+      sprite_16: {fileID: -1128381752, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -149966670, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -249662699, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.60784316, g: 0.6784314, b: 0.7176471, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3400
+    Value:
+      layer: 3
+      sprite_16: {fileID: -88146810, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -222536269, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -265518144, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.509434, g: 0.1727886, b: 0.11294055, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 9900
+    Value:
+      layer: 4
+      sprite_16: {fileID: 637724339, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: -1565904722, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 1166498163, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 10100
+    Value:
+      layer: 4
+      sprite_16: {fileID: 673130480, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 659864838, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 91910209, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 1, g: 0, b: 0.91372555, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 10200
+    Value:
+      layer: 4
+      sprite_16: {fileID: 710163681, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1560141087, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: 452696455, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.7075472, g: 0.7075472, b: 0.7075472, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1550
+    Value:
+      layer: 1
+      sprite_16: {fileID: -465823683, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 1230473568, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -778403581, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.16862746, g: 0.28235295, b: 0.7372549, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 1560
+    Value:
+      layer: 1
+      sprite_16: {fileID: 1162579007, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 302101395, guid: efb356b4730bffc48a6d47b0428a9d1e, type: 3}
+      sprite_4: {fileID: -96900500, guid: 432df2e8c850876428830d875f9ce2f9, type: 3}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.39048594, g: 0.54958487, b: 0.7075472, a: 1}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 10000
+    Value:
+      layer: 0
+      sprite_16: {fileID: 0}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 1303682126, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tile_16: {fileID: 0}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 275
+    Value:
+      layer: 2
+      sprite_16: {fileID: 2078375639, guid: 6455bbd483be77143ad23d85e20dd645, type: 3}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 532781276, guid: 6455bbd483be77143ad23d85e20dd645, type: 3}
+      color: {r: 0.56078434, g: 0.40050623, b: 0.23137252, a: 1}
+      tile_16: {fileID: 11400000, guid: 7639030527d823e4b92d152e01ceeff0, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3500
+    Value:
+      layer: 3
+      sprite_16: {fileID: -739896676, guid: e019957e9eb882341841406cdc4c7351, type: 3}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.56078434, g: 0.5921569, b: 0.2901961, a: 1}
+      tile_16: {fileID: 11400000, guid: 6218c9b9c5ab2d94bbb0372365195655, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 3600
+    Value:
+      layer: 3
+      sprite_16: {fileID: 21300000, guid: e8d33f0bd8e22ae4b98815a24d7237c3, type: 3}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.56078434, g: 0.5921569, b: 0.2901961, a: 1}
+      tile_16: {fileID: 11400000, guid: e102b2b1e79d2e445818699b9d753cd6, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
+  - Key: 2910
+    Value:
+      layer: 3
+      sprite_16: {fileID: 838997794, guid: d05b9b66158f4fd42957bd7196f43408, type: 3}
+      sprite_8: {fileID: 0}
+      sprite_4: {fileID: 0}
+      sprite_menu: {fileID: 0}
+      color: {r: 0.29411766, g: 0.41176474, b: 0.18431373, a: 1}
+      tile_16: {fileID: 11400000, guid: 2ff0b96f4d89cef40968fe7c613a6082, type: 2}
+      tile_8: {fileID: 0}
+      tile_4: {fileID: 0}
