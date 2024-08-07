@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,19 +26,19 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private bool _additionalConnections = false;
 
         [Condition("AdditionalConnections", true)] public int AdditionalUpperBound { get { return _additionalUpperBound; } set { _additionalUpperBound = value; } }
-        [SerializeField, ShowIf("AdditionalConnections", true)] private int _additionalUpperBound = 30;
+        [SerializeField] private int _additionalUpperBound = 30;
 
         [Condition("AdditionalConnections", true)] public int AdditionalLowerBound { get { return _additionalLowerBound; } set { _additionalLowerBound = value; } }
-        [SerializeField, ShowIf("AdditionalConnections", true)] private int _additionalLowerBound = 20;
+        [SerializeField] private int _additionalLowerBound = 20;
 
         public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
         [SerializeField] protected OccupanceType _occupance = OccupanceType.Wall_Obj_Not_NA;
 
         [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
-        [SerializeField, ShowIf("Occupance", OccupanceType.Layer_Not_NA)] protected LayerType _occupyLayer = LayerType.Wall;
+        [SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [Condition("Occupance", OccupanceType.Contains_A)] public TileType TileA { get { return _tileA; } set { _tileA = value; } }
-        [SerializeField, ShowIf("Occupance", OccupanceType.Contains_A)] protected TileType _tileA = TileType.Wall_Cave;
+        [SerializeField] protected TileType _tileA = TileType.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

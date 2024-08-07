@@ -2,13 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Sirenix.OdinInspector;
 
 namespace Dalichrome.RandomGenerator.Databases
 {
     public class Database<T,V> : ScriptableObject
     {
-        [TableList][SerializeField] private List<SerialPair<T,V>> list;
+        [SerializeField] private List<SerialPair<T,V>> list;
 
         private Dictionary<T, V> dict;
         

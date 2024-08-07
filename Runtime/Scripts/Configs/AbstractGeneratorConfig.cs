@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,13 +41,13 @@ namespace Dalichrome.RandomGenerator.Configs
         }
 
         [Condition("Masked", true), Color("#4d728f")] public MaskTimeType MaskTime { get { return _maskTime; } set { _maskTime = value; } }
-        [SerializeField, ShowIf("Masked", true)] private MaskTimeType _maskTime = MaskTimeType.During;
+        [SerializeField] private MaskTimeType _maskTime = MaskTimeType.During;
 
         [Condition("Masked", true), Color("#4d728f")] public List<TileType> IncludeList { get { return _includeList; } set { _includeList = value; } }
-        [SerializeField, ShowIf("Masked", true)] private List<TileType> _includeList = new() {};
+        [SerializeField] private List<TileType> _includeList = new() {};
 
         [Condition("Masked", true), Color("#4d728f")] public List<TileType> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
-        [SerializeField, ShowIf("Masked", true)] private List<TileType> _excludeList = new() { TileType.Wall_Object_NA};
+        [SerializeField] private List<TileType> _excludeList = new() { TileType.Wall_Object_NA};
 
         public override string ToString()
         {
