@@ -10,6 +10,7 @@ using Dalichrome.RandomGenerator.Databases;
 using System.Linq;
 using System.Collections.Concurrent;
 using UnityEngine.Tilemaps;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -123,53 +124,55 @@ namespace Dalichrome.RandomGenerator
             layerGrabber.SetDatabase(layerDatabase);
         }
 
-        private async void GenerationAwaitable(CancellationToken token)
+        private async void Generate(CancellationToken token)
         {
             SetGeneratingConfigs();
 
-            try
+            GenerationInfo generationInfo = CreateGenerationInfo(token);
+            events.RaiseGenerationStart(generationInfo);
+
+            //Background Thread Generating the TileGrid and Calculating Time
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
+            //Await thread syncing on each strategy config, this is done to allow UI like the loader to function
+            int count = 0;
+            foreach (AbstractGeneratorConfig config in generatingConfigs)
             {
-                GenerationInfo generationInfo = CreateGenerationInfo(token);
-                events.RaiseGenerationStart(generationInfo);
+                if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
 
-                //Background Thread Generating the TileGrid and Calculating Time
-                var watch = new System.Diagnostics.Stopwatch();
-                watch.Start();
+                count += 1;
+                events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
 
-                //Await thread syncing on each strategy config, this is done to allow UI like the loader to function
-                int count = 0;
-                foreach (AbstractGeneratorConfig config in generatingConfigs)
+                Func<GenerationInfo> func = () =>
                 {
-                    if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
-
-                    count += 1;
-                    events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
-
-                    await Awaitable.BackgroundThreadAsync();
                     AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                    generationInfo = strategy.Do(generationInfo);
-                    await Awaitable.MainThreadAsync();
+                    return strategy.Do(generationInfo);
+                };
+                Task<GenerationInfo> task = Task.Run(func, token);
+
+                try
+                {
+                    await task;
+                    generationInfo = task.Result;
                 }
-
-                watch.Stop();
-
-                generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-                lastGeneration = generationInfo;
-            }
-            catch (OperationCanceledException exception)
-            {
-                await Awaitable.MainThreadAsync();
-                events.RaiseGenerationCancel();
-                Debug.Log("Generation Got Cancelled!" + exception.ToString());
-                return;
-            }
-            catch (Exception exception)
-            {
-                await Awaitable.MainThreadAsync();
-                events.RaiseGenerationError(exception.ToString());
-                return;
+                catch (OperationCanceledException exception)
+                {
+                    events.RaiseGenerationCancel();
+                    Debug.Log("Generation Got Cancelled!" + exception.ToString());
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    events.RaiseGenerationError(exception.ToString());
+                    return;
+                }
             }
 
+            watch.Stop();
+
+            generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
+            lastGeneration = generationInfo;
             lastGeneratedConfigs = generatingConfigs.DeepClone();
             CheckUngeneratedChanges();
             events.RaiseGenerationEnd(lastGeneration);
@@ -274,7 +277,7 @@ namespace Dalichrome.RandomGenerator
             CancelAsyncGeneration();
             CancellationTokenSource combinationSource = CancellationTokenSource.CreateLinkedTokenSource(manualCancellationSource.Token, Application.exitCancellationToken);
 
-            GenerationAwaitable(combinationSource.Token);
+            Generate(combinationSource.Token);
         }
 
         public void CancelAsyncGeneration()

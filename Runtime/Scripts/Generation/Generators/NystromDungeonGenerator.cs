@@ -4,10 +4,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using System.Linq;
-using static UnityEditor.PlayerSettings;
-using NUnit.Framework;
 using Dalichrome.RandomGenerator.Random;
-using UnityEngine.UIElements;
 using System;
 
 namespace Dalichrome.RandomGenerator.Generators
