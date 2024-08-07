@@ -8,11 +8,12 @@ namespace Dalichrome.RandomGenerator
 {
     public class TilemapCreator : MonoBehaviour
     {
-        [SerializeField] private GenerationManager randomGenerator;
         [SerializeField] private GameObject TilemapPrefab;
         [SerializeField] private List<SerialPair<LayerType, Tilemap>> tilemaps;
         [SerializeField] private bool instantiateMissingTilemaps = true;
         [SerializeField] private bool makeNumberLayer = false;
+
+        private GenerationManager randomGenerator;
 
         private Dictionary<LayerType, Tilemap> tilemapDict;
         private Tilemap numberTilemap;

@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2151493389273895411
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2026909995132346559}
+  - component: {fileID: 831106595240439168}
+  - component: {fileID: 1711460390114186999}
+  - component: {fileID: 8743272443497452337}
+  m_Layer: 0
+  m_Name: Generation Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2026909995132346559
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2151493389273895411}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &831106595240439168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2151493389273895411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 083f8a6442ec4ef458a419cdf97ece2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  generationParameters:
+    isSeeded: 1
+    seed: 1
+    width: 100
+    height: 100
+    configs:
+    - rid: 8360170923524882437
+    - rid: 8360170923524882438
+    - rid: 8360170923524882439
+    - rid: 8360170923524882440
+    - rid: 8360170923524882441
+  tilemapCreator: {fileID: 1711460390114186999}
+  tileDatabase: {fileID: 11400000, guid: 40d0ff445599fea4d834c5b9d7e6049b, type: 2}
+  layerDatabase: {fileID: 11400000, guid: 43f83554656423c40b265a03edbc5763, type: 2}
+  numberSpriteDatabase: {fileID: 11400000, guid: 0c05980b1c5b13d46ada327af00b0392, type: 2}
+  generateOnStart: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 8360170923524882437
+      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _density: 0.5
+        _repetitions: 1
+        _tiles: 64000000
+    - rid: 8360170923524882438
+      type: {class: OvalConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _radius: 1
+        _interior: 0
+        _exterior: 100
+    - rid: 8360170923524882439
+      type: {class: CellularAutomataConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _liveNeighboursRequired: 4
+        _repetitions: 4
+        _fill: 100
+        _empty: 9996
+        _placeProbability: 1
+        _borderOccupied: 1
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0
+    - rid: 8360170923524882440
+      type: {class: RoomFillConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _roomFill: 0
+        _roomLimit: 1
+        _minimumRoomSize: 300
+        _debugRooms: 0
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0
+    - rid: 8360170923524882441
+      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 1
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _density: 0.5
+        _repetitions: 1
+        _tiles: 280a0000
+--- !u!114 &1711460390114186999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2151493389273895411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b280da6caa6710499b890602f8cdec2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomGenerator: {fileID: 0}
+  TilemapPrefab: {fileID: 6357629691273527064, guid: 8c0fe74019b91b54391d21224210f027, type: 3}
+  tilemaps: []
+  instantiateMissingTilemaps: 1
+  makeNumberLayer: 0
+--- !u!156049354 &8743272443497452337
+Grid:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2151493389273895411}
+  m_Enabled: 1
+  m_CellSize: {x: 1, y: 1, z: 1}
+  m_CellGap: {x: 0, y: 0, z: 0}
+  m_CellLayout: 0
+  m_CellSwizzle: 0
