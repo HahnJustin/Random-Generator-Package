@@ -1,0 +1,24 @@
+{
+  "name": "com.dalichrome.randomgenerator",
+  "version": "0.1.0",
+  "displayName": "Random Generator",
+  "description": "This is an in-progress package that helps generate random 2D terrain",
+  "unity": "2023.3",
+  "unityRelease": "0b5",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "author": {
+    "name": "Vein Dali",
+    "email": "unity@example.com",
+    "url": "https://www.unity3d.com"
+  },
+  "dependencies": {
+    "com.unity.mathematics": "1.2.6"
+  }
+}
