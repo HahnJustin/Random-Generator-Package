@@ -278,14 +278,14 @@ MonoBehaviour:
       sprite_16: {fileID: -465823683, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
       sprite_menu: {fileID: 0}
       color: {r: 0.09411766, g: 0.3019608, b: 0.6039216, a: 1}
-      tile_16: {fileID: 0}
+      tile_16: {fileID: 11400000, guid: f43ceac8f19ef4d44b3f39d7df7f8f9f, type: 2}
   - Key: 1560
     Value:
       layer: 1
       sprite_16: {fileID: 1162579007, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
       sprite_menu: {fileID: 0}
       color: {r: 0.39607847, g: 0.5058824, b: 0.6313726, a: 1}
-      tile_16: {fileID: 0}
+      tile_16: {fileID: 11400000, guid: df87180332620a944aa3e0ebb505362b, type: 2}
   - Key: 10000
     Value:
       layer: 0
