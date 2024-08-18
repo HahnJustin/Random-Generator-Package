@@ -6,6 +6,7 @@ using UnityEngine;
 [Serializable]
 public class LayerInfo
 {
+    public string layerName;
     public int sortingOrder;
     public int tieOrder;
 }

@@ -15,17 +15,21 @@ MonoBehaviour:
   list:
   - Key: 1
     Value:
+      layerName: Default
       sortingOrder: 1
       tieOrder: 0
   - Key: 2
     Value:
+      layerName: Default
       sortingOrder: 2
       tieOrder: 0
   - Key: 3
     Value:
+      layerName: Default
       sortingOrder: 3
       tieOrder: 1
   - Key: 4
     Value:
+      layerName: Default
       sortingOrder: 4
       tieOrder: 0

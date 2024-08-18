@@ -8,5 +8,6 @@ namespace Dalichrome.RandomGenerator.Databases
     [CreateAssetMenu(menuName = "Databases/LayerDatabase")]
     public class LayerDatabase : Database<LayerType, LayerInfo>
     {
+
     }
 }

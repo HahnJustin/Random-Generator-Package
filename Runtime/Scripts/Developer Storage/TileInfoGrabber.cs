@@ -17,14 +17,15 @@ namespace Dalichrome.RandomGenerator
         private static Dictionary<TileType, TileBase> tileBases = new();
         private static Dictionary<int, TileBase> numberTileBases = new();
 
-        private record ExtractedValue(LayerType LayerValue, Sprite SpriteValue, Color ColorValue, TileBase TileValue);
+        private record ExtractedValue(GameObject gameObject, Sprite SpriteValue, Color ColorValue, TileBase TileValue);
 
         private enum TileInfoType
         {
             layer,
             sprite,
             color,
-            tile
+            tile,
+            gameObject
         }
 
         public void SetDatabase(TileInfoDatabase database, NumberSpriteDatabase numberSpriteDatabase = null)
@@ -33,9 +34,9 @@ namespace Dalichrome.RandomGenerator
             this.numberSpriteDB = numberSpriteDatabase;
         }
 
-        public LayerType GetLayerOfTile(TileType type)
+        public GameObject GetGameObject(TileType type)
         {
-            return GetInfoHelper(type, TileInfoType.layer).LayerValue;
+            return GetInfoHelper(type, TileInfoType.gameObject).gameObject;
         }
 
         public Sprite GetTileSprite(TileType type)
@@ -102,14 +103,14 @@ namespace Dalichrome.RandomGenerator
 
             switch (infoType)
             {
-                case TileInfoType.layer:
-                    return new(tileInfo.layer, default, default, default);
                 case TileInfoType.sprite:
                     return new(default, tileInfo.sprite_16, default, default);
                 case TileInfoType.color:
                     return new(default, default, tileInfo.color, default);
                 case TileInfoType.tile:
                     return new(default, default, default, tileInfo.tile_16);
+                case TileInfoType.gameObject:
+                    return new(tileInfo.gameObject, default, default, default);
                 default:
                     Debug.LogError("[TileInfoGrabber] Bad Tile Info Type Argument");
                     return default;

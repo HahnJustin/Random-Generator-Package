@@ -7,13 +7,13 @@ namespace Dalichrome.RandomGenerator
 {
     public interface ITileInfoGrabber
     {
-        public LayerType GetLayerOfTile(TileType type);
-
         public Sprite GetTileSprite(TileType type);
 
         public Color GetTileColor(TileType type);
 
         public TileBase GetTileBase(TileType type);
+
+        public GameObject GetGameObject(TileType type);
 
         public TileBase GetNumberTileBase(int value);
     }

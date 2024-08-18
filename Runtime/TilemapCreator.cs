@@ -8,9 +8,16 @@ namespace Dalichrome.RandomGenerator
 {
     public class TilemapCreator : MonoBehaviour
     {
+        [Header("Core")]
         [SerializeField] private GameObject TilemapPrefab;
         [SerializeField] private List<SerialPair<LayerType, Tilemap>> tilemaps;
         [SerializeField] private bool instantiateMissingTilemaps = true;
+
+        [Header("GameObjects")]
+        [SerializeField] private bool useGameObjects = false;
+        [SerializeField] private Transform gameObjectParent;
+
+        [Header("Number Tiles")]
         [SerializeField] private bool makeNumberLayer = false;
 
         private GenerationManager randomGenerator;
@@ -34,6 +41,16 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
+        private void SpawnTileGameObject(Tile tile, LayerType layer)
+        {
+            TileType type = tile.GetTypeInLayer(layer);
+
+            GameObject prefab = randomGenerator.GetGameObject(type);
+            if (prefab == null) return;
+
+            Instantiate(prefab, (Vector3Int)tile.Vector, Quaternion.identity, gameObjectParent);
+        }
+
         private void SetTilesByLayer(LayerType layer)
         {
             if (layer == LayerType.NA) return;
@@ -52,7 +69,14 @@ namespace Dalichrome.RandomGenerator
                     int tempIndex = x + (y * tileGrid.width);
                     Tile tile = tileGrid.GetTile(x, y);
                     TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
-                    tileBaseArray[tempIndex] = tileBase;
+                    if (useGameObjects) {
+                        SpawnTileGameObject(tile,layer);
+                        tileBaseArray[tempIndex] = null;
+                    }
+                    else
+                    {
+                        tileBaseArray[tempIndex] = tileBase;
+                    }
                 }
             }
 
@@ -88,6 +112,7 @@ namespace Dalichrome.RandomGenerator
             GameObject tilemapObject = Instantiate(TilemapPrefab, transform);
             int sortingOrder = randomGenerator.GetSortingOrder(layer);
             tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = sortingOrder;
+            tilemapObject.GetComponent<Renderer>().sortingLayerID = randomGenerator.GetSortingLayerID(layer);
             Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
             if (tilemap == null)
             {

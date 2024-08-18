@@ -24,5 +24,14 @@ namespace Dalichrome.RandomGenerator
             }
             return database.GetValue(layer).sortingOrder;
         }
+
+        public int GetSortingLayerID(LayerType layer)
+        {
+            if (database == null)
+            {
+                return SortingLayer.NameToID("Default");
+            }
+            return SortingLayer.NameToID(database.GetValue(layer).layerName);
+        }
     }
 }

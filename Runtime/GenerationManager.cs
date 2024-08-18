@@ -359,9 +359,9 @@ namespace Dalichrome.RandomGenerator
             return !lastGeneratedConfigs.SequenceEqual(Configs);
         }
 
-        public LayerType GetLayerOfTile(TileType type)
+        public GameObject GetGameObject(TileType type)
         {
-            return tileGrabber.GetLayerOfTile(type);
+            return tileGrabber.GetGameObject(type);
         }
 
         public Sprite GetTileSprite(TileType type)
@@ -387,6 +387,11 @@ namespace Dalichrome.RandomGenerator
         public int GetSortingOrder(LayerType layer)
         {
             return layerGrabber.GetSortingOrder(layer);
+        }
+
+        public int GetSortingLayerID(LayerType layer)
+        {
+            return layerGrabber.GetSortingLayerID(layer);
         }
 
         public Texture2D CreateTexture(TileGrid grid)
