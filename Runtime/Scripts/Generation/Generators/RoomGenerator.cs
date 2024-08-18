@@ -49,5 +49,10 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             util.RoomFill(TileGrid, x, y, room, useNumbers);
         }
+
+        public void RoomCreate(TileGrid grid, int x, int y, Room room, bool lowerNumber = false, int number = 1)
+        {
+            util.RoomCreate(TileGrid, x, y, room, lowerNumber, number);
+        }
     }
 }

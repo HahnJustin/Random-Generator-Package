@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Random;
+using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -46,7 +48,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public void AddTile(Tile tile)
         {
-            Vector2Int position = new Vector2Int(tile.x, tile.y);
+            Vector2Int position = new (tile.x, tile.y);
             if (tileDictionary.ContainsKey(position))
             {
                 return;
@@ -60,6 +62,23 @@ namespace Dalichrome.RandomGenerator.Utils
             if (left == null || left.x > tile.x) left = tile;
         }
 
+        public void RemoveTile(Tile tile)
+        {
+            Vector2Int position = new (tile.x, tile.y);
+            if (!tileDictionary.ContainsKey(position))
+            {
+                return;
+            }
+            tiles.Remove(tile);
+            tileDictionary.Remove(position);
+
+            //TODO: Redo these here :o
+            if (top == tile) top = null;
+            if (bottom == tile) bottom = null;
+            if (right == tile) right = null;
+            if (left == tile) left = null;
+        }
+
         //Could definitely have issue with using bounds related to rooms wrapping around a grid
         public BoundsInt GetBounds()
         {
@@ -71,9 +90,9 @@ namespace Dalichrome.RandomGenerator.Utils
             return tiles[0];
         }
 
-        public Tile GetRandomTile(System.Random random)
+        public Tile GetRandomTile(AbstractRandom random)
         {
-            return tiles[random.Next(0, tiles.Count)];
+            return tiles[random.NextInt(0, tiles.Count)];
         }
 
         public bool ContainsTile(Tile tile)

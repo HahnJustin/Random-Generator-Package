@@ -13,6 +13,8 @@ namespace Dalichrome.RandomGenerator
         public readonly int width;
         public readonly int height;
 
+        public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width/2,0,width), Mathf.Clamp(height /2, 0, height)); } }
+
         protected Tile[,] grid;
 
         public TileGrid(TileGrid other)

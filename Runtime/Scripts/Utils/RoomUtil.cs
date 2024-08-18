@@ -53,7 +53,7 @@ namespace Dalichrome.RandomGenerator.Utils
             this.config = config;
         }
 
-        private bool EnqueueIfMatches(TileGrid grid, Queue<Vector2Int> queue, int x, int y)
+        private bool EnqueueIfMatches(TileGrid grid, Queue<Tuple<Vector2Int, int>> queue, int x, int y, int number)
         {
             // Outta bounds
             if (x < 0 || x >= grid.width || y < 0 || y >= grid.height)
@@ -66,38 +66,10 @@ namespace Dalichrome.RandomGenerator.Utils
             // Isn't Occupied
             if (IsOccupied(tile) <= 0)
             {
-                queue.Enqueue(new Vector2Int(x, y));
+                queue.Enqueue(new(new Vector2Int(x, y), number));
                 return false;
             }
             return true;
-        }
-
-        private void RoomFillUtilRecurse(TileGrid grid, int x, int y, Room room)
-        {
-            // Base cases
-            if (x < 0 || x >= grid.width ||
-                y < 0 || y >= grid.height)
-                return;
-
-            Tile tile = grid.GetTile(x, y);
-
-            // Is occupied
-            if (IsOccupied(tile) >= 1)
-                return;
-
-            // Fill
-            if (room != null)
-            {
-                room.AddTile(tile);
-            }
-            Fill(tile);
-            tile.Value = 1;
-
-            // Recur for north, east, south and west
-            RoomFillUtilRecurse(grid, x + 1, y, room);
-            RoomFillUtilRecurse(grid, x - 1, y, room);
-            RoomFillUtilRecurse(grid, x, y + 1, room);
-            RoomFillUtilRecurse(grid, x, y - 1, room);
         }
 
         protected void CreateRooms()
@@ -128,17 +100,24 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public void RoomFill(int x, int y, Room room, bool useNumbers)
         {
-            RoomFill( tileGrid, x, y, room, useNumbers);
+            RoomFillHelper( tileGrid, x, y, room, useNumbers);
         }
 
         public void RoomFill(TileGrid grid, int x, int y, Room room, bool useNumbers)
         {
-            Queue<Vector2Int> queue = new Queue<Vector2Int>();
-            queue.Enqueue(new Vector2Int(x, y));
+            RoomFillHelper(grid, x, y, room, useNumbers);
+        }
+
+        private void RoomFillHelper(TileGrid grid, int x, int y, Room room, bool useNumbers, bool decreaseNumbers = false, int number = -1)
+        {
+            Queue<Tuple<Vector2Int,int>> queue = new Queue<Tuple<Vector2Int, int>>();
+            queue.Enqueue(new(new Vector2Int(x, y), number));
 
             while (queue.Any())
             {
-                Vector2Int point = queue.Dequeue();
+                Tuple<Vector2Int, int> tuple = queue.Dequeue();
+                Vector2Int point = tuple.Item1;
+                int currentNum = tuple.Item2;
                 Tile tile = grid.GetTile(point);
 
                 // Is Occupied
@@ -149,19 +128,57 @@ namespace Dalichrome.RandomGenerator.Utils
                     room.AddTile(tile);
                 }
 
-                if (useNumbers) tile.Value = currentRoomNumber;
+                if(decreaseNumbers && useNumbers) tile.Value = currentNum;
+                else if (useNumbers) tile.Value = currentRoomNumber;
                 else Fill(tile);
 
-                bool leftOccupied = EnqueueIfMatches(grid, queue, point.x - 1, point.y);
-                bool rightOccupied = EnqueueIfMatches(grid, queue, point.x + 1, point.y);
-                bool downOccupied = EnqueueIfMatches(grid, queue, point.x, point.y - 1);
-                bool upOccupied = EnqueueIfMatches(grid, queue, point.x, point.y + 1);
+                if (decreaseNumbers) currentNum -= 1;
+
+                bool leftOccupied = EnqueueIfMatches(grid, queue, point.x - 1, point.y, currentNum);
+                bool rightOccupied = EnqueueIfMatches(grid, queue, point.x + 1, point.y, currentNum);
+                bool downOccupied = EnqueueIfMatches(grid, queue, point.x, point.y - 1, currentNum);
+                bool upOccupied = EnqueueIfMatches(grid, queue, point.x, point.y + 1, currentNum);
 
                 if ((leftOccupied || rightOccupied || downOccupied || upOccupied) && room != null)
                 {
                     room.AddEdge(tile);
                 }
             }
+        }
+
+        private void RoomCreateRecurse(TileGrid grid, int x, int y, Room room, int firstNumber, bool lowerNumber = false, int number = -1)
+        {
+            // Base cases
+            if (x < 0 || x >= grid.width ||
+                y < 0 || y >= grid.height)
+                return;
+
+            Tile tile = grid.GetTile(x, y);
+
+            // Is occupied
+            if (IsOccupied(tile) >= 1 || tile.Value <= firstNumber)
+                return;
+
+            //Add
+            if (room != null)
+            {
+                room.AddTile(tile);
+            }
+
+            tile.Value = number;
+            int value = lowerNumber ? number - 1 : number;
+
+            // Recur for north, east, south and west
+            RoomCreateRecurse(grid, x + 1, y, room, firstNumber, lowerNumber, value);
+            RoomCreateRecurse(grid, x - 1, y, room, firstNumber, lowerNumber, value);
+            RoomCreateRecurse(grid, x, y + 1, room, firstNumber, lowerNumber, value);
+            RoomCreateRecurse(grid, x, y - 1, room, firstNumber, lowerNumber, value);
+        }
+
+        public void RoomCreate(TileGrid grid, int x, int y, Room room, bool lowerNumber = false, int number = -1)
+        {
+            grid.ClearNumbers();
+            RoomFillHelper(grid, x, y, room, true, lowerNumber, number);
         }
 
         public void Initialize()

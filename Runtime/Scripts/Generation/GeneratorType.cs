@@ -19,6 +19,7 @@ namespace Dalichrome.RandomGenerator
         Universal_Mask,
         Upscaled_Noise,
         Distance_Fill,
-        Nystrom_Dungeon
+        Nystrom_Dungeon,
+        Guarantee_Spawn
     }
 }

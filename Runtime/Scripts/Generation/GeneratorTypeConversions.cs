@@ -46,6 +46,8 @@ namespace Dalichrome.RandomGenerator.Generators
                     return new DistanceFillConfig();
                 case GeneratorType.Nystrom_Dungeon:
                     return new NystromDungeonConfig();
+                case GeneratorType.Guarantee_Spawn:
+                    return new GuaranteeSpawnConfig();
                 default:
                     Debug.LogWarning("[GeneratorDataManager] A Config without a related strategy was found");
                     return null;
@@ -107,6 +109,9 @@ namespace Dalichrome.RandomGenerator.Generators
                     break;
                 case NystromDungeonConfig nyDunConfig:
                     generator = new NystromDungeonGenerator(nyDunConfig);
+                    break;
+                case GuaranteeSpawnConfig guSpConfig:
+                    generator = new GuaranteeSpawnGenerator(guSpConfig);
                     break;
                 default:
                     Debug.LogError("[GeneratorDataManager] A Config without a related generator was found");

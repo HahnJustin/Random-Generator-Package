@@ -10,5 +10,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public abstract List<Room> SortBySmallest(List<Room> rooms);
 
         public abstract void RoomFill(TileGrid grid, int x, int y, Room room, bool useNumbers);
+
+        public abstract void RoomCreate(TileGrid grid, int x, int y, Room room, bool lowerNumber = false, int number = 1);
     }
 }
