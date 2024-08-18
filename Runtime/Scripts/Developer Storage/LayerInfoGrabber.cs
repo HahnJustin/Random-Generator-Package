@@ -33,5 +33,14 @@ namespace Dalichrome.RandomGenerator
             }
             return SortingLayer.NameToID(database.GetValue(layer).layerName);
         }
+
+        public bool GetHasCollider(LayerType layer)
+        {
+            if (database == null)
+            {
+                return false;
+            }
+            return database.GetValue(layer).hasCollider;
+        }
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 public class LayerInfo
 {
     public string layerName;
+    public bool hasCollider = false;
     public int sortingOrder;
     public int tieOrder;
 }

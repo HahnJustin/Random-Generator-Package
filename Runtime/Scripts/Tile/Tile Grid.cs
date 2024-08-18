@@ -15,6 +15,8 @@ namespace Dalichrome.RandomGenerator
 
         public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width/2,0,width), Mathf.Clamp(height /2, 0, height)); } }
 
+        public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } } 
+
         protected Tile[,] grid;
 
         public TileGrid(TileGrid other)

@@ -41,14 +41,15 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private void SpawnTileGameObject(Tile tile, LayerType layer)
+        private bool SpawnTileGameObject(Tile tile, LayerType layer)
         {
             TileType type = tile.GetTypeInLayer(layer);
 
             GameObject prefab = randomGenerator.GetGameObject(type);
-            if (prefab == null) return;
+            if (prefab == null) return false;
 
             Instantiate(prefab, (Vector3Int)tile.Vector, Quaternion.identity, gameObjectParent);
+            return true;
         }
 
         private void SetTilesByLayer(LayerType layer)
@@ -69,8 +70,7 @@ namespace Dalichrome.RandomGenerator
                     int tempIndex = x + (y * tileGrid.width);
                     Tile tile = tileGrid.GetTile(x, y);
                     TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
-                    if (useGameObjects) {
-                        SpawnTileGameObject(tile,layer);
+                    if (useGameObjects && SpawnTileGameObject(tile, layer)) {
                         tileBaseArray[tempIndex] = null;
                     }
                     else
@@ -113,6 +113,8 @@ namespace Dalichrome.RandomGenerator
             int sortingOrder = randomGenerator.GetSortingOrder(layer);
             tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = sortingOrder;
             tilemapObject.GetComponent<Renderer>().sortingLayerID = randomGenerator.GetSortingLayerID(layer);
+            if (randomGenerator.GetHasCollider(layer)) tilemapObject.AddComponent<TilemapCollider2D>();
+
             Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
             if (tilemap == null)
             {

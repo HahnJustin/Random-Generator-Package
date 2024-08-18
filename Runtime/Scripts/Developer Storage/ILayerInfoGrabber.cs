@@ -9,5 +9,7 @@ namespace Dalichrome.RandomGenerator
         public int GetSortingOrder(LayerType layer);
 
         public int GetSortingLayerID(LayerType layer);
+
+        public bool GetHasCollider(LayerType layer);
     }
 }
