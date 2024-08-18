@@ -48,6 +48,8 @@ namespace Dalichrome.RandomGenerator.Generators
                     return new NystromDungeonConfig();
                 case GeneratorType.Guarantee_Spawn:
                     return new GuaranteeSpawnConfig();
+                case GeneratorType.Border:
+                    return new BorderConfig();
                 default:
                     Debug.LogWarning("[GeneratorDataManager] A Config without a related strategy was found");
                     return null;
@@ -112,6 +114,9 @@ namespace Dalichrome.RandomGenerator.Generators
                     break;
                 case GuaranteeSpawnConfig guSpConfig:
                     generator = new GuaranteeSpawnGenerator(guSpConfig);
+                    break;
+                case BorderConfig boConfig:
+                    generator = new BorderGenerator(boConfig);
                     break;
                 default:
                     Debug.LogError("[GeneratorDataManager] A Config without a related generator was found");

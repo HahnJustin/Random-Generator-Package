@@ -20,6 +20,7 @@ namespace Dalichrome.RandomGenerator
         Upscaled_Noise,
         Distance_Fill,
         Nystrom_Dungeon,
-        Guarantee_Spawn
+        Guarantee_Spawn,
+        Border
     }
 }
