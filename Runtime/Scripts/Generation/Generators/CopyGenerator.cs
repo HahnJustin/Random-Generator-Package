@@ -27,7 +27,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     {
                         if (tile.ContainsType(pair.Key))
                         {
-                            tile.SetType(pair.Value);
+                            TileGrid.SetTileType(tile, pair.Value);
                         }
                     }
                 }
