@@ -48,8 +48,8 @@ namespace Dalichrome.RandomGenerator
             GameObject prefab = randomGenerator.GetGameObject(type);
             if (prefab == null) return false;
 
-            Instantiate(prefab, (Vector3Int)tile.Vector, Quaternion.identity, gameObjectParent);
-            return true;
+            Instantiate(prefab, new Vector3(tile.Vector.x, tile.Vector.y, prefab.transform.position.z), Quaternion.identity, gameObjectParent);
+			return true;
         }
 
         private void SetTilesByLayer(LayerType layer)
