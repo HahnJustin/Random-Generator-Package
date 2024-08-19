@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Dalichrome.RandomGenerator.Random;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -15,6 +16,7 @@ namespace Dalichrome.RandomGenerator
 
         [Header("GameObjects")]
         [SerializeField] private bool useGameObjects = false;
+        [SerializeField] private float gameObjectVariance = 0.2f;
         [SerializeField] private Transform gameObjectParent;
 
         [Header("Number Tiles")]
@@ -48,7 +50,9 @@ namespace Dalichrome.RandomGenerator
             GameObject prefab = randomGenerator.GetGameObject(type);
             if (prefab == null) return false;
 
-            Instantiate(prefab, new Vector3(tile.Vector.x, tile.Vector.y, prefab.transform.position.z), Quaternion.identity, gameObjectParent);
+            Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
+
+            Instantiate(prefab, new Vector3(tile.Vector.x + circle.x, tile.Vector.y + circle.y, prefab.transform.position.z), Quaternion.identity, gameObjectParent);
 			return true;
         }
 
