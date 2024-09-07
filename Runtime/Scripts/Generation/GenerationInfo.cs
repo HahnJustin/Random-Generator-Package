@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator
             set
             {
                 _seed = value;
-                _random = new UnityMathematicsRandom(value);
+                _random = new CSharpNativeRandom(value);
             }
         }
         private uint _seed;

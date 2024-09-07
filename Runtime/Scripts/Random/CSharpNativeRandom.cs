@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator.Random
 
         public override void InitState(uint seed)
         {
-            random = new System.Random(Convert.ToInt32(seed));
+            random = new System.Random((int)seed);
         }
 
         public override float NextFloat()

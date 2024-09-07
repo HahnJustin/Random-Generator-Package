@@ -40,6 +40,20 @@ namespace Dalichrome.RandomGenerator.Databases
             return dict[type];
         }
 
+        public void SetValue(T type, V info)
+        {
+            if (dict == null)
+            {
+                CreateDictionary();
+            }
+
+            if (dict != null && !dict.ContainsKey(type))
+            {
+                Debug.Log("[Database]: Type to Mapping Dictionary does not contain type:" + type.ToString());
+            }
+            dict[type] = info;
+        }
+
         public bool ContainsKey(T type)
         {
             if (dict == null)
