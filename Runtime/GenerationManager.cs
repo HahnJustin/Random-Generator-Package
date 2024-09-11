@@ -244,7 +244,7 @@ namespace Dalichrome.RandomGenerator
             if (CannotGenerate()) return null;
             last = this;
 
-            uint seed = 0;
+            uint seed = generationParameters.Seed;
             if (!generationParameters.IsSeeded || generationParameters.Seed == 0)
             {
                 seed = GetRandomSeed();
