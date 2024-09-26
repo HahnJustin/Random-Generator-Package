@@ -394,6 +394,11 @@ namespace Dalichrome.RandomGenerator
             return layerGrabber.GetSortingLayerID(layer);
         }
 
+        public int GetLayerID(LayerType layer)
+        {
+            return layerGrabber.GetLayerID(layer);
+        }
+
         public bool GetHasCollider(LayerType layer)
         {
             return layerGrabber.GetHasCollider(layer);

@@ -31,7 +31,16 @@ namespace Dalichrome.RandomGenerator
             {
                 return SortingLayer.NameToID("Default");
             }
-            return SortingLayer.NameToID(database.GetValue(layer).layerName);
+            return SortingLayer.NameToID(database.GetValue(layer).sortingLayerName);
+        }
+
+        public int GetLayerID(LayerType layer)
+        {
+            if (database == null)
+            {
+                return LayerMask.NameToLayer("Default");
+            }
+            return LayerMask.NameToLayer(database.GetValue(layer).layerName);
         }
 
         public bool GetHasCollider(LayerType layer)
