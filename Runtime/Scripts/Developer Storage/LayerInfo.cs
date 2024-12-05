@@ -11,4 +11,5 @@ public class LayerInfo
     public bool hasCollider = false;
     public int sortingOrder;
     public int tieOrder;
+    public Material material;
 }

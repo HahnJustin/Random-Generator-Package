@@ -404,6 +404,11 @@ namespace Dalichrome.RandomGenerator
             return layerGrabber.GetHasCollider(layer);
         }
 
+        public Material GetMaterial(LayerType layer)
+        {
+            return layerGrabber.GetMaterial(layer);
+        }
+
         public Texture2D CreateTexture(TileGrid grid)
         {
             // Create a new x by y texture ARGB32 (32 bit with alpha) and no mipmaps

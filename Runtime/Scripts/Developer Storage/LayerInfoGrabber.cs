@@ -51,5 +51,14 @@ namespace Dalichrome.RandomGenerator
             }
             return database.GetValue(layer).hasCollider;
         }
+
+        public Material GetMaterial(LayerType layer)
+        {
+            if (database == null)
+            {
+                return null;
+            }
+            return database.GetValue(layer).material;
+        }
     }
 }

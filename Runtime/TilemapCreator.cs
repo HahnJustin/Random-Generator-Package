@@ -117,6 +117,10 @@ namespace Dalichrome.RandomGenerator
             int sortingOrder = randomGenerator.GetSortingOrder(layer);
             tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = sortingOrder;
             tilemapObject.GetComponent<Renderer>().sortingLayerID = randomGenerator.GetSortingLayerID(layer);
+
+            Material material = randomGenerator.GetMaterial(layer);
+            if(material != null)tilemapObject.GetComponent<Renderer>().material = material;
+
             int number = randomGenerator.GetLayerID(layer);
             tilemapObject.layer = number;
             if (randomGenerator.GetHasCollider(layer)) tilemapObject.AddComponent<TilemapCollider2D>();
