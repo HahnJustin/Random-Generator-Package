@@ -116,52 +116,34 @@ namespace Dalichrome.RandomGenerator
 
         public Vector2Int GetNearestPosition(int x, int y, TileType type)
         {
-            // Check point (xs, ys)
+            // Iterate through all distances from the center
             for (int d = 1; d < Mathf.Max(height, width); d++)
             {
-                for (int i = 0; i < d + 1; i++)
+                // Check all positions at distance `d`
+                for (int dx = -d; dx <= d; dx++)
                 {
-                    int x1 = x - d + i;
-                    int y1 = y - i;
+                    int dy1 = d - Mathf.Abs(dx); // Top and bottom edges
+                    int dy2 = -dy1;
 
-                    if (x1 < grid.GetLength(0) && x1 > -1 &&
-                        y1 < grid.GetLength(1) && y1 > -1 &&
-                        grid[x1, y1].ContainsType(type))
+                    // Top edge
+                    int x1 = x + dx;
+                    int y1 = y + dy1;
+
+                    if (IsInBounds(x1, y1) && grid[x1, y1].ContainsType(type))
                     {
                         return new Vector2Int(x1, y1);
                     }
 
-                    int x2 = x + d - i;
-                    int y2 = y + i;
-
-                    if (x2 < grid.GetLength(0) && x2 > -1 &&
-                        y2 < grid.GetLength(1) && y2 > -1 &&
-                        grid[x2, y2].ContainsType(type))
+                    // Bottom edge (avoid duplicate check for middle row)
+                    if (dy1 != dy2)
                     {
-                        return new Vector2Int(x2, y2);
-                    }
-                }
+                        int x2 = x + dx;
+                        int y2 = y + dy2;
 
-                for (int i = 1; i < d; i++)
-                {
-                    int x1 = x - i;
-                    int y1 = y + d - i;
-
-                    if (x1 < grid.GetLength(0) && x1 > -1 &&
-                        y1 < grid.GetLength(1) && y1 > -1 &&
-                        grid[x1, y1].ContainsType(type))
-                    {
-                        return new Vector2Int(x1, y1);
-                    }
-
-                    int x2 = x + i;
-                    int y2 = y - d + i;
-
-                    if (x2 < grid.GetLength(0) && x2 > -1 &&
-                        y2 < grid.GetLength(1) && y2 > -1 &&
-                        grid[x2, y2].ContainsType(type))
-                    {
-                        return new Vector2Int(x2, y2);
+                        if (IsInBounds(x2, y2) && grid[x2, y2].ContainsType(type))
+                        {
+                            return new Vector2Int(x2, y2);
+                        }
                     }
                 }
             }
@@ -247,6 +229,11 @@ namespace Dalichrome.RandomGenerator
             if (value == 1) return new Vector2Int(0, random.NextInt(height));
             if (value == 2) return new Vector2Int(random.NextInt(width), height);
             else return new Vector2Int(random.NextInt(width), 0);
+        }
+
+        public bool IsInBounds(int x, int y)
+        {
+            return x >= 0 && x < grid.GetLength(0) && y >= 0 && y < grid.GetLength(1);
         }
     }
 }

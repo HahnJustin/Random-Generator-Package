@@ -159,58 +159,35 @@ namespace Dalichrome.RandomGenerator {
 
         public static Vector2Int GetNearestPosition(this int[,] grid, Vector2Int position, int value)
         {
+            int width = grid.GetLength(0);
+            int height = grid.GetLength(1);
             int x = position.x;
             int y = position.y;
 
-            // Check point (xs, ys)
-            for (int d = 1; d < Mathf.Max(grid.GetLength(0), grid.GetLength(1)); d++)
+            // Iterate outward from the starting position
+            for (int d = 0; d < Mathf.Max(width, height); d++)
             {
-                for (int i = 0; i < d + 1; i++)
+                // Check all positions in a square ring around the center
+                for (int dx = -d; dx <= d; dx++)
                 {
-                    int x1 = x - d + i;
-                    int y1 = y - i;
-
-                    if (x1 < grid.GetLength(0) && x1 > -1 &&
-                        y1 < grid.GetLength(1) && y1 > -1 &&
-                        grid[x1, y1] == value)
+                    for (int dy = -d; dy <= d; dy++)
                     {
-                        return new Vector2Int(x1, y1);
-                    }
+                        // Skip points outside the current ring
+                        if (Mathf.Abs(dx) != d && Mathf.Abs(dy) != d)
+                            continue;
 
-                    int x2 = x + d - i;
-                    int y2 = y + i;
+                        int nx = x + dx;
+                        int ny = y + dy;
 
-                    if (x2 < grid.GetLength(0) && x2 > -1 &&
-                        y2 < grid.GetLength(1) && y2 > -1 &&
-                        grid[x2, y2] == value)
-                    {
-                        return new Vector2Int(x2, y2);
-                    }
-                }
-
-                for (int i = 1; i < d; i++)
-                {
-                    int x1 = x - i;
-                    int y1 = y + d - i;
-
-                    if (x1 < grid.GetLength(0) && x1 > -1 &&
-                        y1 < grid.GetLength(1) && y1 > -1 &&
-                        grid[x1, y1] == value)
-                    {
-                        return new Vector2Int(x1, y1);
-                    }
-
-                    int x2 = x + i;
-                    int y2 = y - d + i;
-
-                    if (x2 < grid.GetLength(0) && x2 > -1 &&
-                        y2 < grid.GetLength(1) && y2 > -1 &&
-                        grid[x2, y2] == value)
-                    {
-                        return new Vector2Int(x2, y2);
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height && grid[nx, ny] == value)
+                        {
+                            return new Vector2Int(nx, ny);
+                        }
                     }
                 }
             }
+
+            // Return a constant for "not found"
             return Constants.OutsideGridVectorInt;
         }
     }

@@ -39,7 +39,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
             else if (config.Positioning == EEPositionType.Any_Opposite)
             {
-                float a = random.NextFloat();
+                float a = random.NextFloat() * Mathf.PI * 2;
                 float r = Mathf.Sqrt(Mathf.Pow(width,2) + Mathf.Pow(height,2));
                 float x = r * Mathf.Cos(a);
                 float y = r * Mathf.Sin(a);
@@ -49,8 +49,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 first += new Vector2Int(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
                 second += new Vector2Int(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
 
-                vector1 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(first.x, 0, width)), Mathf.RoundToInt(Mathf.Clamp(first.y, 0, height)));
-                vector2 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(second.x, 0, width)), Mathf.RoundToInt(Mathf.Clamp(second.y, 0, height)));
+                vector1 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(first.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(first.y, 0, height - 1)));
+                vector2 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(second.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(second.y, 0, height - 1)));
             }
             else
             {
