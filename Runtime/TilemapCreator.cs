@@ -17,6 +17,7 @@ namespace Dalichrome.RandomGenerator
         [Header("GameObjects")]
         [SerializeField] private bool useGameObjects = false;
         [SerializeField] private float gameObjectVariance = 0.2f;
+        [SerializeField] private Vector2 gameObjectOffset = new Vector2(0.5f,0.5f);
         [SerializeField] private Transform gameObjectParent;
 
         [Header("Number Tiles")]
@@ -52,7 +53,9 @@ namespace Dalichrome.RandomGenerator
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            Instantiate(prefab, new Vector3(tile.Vector.x + circle.x, tile.Vector.y + circle.y, prefab.transform.position.z), Quaternion.identity, gameObjectParent);
+            Instantiate(prefab, new Vector3(tile.Vector.x + circle.x + gameObjectOffset.x,
+                                            tile.Vector.y + circle.y + gameObjectOffset.y,
+                                            prefab.transform.position.z), Quaternion.identity, gameObjectParent);
 			return true;
         }
 
