@@ -126,7 +126,20 @@ namespace Dalichrome.RandomGenerator
 
             int number = randomGenerator.GetLayerID(layer);
             tilemapObject.layer = number;
-            if (randomGenerator.GetHasCollider(layer)) tilemapObject.AddComponent<TilemapCollider2D>();
+            if (randomGenerator.GetHasCollider(layer))
+            {
+                TilemapCollider2D tilemapCollider = tilemapObject.AddComponent<TilemapCollider2D>();
+                if (randomGenerator.GetUseCompositeCollider(layer))
+                {
+                    CompositeCollider2D compColl = tilemapObject.AddComponent<CompositeCollider2D>();
+
+                    Rigidbody2D rb = tilemapObject.GetComponent<Rigidbody2D>();
+                    rb.bodyType = RigidbodyType2D.Static;
+                    rb.simulated = true;
+
+                    tilemapCollider.usedByComposite = true;
+                }
+            }
 
             Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
             if (tilemap == null)

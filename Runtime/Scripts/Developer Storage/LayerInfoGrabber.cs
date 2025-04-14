@@ -52,6 +52,12 @@ namespace Dalichrome.RandomGenerator
             return database.GetValue(layer).hasCollider;
         }
 
+        public bool GetUseCompositeCollider(LayerType layer)
+        {
+            if (database == null) return false;
+            return database.GetValue(layer).useCompositeCollider;
+        }
+
         public Material GetMaterial(LayerType layer)
         {
             if (database == null)

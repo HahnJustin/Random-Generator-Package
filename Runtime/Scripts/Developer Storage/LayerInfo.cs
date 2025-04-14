@@ -9,6 +9,7 @@ public class LayerInfo
     public string layerName;
     public string sortingLayerName;
     public bool hasCollider = false;
+    public bool useCompositeCollider = false;
     public int sortingOrder;
     public int tieOrder;
     public Material material;
