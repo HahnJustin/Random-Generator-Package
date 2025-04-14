@@ -9,7 +9,7 @@ A Unity package for generating random maps. This tool is designed to create hund
 - **Serializable Parameter Objects:** Can save paramaters in an object to use later
 - **Dynamic Algorithm Stack:** Customize which algorithms you want to run in which order
 - **Visualizer Compatibility:** Works with a random generator visualizer that will eventually export parameter files for use in unity projects, this visualizer also has a built-in testing framework
-- **Texture Packing:** Support for packing multiple tilemaps into textures for efficient rendering.
+- **Texture Rendering:** Support for exporting multiple tilemaps into a texture.
 - **Event System:** Support for events that run on different outcomes of the generation, such as finish or error
 
 ## Installation
