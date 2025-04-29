@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Dalichrome.RandomGenerator.Random;
+using System.ComponentModel;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -19,6 +20,7 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private float gameObjectVariance = 0.2f;
         [SerializeField] private Vector2 gameObjectOffset = new Vector2(0.5f,0.5f);
         [SerializeField] private Transform gameObjectParent;
+        private List<GameObject> spawnedObjects = new();
 
         [Header("Number Tiles")]
         [SerializeField] private bool makeNumberLayer = false;
@@ -53,10 +55,11 @@ namespace Dalichrome.RandomGenerator
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            Instantiate(prefab, new Vector3(tile.Vector.x + circle.x + gameObjectOffset.x,
+            GameObject spawned = Instantiate(prefab, new Vector3(tile.Vector.x + circle.x + gameObjectOffset.x,
                                             tile.Vector.y + circle.y + gameObjectOffset.y,
                                             prefab.transform.position.z), Quaternion.identity, gameObjectParent);
-			return true;
+            spawnedObjects.Add(spawned);
+            return true;
         }
 
         private void SetTilesByLayer(LayerType layer)
@@ -126,6 +129,9 @@ namespace Dalichrome.RandomGenerator
 
             int number = randomGenerator.GetLayerID(layer);
             tilemapObject.layer = number;
+
+            tilemapObject.tag = randomGenerator.GetTag(layer);
+
             if (randomGenerator.GetHasCollider(layer))
             {
                 TilemapCollider2D tilemapCollider = tilemapObject.AddComponent<TilemapCollider2D>();
@@ -210,6 +216,11 @@ namespace Dalichrome.RandomGenerator
         public Tilemap GetNumberTilemap()
         {
             return numberTilemap;
+        }
+
+        public List<GameObject> GetGameObjects()
+        {
+            return spawnedObjects;
         }
     }
 }

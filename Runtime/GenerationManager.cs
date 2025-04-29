@@ -404,6 +404,11 @@ namespace Dalichrome.RandomGenerator
             return layerGrabber.GetHasCollider(layer);
         }
 
+        public string GetTag(LayerType layer)
+        {
+            return layerGrabber.GetTag(layer);
+        }
+
         public bool GetUseCompositeCollider(LayerType layer)
         {
             return layerGrabber.GetUseCompositeCollider(layer);

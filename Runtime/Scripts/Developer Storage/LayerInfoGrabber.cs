@@ -43,6 +43,15 @@ namespace Dalichrome.RandomGenerator
             return LayerMask.NameToLayer(database.GetValue(layer).layerName);
         }
 
+        public string GetTag(LayerType layer)
+        {
+            if (database == null)
+            {
+                return "Untagged";
+            }
+            return database.GetValue(layer).tag;
+        }
+
         public bool GetHasCollider(LayerType layer)
         {
             if (database == null)

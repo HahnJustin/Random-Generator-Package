@@ -12,6 +12,8 @@ namespace Dalichrome.RandomGenerator
 
         public int GetLayerID(LayerType layer);
 
+        public string GetTag(LayerType layer);
+
         public bool GetHasCollider(LayerType layer);
 
         public bool GetUseCompositeCollider(LayerType layer);
