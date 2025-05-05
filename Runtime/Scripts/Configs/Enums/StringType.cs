@@ -49,5 +49,7 @@ public enum StringType
     Tooltip_Layer_Button_Number,
     Tooltip_Toggle_Button_Mask,
     Description_Generator_UpscaledNoise,
-    Description_Generator_DistanceFill
+    Description_Generator_DistanceFill,
+    Description_Generator_GuaranteedSpawn,
+    Description_Generator_BorderFill
 }

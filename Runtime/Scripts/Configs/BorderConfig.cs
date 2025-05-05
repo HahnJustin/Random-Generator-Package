@@ -10,7 +10,7 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         public BorderConfig()
         {
-            _description = StringType.Description_Generator_Initial;
+            _description = StringType.Description_Generator_BorderFill;
         }
 
         public override GeneratorType Type { get { return GeneratorType.Border; } }

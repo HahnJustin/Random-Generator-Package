@@ -7,14 +7,16 @@ using UnityEngine;
 namespace Dalichrome.RandomGenerator.Configs
 {
     [Serializable]
-    public class GuaranteeSpawnConfig : AbstractGeneratorConfig, IRoomConfig
+    public class GuaranteeSpawnConfig : AbstractGeneratorConfig, IRoomConfig, IUniversalMaskConfig
     {
         public GuaranteeSpawnConfig()
         {
-            _description = StringType.Description_Generator_RoomFill;
+            _description = StringType.Description_Generator_GuaranteedSpawn;
         }
 
         public override GeneratorType Type { get { return GeneratorType.Guarantee_Spawn; } }
+
+        [Hidden] public bool ShowUniversalMask { get { return _addSpawnsToMask; } }
 
         public int MinimumSpawnDistance { get { return _minimumSpawnDistance; } set { _minimumSpawnDistance = value; } }
         [SerializeField] private int _minimumSpawnDistance = 10;
@@ -27,6 +29,9 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public List<TileType> TileTypes { get { return _tileTypes; } set { _tileTypes = value; } }
         [SerializeField] private List<TileType> _tileTypes = new List<TileType>() { TileType.Object_Sack_Grub };
+
+        public bool AddSpawnsToMask { get { return _addSpawnsToMask; } set { _addSpawnsToMask = value; } }
+        [SerializeField] private bool _addSpawnsToMask = true;
 
         public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
         [SerializeField] protected OccupanceType _occupance = OccupanceType.Wall_Obj_Not_NA;

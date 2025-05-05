@@ -138,5 +138,15 @@ namespace Dalichrome.RandomGenerator
         {
             excludePositionList.Add(position);
         }
+
+        public bool IsExcluding(Vector2Int position)
+        {
+            return excludePositionList.Contains(position);
+        }
+
+        public bool IsExcluding(Tile tile)
+        {
+            return IsExcluding(tile.Vector);
+        }
     }
 }

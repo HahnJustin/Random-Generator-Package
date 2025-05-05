@@ -31,7 +31,7 @@ namespace Dalichrome.RandomGenerator.Generators
             while(value > 0 && room.Count > 0) 
             {
                 Tile tile = room.GetRandomTile(random);
-                if (tile.Value > -config.MinimumSpawnDistance)
+                if (tile.Value > -config.MinimumSpawnDistance || TileGrid.IsExcluding(tile))
                 {
                     room.RemoveTile(tile);
                     continue;
@@ -40,6 +40,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 TileType type = config.TileTypes[random.NextInt(0, config.TileTypes.Count)];
                 TileGrid.SetTileType(tile.Vector, type);
                 room.RemoveTile(tile);
+
+                if (config.AddSpawnsToMask) TileGrid.AddExcludedPosition(tile.Vector);
 
                 value -= 1;
 
