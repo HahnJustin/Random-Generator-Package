@@ -186,7 +186,7 @@ namespace Dalichrome.RandomGenerator
             texture.Apply();
 
             CustomTileBase tile = (CustomTileBase)ScriptableObject.CreateInstance(typeof(CustomTileBase));
-            Sprite sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, 16, 16), new Vector2(0.5f, 0.5f), 32, 0, SpriteMeshType.FullRect);
+            Sprite sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, 16, 16), new Vector2(0.5f, 0.5f), 16, 0, SpriteMeshType.FullRect);
 
             tile.sprite = sprite;
 
