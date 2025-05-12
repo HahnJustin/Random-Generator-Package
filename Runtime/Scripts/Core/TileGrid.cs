@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -20,6 +19,30 @@ namespace Dalichrome.RandomGenerator.Core
         protected Tile[,] grid;
 
         protected readonly Tile invalidTile = new (){ IsValid = false };
+
+        // Mask Variables
+        protected bool masked = true;
+        public bool Masked { get { return masked; } }
+
+        protected TileMask tileMask;
+        protected List<Vector2Int> excludePositionList = new();
+
+        protected bool IsIncludingTiles
+        {
+            get
+            {
+                if (tileMask == null) return false;
+                return tileMask.includeList.Count > 0;
+            }
+        }
+        protected bool IsExcludingTiles
+        {
+            get
+            {
+                if (tileMask == null) return false;
+                return tileMask.excludeList.Count > 0;
+            }
+        }
 
         public TileGrid(TileGrid other)
         {
@@ -44,11 +67,49 @@ namespace Dalichrome.RandomGenerator.Core
                 }
             }
         }
+        private bool CanModifyTile(Tile tile)
+        {
+            if (excludePositionList.Contains(tile.Position))
+            {
+                return false;
+            }
+
+            if (!Masked || tileMask == null) return true;
+
+            bool included = false;
+            bool excluded = false;
+
+            foreach (TileType type in tileMask.includeList)
+            {
+                if (tile.ContainsType(type))
+                {
+                    included = true;
+                    break;
+                }
+            }
+
+            foreach (TileType type in tileMask.excludeList)
+            {
+                if (tile.ContainsType(type))
+                {
+                    excluded = true;
+                    break;
+                }
+            }
+
+            if (IsExcludingTiles && excluded) return false;
+            else if (IsIncludingTiles && included) return true;
+            else return !IsIncludingTiles;
+        }
 
         public static TileGrid DeepClone(TileGrid other)
         {
             TileGrid tileGrid = new(other.width, other.height);
             tileGrid.grid = other.grid.DeepClone();
+
+            tileGrid.masked = other.masked;
+            if (other.tileMask != null) tileGrid.tileMask = (TileMask)other.tileMask.Clone();
+
             return tileGrid;
         }
 
@@ -57,7 +118,7 @@ namespace Dalichrome.RandomGenerator.Core
             if (!IsInBounds(x, y)) return false;
 
             Tile t = grid[x, y];
-            if (!t.IsValid) return false;
+            if (!t.IsValid || !CanModifyTile(t)) return false;
 
             t.SetType(type);
             grid[x, y] = t;
@@ -101,7 +162,7 @@ namespace Dalichrome.RandomGenerator.Core
             if (!IsInBounds(x, y)) return false;
 
             Tile t = grid[x, y];
-            if (!t.IsValid) return false;
+            if (!t.IsValid || !CanModifyTile(t)) return false;
 
             t.SetTypes(toSet);
             grid[x, y] = t;
@@ -118,6 +179,7 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTile(oldTile.Position, toSet);
         }
 
+        //Can still set the value for a masked tile
         public bool SetTileValue(int x, int y, int value)
         {
             if (!IsInBounds(x, y)) return false;
@@ -134,10 +196,42 @@ namespace Dalichrome.RandomGenerator.Core
         {
             return SetTileValue(position.x, position.y, value);
         }
+
         public bool SetTileValue(Tile tile, int value)
         {
             return SetTileValue(tile.x, tile.y, value);
 
+        }
+
+        public void RemoveMask()
+        {
+            masked = false;
+            tileMask = null;
+        }
+
+        public void AddMask(TileMask mask)
+        {
+            tileMask = mask;
+        }
+
+        public void ToggleMasked(bool on)
+        {
+            this.masked = on;
+        }
+
+        public void AddExcludedPosition(Vector2Int position)
+        {
+            excludePositionList.Add(position);
+        }
+
+        public bool IsExcluding(Vector2Int position)
+        {
+            return excludePositionList.Contains(position);
+        }
+
+        public bool IsExcluding(Tile tile)
+        {
+            return IsExcluding(tile.Position);
         }
 
         public Vector2Int GetNearestPosition(int x, int y, TileType type)

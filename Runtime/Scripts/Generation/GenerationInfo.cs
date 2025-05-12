@@ -5,7 +5,7 @@ namespace Dalichrome.RandomGenerator
 {
     public class GenerationInfo : AbstractOperationInfo
     {
-        public new MaskedTileGrid Grid { get; set; }
+        public new TileGrid Grid { get; set; }
 
         public int Width { get { return Grid.width; } }
 

@@ -11,7 +11,7 @@ namespace Dalichrome.RandomGenerator.Generators
 {
     public abstract class AbstractGenerator : AbstractGridOperation
     {
-        protected MaskedTileGrid TileGrid { get { return (MaskedTileGrid) GetTileGrid(); } set { SetTileGrid(value); } }
+        protected TileGrid TileGrid { get { return GetTileGrid(); } set { SetTileGrid(value); } }
         protected AbstractRandom random;
 
         protected new AbstractGeneratorConfig config;
@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator.Generators
             this.config = config;
         }
 
-        private void ApplyAfterMask(MaskedTileGrid finalGrid)
+        private void ApplyAfterMask(TileGrid finalGrid)
         {
             for(int x = 0; x < TileGrid.width; x++)
             {
@@ -36,7 +36,7 @@ namespace Dalichrome.RandomGenerator.Generators
         private void InitializingTileGrid(GenerationInfo generationInfo)
         {
             if (!config.Masked) TileGrid = generationInfo.Grid;
-            else if (config.MaskTime == MaskTimeType.After) TileGrid = MaskedTileGrid.DeepClone(generationInfo.Grid);
+            else if (config.MaskTime == MaskTimeType.After) TileGrid = TileGrid.DeepClone(generationInfo.Grid);
 
             if (config.Masked)
             {

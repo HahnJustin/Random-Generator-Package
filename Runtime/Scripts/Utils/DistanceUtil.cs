@@ -114,8 +114,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 }
                 if (newRing.Count > 3000000)
                 {
-                    Debug.LogError("DistanceUtil is going Infinite - more than 3 million tiles in a ring");
-                    break;
+                    throw new System.Exception("DistanceUtil is going Infinite - more than 3 million tiles in a ring");
                 }
                 ring = newRing;
             }
