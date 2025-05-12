@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {

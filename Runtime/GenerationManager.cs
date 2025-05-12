@@ -7,6 +7,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Generators;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Databases;
+using Dalichrome.RandomGenerator.Core;
 using System.Linq;
 using System.Collections.Concurrent;
 using UnityEngine.Tilemaps;
@@ -128,7 +129,7 @@ namespace Dalichrome.RandomGenerator
 
         private void Start()
         {
-            if (generateOnStart) GenerateAsync();
+            if (generateOnStart) GenerateThreadSafe();
         }
 
         private async void Generate(CancellationToken token)
@@ -185,7 +186,7 @@ namespace Dalichrome.RandomGenerator
 
             if (tilemapCreator != null)
             {
-                tilemapCreator.SetTileGrid(lastGeneration.Grid);
+                tilemapCreator.CreateTilemaps(lastGeneration.Grid);
             }
             events.RaiseGenerationEnd(lastGeneration);
         }
@@ -429,7 +430,7 @@ namespace Dalichrome.RandomGenerator
             {
                 for (int y = 0; y < grid.height; y++)
                 {
-                    Tile tile = grid.GetTile(x, y);
+                    Core.Tile tile = grid.GetTile(x, y);
 
                     Color color;
                     if (!Enum.GetName(typeof(TileType), tile.Object).Contains("NA"))

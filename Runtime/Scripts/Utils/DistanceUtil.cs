@@ -1,5 +1,6 @@
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using System.Collections.Generic;
 
 namespace Dalichrome.RandomGenerator.Utils
@@ -18,10 +19,14 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private void AddRingHelper(List<Tile> newRing, Tile neighbor, int value)
         {
-            if (IsOccupied(neighbor) == depthProddableValue && neighbor.Value == 0)
+            if (neighbor.IsValid && IsOccupied(neighbor) == depthProddableValue)
             {
-                neighbor.Value = value;
-                newRing.Add(neighbor);
+                Tile refreshed = tileGrid.GetTile(neighbor.x, neighbor.y);
+                if (refreshed.Value == 0)
+                {
+                    tileGrid.SetTileValue(refreshed, value);
+                    newRing.Add(refreshed);
+                }
             }
         }
 
@@ -76,12 +81,12 @@ namespace Dalichrome.RandomGenerator.Utils
                 if(IsOccupied(tile) == depthProddableValue && ((GetIfOccupiedTileNextToPosition(tile) && !config.FillOccupied) ||
                                                                 GetIfUnoccupiedTileNextToPosition(tile) && config.FillOccupied))
                 {
-                    tile.Value = value;
+                    tileGrid.SetTileValue(tile, value);
                     ring.Add(tile);
                 }
                 else if (IsOccupied(tile) != depthProddableValue)
                 {
-                    tile.Value = -1;
+                    tileGrid.SetTileValue(tile, -1);
                 }
             }
             
@@ -106,6 +111,11 @@ namespace Dalichrome.RandomGenerator.Utils
                             AddRingHelper(newRing, neighbor, value);
                         }
                     }
+                }
+                if (newRing.Count > 3000000)
+                {
+                    Debug.LogError("DistanceUtil is going Infinite - more than 3 million tiles in a ring");
+                    break;
                 }
                 ring = newRing;
             }

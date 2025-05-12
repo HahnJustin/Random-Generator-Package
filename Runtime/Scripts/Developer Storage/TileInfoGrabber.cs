@@ -6,6 +6,7 @@ using System.ComponentModel;
 using UnityEngine.Tilemaps;
 using Dalichrome.RandomGenerator;
 using Dalichrome.RandomGenerator.Databases;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator
 {

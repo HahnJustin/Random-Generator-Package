@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Random;
 using System.ComponentModel;
 
@@ -46,7 +47,7 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private bool SpawnTileGameObject(Tile tile, LayerType layer)
+        private bool SpawnTileGameObject(Core.Tile tile, LayerType layer)
         {
             TileType type = tile.GetTypeInLayer(layer);
 
@@ -55,8 +56,8 @@ namespace Dalichrome.RandomGenerator
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            GameObject spawned = Instantiate(prefab, new Vector3(tile.Vector.x + circle.x + gameObjectOffset.x,
-                                            tile.Vector.y + circle.y + gameObjectOffset.y,
+            GameObject spawned = Instantiate(prefab, new Vector3(tile.Position.x + circle.x + gameObjectOffset.x,
+                                            tile.Position.y + circle.y + gameObjectOffset.y,
                                             prefab.transform.position.z), Quaternion.identity, gameObjectParent);
             spawnedObjects.Add(spawned);
             return true;
@@ -78,7 +79,7 @@ namespace Dalichrome.RandomGenerator
                 for (int x = 0; x < tileGrid.width; x++)
                 {
                     int tempIndex = x + (y * tileGrid.width);
-                    Tile tile = tileGrid.GetTile(x, y);
+                    Core.Tile tile = tileGrid.GetTile(x, y);
                     TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
                     if (useGameObjects && SpawnTileGameObject(tile, layer)) {
                         tileBaseArray[tempIndex] = null;
@@ -107,7 +108,7 @@ namespace Dalichrome.RandomGenerator
                 for (int x = 0; x < tileGrid.width; x++)
                 {
                     int tempIndex = x + (y * tileGrid.width);
-                    Tile tile = tileGrid.GetTile(x, y);
+                    Core.Tile tile = tileGrid.GetTile(x, y);
                     TileBase tileBase = randomGenerator.GetNumberTileBase(tile.Value);
                     tileBaseArray[tempIndex] = tileBase;
                 }
@@ -168,7 +169,7 @@ namespace Dalichrome.RandomGenerator
             tilemapObject.SetActive(false);
         }
 
-        public void SetTileGrid(TileGrid tileGrid)
+        public void CreateTilemaps(TileGrid tileGrid)
         {
             if (tilemapDict == null)
             {

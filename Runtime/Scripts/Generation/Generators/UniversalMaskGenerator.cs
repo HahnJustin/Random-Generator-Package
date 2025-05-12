@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -26,7 +27,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     {
                         if (tile.ContainsType(type))
                         {
-                            TileGrid.AddExcludedPosition(tile.Vector);
+                            TileGrid.AddExcludedPosition(tile.Position);
                             break;
                         }
                     }

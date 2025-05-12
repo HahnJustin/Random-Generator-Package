@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -71,7 +72,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         finalPositon.x >= 0 && finalPositon.y >= 0 && finalPositon.x < width && finalPositon.y < height)
                     {
                         Tile tile = TileGrid.GetTile(finalPositon);
-                        tile.SetType(config.StickTo);
+                        TileGrid.SetTileType(tile, config.StickTo);
                     }
                 }
             }

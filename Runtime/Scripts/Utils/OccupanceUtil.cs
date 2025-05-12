@@ -1,5 +1,6 @@
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using System.Collections.Generic;
 
 namespace Dalichrome.RandomGenerator.Utils
@@ -77,16 +78,16 @@ namespace Dalichrome.RandomGenerator.Utils
                 switch (config.OccupyLayer)
                 {
                     case LayerType.Ground:
-                        tile.Ground = TileType.Ground_Light;
+                        tileGrid.SetTileType(tile, TileType.Ground_Light);
                         break;
                     case LayerType.Wall:
-                        tile.Wall = TileType.Wall_Cave;
+                        tileGrid.SetTileType(tile, TileType.Wall_Cave);
                         break;
                     case LayerType.Object:
-                        tile.Object = TileType.Object_Stalagmite;
+                        tileGrid.SetTileType(tile, TileType.Object_Stalagmite);
                         break;
                     case LayerType.Debug:
-                        tile.Debug = TileType.Debug_Star_Red;
+                        tileGrid.SetTileType(tile, TileType.Debug_Star_Red);
                         break;
                     default:
                         break;
@@ -94,11 +95,11 @@ namespace Dalichrome.RandomGenerator.Utils
             }
             else if (config.Occupance == OccupanceType.Contains_A)
             {
-                tile.SetType(config.TileA);
+                tileGrid.SetTileType(tile, config.TileA);
             }
             else
             {
-                tile.Wall = TileType.Wall_Cave;
+                tileGrid.SetTileType(tile, TileType.Wall_Cave);
             }
         }
 

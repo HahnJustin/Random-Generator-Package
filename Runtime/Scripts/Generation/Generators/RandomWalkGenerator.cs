@@ -1,5 +1,6 @@
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -67,20 +68,19 @@ namespace Dalichrome.RandomGenerator.Generators
             Vector2Int intOrigin = Vector2Int.RoundToInt(origin);
 
             Walker drunkGuy = new(intOrigin.x, intOrigin.y);
-            Tile tile = TileGrid.GetTile(intOrigin);
-            tile.SetType(config.Path);
+            TileGrid.SetTileType(intOrigin, config.Path);
 
-            if (config.DebugEnds) TileGrid.GetTile(drunkGuy.x, drunkGuy.y).SetType(TileType.Debug_Star_Green);
+            if (config.DebugEnds) TileGrid.SetTileType(drunkGuy.GetPosition(),TileType.Debug_Star_Green);
 
             for (int step = 0; step < config.Steps; step++)
             {
                 int value = random.NextInt(0, 4);
                 drunkGuy.Step(value);
-                TileGrid.GetTile(drunkGuy.x, drunkGuy.y).SetType(config.Path);
+                TileGrid.SetTileType(drunkGuy.GetPosition(), config.Path);
                 CancelCheck();
             }
 
-            if (config.DebugEnds) TileGrid.GetTile(drunkGuy.x, drunkGuy.y).SetType(TileType.Debug_Star_Red);
+            if (config.DebugEnds) TileGrid.SetTileType(drunkGuy.GetPosition(), TileType.Debug_Star_Red);
         }
     }
 }

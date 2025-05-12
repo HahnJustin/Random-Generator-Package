@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -111,7 +112,7 @@ namespace Dalichrome.RandomGenerator.Utils
         }
 
         //Converts Technical Tile in Wall and Technical Tile 2 into Carve
-        private void CovertTechnicalTiles()
+        private void CovertTechnicalTiles(TileGrid tileGrid)
         {
             for (int x = 0; x < width; x++)
             {
@@ -120,13 +121,13 @@ namespace Dalichrome.RandomGenerator.Utils
                     Tile tile = tileGrid.GetTile(x, y);
                     if (tile.ContainsType(TileType.Debug_Technical))
                     {
-                        tile.SetType(TileType.Debug_NA);
-                        tile.SetType(config.WallTile);
+                        tileGrid.SetTileType(tile, TileType.Debug_NA);
+                        tileGrid.SetTileType(tile, config.WallTile);
                     }
                     else if (tile.ContainsType(TileType.Debug_Technical2))
                     {
-                        tile.SetType(TileType.Debug_NA);
-                        tile.SetType(config.HallwayTile);
+                        tileGrid.SetTileType(tile, TileType.Debug_NA);
+                        tileGrid.SetTileType(tile, config.HallwayTile);
                     }
                 }
             }
@@ -147,11 +148,11 @@ namespace Dalichrome.RandomGenerator.Utils
                     if (x % 2 == 1 && y % 2 == 1)
                     {
                         cellGrid[x, y] = CreateMazeCell(tile);
-                        tile.SetType(TileType.Debug_Technical2);
+                        tileGrid.SetTileType(tile, TileType.Debug_Technical2);
                     }
                     else
                     {
-                        tile.SetType(TileType.Debug_Technical);
+                        tileGrid.SetTileType(tile, TileType.Debug_Technical);
                     }
                 }
             }
@@ -325,9 +326,9 @@ namespace Dalichrome.RandomGenerator.Utils
                         break;
                     }
 
-                    Tile BetweenTile = tileGrid.GetTile((currentCell.X + neighborCell.X) / 2,
+                    Tile betweenTile = tileGrid.GetTile((currentCell.X + neighborCell.X) / 2,
                                                         (currentCell.Y + neighborCell.Y) / 2);
-                    BetweenTile.SetType(TileType.Debug_Technical2);
+                    tileGrid.SetTileType(betweenTile, TileType.Debug_Technical2);
                     currentCell = neighborCell;
                     break;
                 }
@@ -339,7 +340,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 else if (cells.Count > 0) currentCell = cells[random.NextInt(0, cells.Count)];
             }
 
-            CovertTechnicalTiles();
+            CovertTechnicalTiles(tileGrid);
         }
     }
 }

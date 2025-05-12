@@ -5,7 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
 
-namespace Dalichrome.RandomGenerator {
+namespace Dalichrome.RandomGenerator.Core {
     public static class ExtensionMethods
     {
         public static T DeepClone<T>(this T obj)

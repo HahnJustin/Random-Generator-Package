@@ -5,6 +5,7 @@ using System.Threading;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -39,7 +40,8 @@ namespace Dalichrome.RandomGenerator.Generators
 
             if (config.Masked)
             {
-                generationInfo.Grid.SetMask(config);
+                generationInfo.Grid.AddMask(config.TileMask);
+                generationInfo.Grid.ToggleMasked(config.Masked);
                 if (config.MaskTime == MaskTimeType.During) TileGrid = generationInfo.Grid;
             }
 

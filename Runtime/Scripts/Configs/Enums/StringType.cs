@@ -51,5 +51,6 @@ public enum StringType
     Description_Generator_UpscaledNoise,
     Description_Generator_DistanceFill,
     Description_Generator_GuaranteedSpawn,
-    Description_Generator_BorderFill
+    Description_Generator_BorderFill,
+    Tooltip_Layer_button_Heatmap
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -29,11 +30,11 @@ namespace Dalichrome.RandomGenerator.Generators
                     if (Mathf.Pow(x - xOrg, 2) / Mathf.Pow(xOrg, 2) + 
                         Mathf.Pow(y - yOrg, 2) / Mathf.Pow(yOrg, 2) <= config.Radius)
                     {
-                        tile.SetType(config.Interior);
+                        TileGrid.SetTileType(tile, config.Interior);
                     }
                     else
                     {
-                        tile.SetType( config.Exterior);
+                        TileGrid.SetTileType(tile, config.Exterior);
                     }
                 }
             }

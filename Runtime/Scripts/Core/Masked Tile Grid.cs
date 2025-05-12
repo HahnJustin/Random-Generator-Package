@@ -1,25 +1,37 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Dalichrome.RandomGenerator.Configs;
 
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Core
 {
     public class MaskedTileGrid : TileGrid
     {
         public bool Masked { get { return masked; } }
 
-        protected bool masked = false;
-        protected List<TileType> includeList = new();
-        protected List<TileType> excludeList = new();
+        protected bool masked = true;
+        protected TileMask tileMask;
 
         protected List<Vector2Int> excludePositionList = new();
 
-        protected bool IsIncludingTiles { get { return includeList.Count > 0; } }
-        protected bool IsExcludingTiles { get { return excludeList.Count > 0; } }
-
-        public MaskedTileGrid(TileGrid other, AbstractGeneratorConfig config) : this(other)
+        protected bool IsIncludingTiles { 
+            get 
+            {
+                if (tileMask == null) return false;
+                return tileMask.includeList.Count > 0; 
+            } 
+        }
+        protected bool IsExcludingTiles
         {
-            SetMask(config);
+            get
+            {
+                if (tileMask == null) return false;
+                return tileMask.excludeList.Count > 0;
+            }
+        }
+
+        public MaskedTileGrid(TileGrid other, TileMask mask) : this(other)
+        {
+            tileMask = mask;
+            ToggleMasked(true);
         }
 
         public MaskedTileGrid(TileGrid other) : base(other)
@@ -38,25 +50,24 @@ namespace Dalichrome.RandomGenerator
             tileGrid.grid = other.grid.DeepClone();
 
             tileGrid.masked = other.masked;
-            tileGrid.includeList = new(other.includeList);
-            tileGrid.excludeList = new(other.excludeList);
+            if (other.tileMask != null) tileGrid.tileMask = (TileMask) other.tileMask.Clone();
 
             return tileGrid;
         }
 
         protected bool CanModifyTile(Tile tile)
         {
-            if (excludePositionList.Contains(tile.Vector))
+            if (excludePositionList.Contains(tile.Position))
             {
                 return false;
             }
 
-            if (!Masked) return true;
+            if (!Masked || tileMask == null) return true;
 
             bool included = false;
             bool excluded = false;
 
-            foreach (TileType type in includeList)
+            foreach (TileType type in tileMask.includeList)
             {
                 if (tile.ContainsType(type))
                 {
@@ -65,7 +76,7 @@ namespace Dalichrome.RandomGenerator
                 }
             }
 
-            foreach (TileType type in excludeList)
+            foreach (TileType type in tileMask.excludeList)
             {
                 if (tile.ContainsType(type))
                 {
@@ -123,15 +134,17 @@ namespace Dalichrome.RandomGenerator
         public void RemoveMask()
         {
             masked = false;
-            if (includeList != null) includeList = new();
-            if (excludeList != null) excludeList = new();
+            tileMask = null;
         }
 
-        public void SetMask(AbstractGeneratorConfig config)
+        public void AddMask(TileMask mask)
         {
-            this.masked = config.Masked;
-            this.includeList = config.IncludeList;
-            this.excludeList = config.ExcludeList;
+            tileMask = mask;
+        }
+
+        public void ToggleMasked(bool on)
+        {
+            this.masked = on;
         }
 
         public void AddExcludedPosition(Vector2Int position)
@@ -146,7 +159,7 @@ namespace Dalichrome.RandomGenerator
 
         public bool IsExcluding(Tile tile)
         {
-            return IsExcluding(tile.Vector);
+            return IsExcluding(tile.Position);
         }
     }
 }

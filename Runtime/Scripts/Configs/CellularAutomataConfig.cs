@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Dalichrome.RandomGenerator.Core;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs

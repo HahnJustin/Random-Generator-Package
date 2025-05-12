@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -31,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     {
                         foreach (Tile roomTile in room)
                         {
-                            roomTile.SetType(TileType.Debug_Path_Red);
+                            TileGrid.SetTileType(tile, TileType.Debug_Path_Red);
                         }
                     }
                 }

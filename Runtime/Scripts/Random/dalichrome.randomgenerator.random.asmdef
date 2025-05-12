@@ -1,10 +1,8 @@
 {
-    "name": "Dalichrome.RandomGenerator",
+    "name": "dalichrome.randomgenerator.random",
     "rootNamespace": "",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:ac422043113dd38479a01a1904702f3b",
-        "GUID:c967b8ba713466f409b733123b16bbc8"
+        "GUID:d8b63aba1907145bea998dd612889d6b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

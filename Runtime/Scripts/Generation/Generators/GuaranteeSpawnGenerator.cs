@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using System.Numerics;
 using UnityEngine;
 
@@ -38,10 +39,10 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
 
                 TileType type = config.TileTypes[random.NextInt(0, config.TileTypes.Count)];
-                TileGrid.SetTileType(tile.Vector, type);
+                TileGrid.SetTileType(tile.Position, type);
                 room.RemoveTile(tile);
 
-                if (config.AddSpawnsToMask) TileGrid.AddExcludedPosition(tile.Vector);
+                if (config.AddSpawnsToMask) TileGrid.AddExcludedPosition(tile.Position);
 
                 value -= 1;
 

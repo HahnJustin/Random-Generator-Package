@@ -1,3 +1,4 @@
+using Dalichrome.RandomGenerator.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,6 +49,15 @@ namespace Dalichrome.RandomGenerator.Configs
 
         [Condition("Masked", true), Color("#4d728f")] public List<TileType> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
         [SerializeField] private List<TileType> _excludeList = new() { TileType.Wall_Object_NA};
+
+
+        public TileMask TileMask
+        {
+            get
+            {
+                return new(_includeList,_excludeList);
+            }
+        }
 
         public override string ToString()
         {

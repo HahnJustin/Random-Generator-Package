@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
+using Dalichrome.RandomGenerator.Core;
 using System.Linq;
 using Dalichrome.RandomGenerator.Random;
 using System;

@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using System;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -128,8 +130,8 @@ namespace Dalichrome.RandomGenerator.Utils
                     room.AddTile(tile);
                 }
 
-                if(decreaseNumbers && useNumbers) tile.Value = currentNum;
-                else if (useNumbers) tile.Value = currentRoomNumber;
+                if(decreaseNumbers && useNumbers) tileGrid.SetTileValue(tile, currentNum);
+                else if (useNumbers) tileGrid.SetTileValue(tile, currentRoomNumber);
                 else Fill(tile);
 
                 if (decreaseNumbers) currentNum -= 1;
@@ -165,7 +167,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 room.AddTile(tile);
             }
 
-            tile.Value = number;
+            tileGrid.SetTileValue(tile, number);
             int value = lowerNumber ? number - 1 : number;
 
             // Recur for north, east, south and west

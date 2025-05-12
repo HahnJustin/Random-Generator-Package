@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -49,7 +50,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         float separation = config.Cutoff / (float)config.Tiles.Count;
                         float roughIndex = sample / separation;
                         int index = Mathf.Clamp(Mathf.RoundToInt(roughIndex), 0, config.Tiles.Count-1);
-                        tile.SetType(config.Tiles[index]);
+                        TileGrid.SetTileType(tile, config.Tiles[index]);
                     }
                 }
             }

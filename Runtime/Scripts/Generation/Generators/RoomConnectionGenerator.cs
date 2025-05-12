@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
+using System.Diagnostics.Eventing.Reader;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -49,15 +52,15 @@ namespace Dalichrome.RandomGenerator.Generators
                         directions.Shuffle(random);
                         foreach (Direction direction in directions)
                         {
-                            Vector2Int point = GetPointInDirection(tile.Vector, direction);
+                            Vector2Int point = GetPointInDirection(tile.Position, direction);
                             Tile adjacentTile = TileGrid.GetTile(point);
 
-                            if (adjacentTile == null) continue;
+                            if (!adjacentTile.IsValid) continue;
 
                             int adjValue = adjacentTile.Value;
                             if (adjValue == 0)
                             {
-                                adjacentTile.Value = ringValue;
+                                TileGrid.SetTileValue(adjacentTile, ringValue);
                                 tempRing.Add(adjacentTile);
                             }
                             else if (adjValue < 0 && adjValue != room.Value && !roomInfos.ContainsKey(adjValue) &&
@@ -100,9 +103,9 @@ namespace Dalichrome.RandomGenerator.Generators
                 directions.Shuffle(random);
                 foreach (Direction direction in directions)
                 {
-                    Vector2Int point = GetPointInDirection(tile.Vector, direction);
+                    Vector2Int point = GetPointInDirection(tile.Position, direction);
                     Tile adjacentTile = TileGrid.GetTile(point);
-                    if (adjacentTile == null) continue;
+                    if (!adjacentTile.IsValid) continue;
                     else if (adjacentTile.Value == value)
                     {
                         path.Add(adjacentTile);
@@ -114,11 +117,11 @@ namespace Dalichrome.RandomGenerator.Generators
 
             foreach (Tile pathTile in path)
             {
-                TileGrid.SetTileType(pathTile.Vector, config.HallwayTile);
+                TileGrid.SetTileType(pathTile.Position, config.HallwayTile);
                 if (consolidateRooms)
                 {
                     room.AddEdge(pathTile);
-                    pathTile.Value = room.Value;
+                    TileGrid.SetTileValue(pathTile, room.Value);
                 }
             }
 
@@ -130,7 +133,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 foreach (Tile roomTile in room2)
                 {
-                    roomTile.Value = room.Value;
+                    TileGrid.SetTileValue(roomTile, room.Value);
                 }
 
                 room.AddEdgeRange(room2.GetEdges());

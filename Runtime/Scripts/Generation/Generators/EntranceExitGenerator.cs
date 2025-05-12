@@ -4,6 +4,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Random;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -97,9 +98,9 @@ namespace Dalichrome.RandomGenerator.Generators
                         }
                         else
                         {
-                            if (neighbor.x == x || neighbor.y == y) unoccCard = neighbor.Vector;
-                            else if (unoccCorn == null) unoccCorn = neighbor.Vector;
-                            else if (unoccCorn2 == null) unoccCorn2 = neighbor.Vector;
+                            if (neighbor.x == x || neighbor.y == y) unoccCard = neighbor.Position;
+                            else if (unoccCorn == null) unoccCorn = neighbor.Position;
+                            else if (unoccCorn2 == null) unoccCorn2 = neighbor.Position;
                         }
                     }
 
@@ -160,7 +161,7 @@ namespace Dalichrome.RandomGenerator.Generators
             foreach (Vector2Int pos in path)
             {
                 if (config.DebugPath) {
-                    TileGrid.GetTile(pos).SetType(TileType.Debug_Path_Green);
+                    TileGrid.SetTileType(pos, TileType.Debug_Path_Green);
                 }
                 if (config.AddPathToMask)
                 {

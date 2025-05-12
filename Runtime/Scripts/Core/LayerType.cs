@@ -1,4 +1,4 @@
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Core
 {
     public enum LayerType
     {

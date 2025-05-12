@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
+using Dalichrome.RandomGenerator.Core;
 using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Utils
@@ -15,10 +16,10 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private Dictionary<Vector2Int, Tile> tileDictionary = new();
 
-        private Tile top = null;
-        private Tile bottom = null;
-        private Tile right = null;
-        private Tile left = null;
+        private Tile top;
+        private Tile bottom;
+        private Tile right;
+        private Tile left;
 
         public int Width
         {
@@ -56,10 +57,10 @@ namespace Dalichrome.RandomGenerator.Utils
             tiles.Add(tile);
             tileDictionary.Add(position, tile);
 
-            if (top == null || top.y < tile.y) top = tile;
-            if (bottom == null || bottom.y > tile.y) bottom = tile;
-            if (right == null || right.x < tile.x) right = tile;
-            if (left == null || left.x > tile.x) left = tile;
+            if (!top.IsValid || top.y < tile.y) top = tile;
+            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
+            if (!right.IsValid || right.x < tile.x) right = tile;
+            if (!left.IsValid || left.x > tile.x) left = tile;
         }
 
         public void RemoveTile(Tile tile)
@@ -73,10 +74,10 @@ namespace Dalichrome.RandomGenerator.Utils
             tileDictionary.Remove(position);
 
             //TODO: Redo these here :o
-            if (top == tile) top = null;
-            if (bottom == tile) bottom = null;
-            if (right == tile) right = null;
-            if (left == tile) left = null;
+            if (!top.IsValid || top.y < tile.y) top = tile;
+            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
+            if (!right.IsValid || right.x < tile.x) right = tile;
+            if (!left.IsValid || left.x > tile.x) left = tile;
         }
 
         //Could definitely have issue with using bounds related to rooms wrapping around a grid
@@ -97,7 +98,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public bool ContainsTile(Tile tile)
         {
-            return tileDictionary.ContainsKey(tile.Vector);
+            return tileDictionary.ContainsKey(tile.Position);
         }
 
         public void AddEdge(Tile tile)
