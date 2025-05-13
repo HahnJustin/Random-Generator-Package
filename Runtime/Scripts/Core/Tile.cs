@@ -6,12 +6,15 @@ using UnityEngine;
 namespace Dalichrome.RandomGenerator.Core
 {
     [Serializable]
-    public struct Tile : IEnumerable
+    public unsafe struct Tile
     {
         public readonly int x, y;
 
-        private Dictionary<LayerType, TileType> _types;
+        private const int layerCount = 4;
+        private fixed int layerTypes[layerCount];
         private int _value;
+
+        public int LayerCount { get {return layerCount;} }
 
         public bool IsValid { get; internal set; }
 
@@ -23,33 +26,22 @@ namespace Dalichrome.RandomGenerator.Core
             this.y = y;
             _value = 0;
 
-            _types = new Dictionary<LayerType, TileType>
-            {
-                { LayerType.Ground, TileType.Ground_Light },
-                { LayerType.Wall, TileType.Wall_NA },
-                { LayerType.Object, TileType.Object_NA },
-                { LayerType.Debug, TileType.Debug_NA }
-            };
+            layerTypes[ConvertLayerTypeToIndex(LayerType.Ground)] = (int)TileType.Ground_NA;
+            layerTypes[ConvertLayerTypeToIndex(LayerType.Wall)] = (int)TileType.Wall_NA;
+            layerTypes[ConvertLayerTypeToIndex(LayerType.Object)] = (int)TileType.Object_NA;
+            layerTypes[ConvertLayerTypeToIndex(LayerType.Debug)] = (int)TileType.Debug_NA;
 
             IsValid = true;
         }
 
-        private static TileType Sanitize(TileType type, LayerType layer) =>
-            TileTypeLayers.GetLayerOfTile(type) == layer
-                ? type
-                : layer switch
-                {
-                    LayerType.Ground => TileType.Ground_NA,
-                    LayerType.Wall => TileType.Wall_NA,
-                    LayerType.Object => TileType.Object_NA,
-                    LayerType.Debug => TileType.Debug_NA,
-                    _ => TileType.NA,
-                };
-
         public TileType this[LayerType layer]
         {
-            get => _types.TryGetValue(layer, out var type) ? type : TileType.NA;
-            internal set => _types[layer] = Sanitize(value, layer);
+            get 
+            {
+                if(layer == LayerType.NA) return TileType.NA;
+                return (TileType)layerTypes[ConvertLayerTypeToIndex(layer)];
+            }
+            internal set => layerTypes[ConvertLayerTypeToIndex(layer)] = (int)Sanitize(value, layer);
         }
 
         public TileType Ground
@@ -82,10 +74,43 @@ namespace Dalichrome.RandomGenerator.Core
             private set => _value = value;
         }
 
+        private static TileType Sanitize(TileType type, LayerType layer) =>
+            TileTypeLayers.GetLayerOfTile(type) == layer
+                ? type
+                : layer switch
+        {
+            LayerType.Ground => TileType.Ground_NA,
+            LayerType.Wall => TileType.Wall_NA,
+            LayerType.Object => TileType.Object_NA,
+            LayerType.Debug => TileType.Debug_NA,
+            _ => TileType.NA,
+        };
+
+        private static int ConvertLayerTypeToIndex(LayerType type)
+        {
+            return (int)type - 1;
+        }
+        
         internal void Invalidate()
         {
             IsValid = false;
         }
+
+        internal void SetValue(int value)
+        {
+            if (!IsValid) return;
+
+            _value = value;
+        }
+
+        internal void SetTypes(Tile other)
+        {
+            for (int i = 0; i < layerCount; i++)
+            {
+                layerTypes[i] = other.layerTypes[i];
+            }
+        }
+
 
         internal void SetType(TileType type)
         {
@@ -99,19 +124,6 @@ namespace Dalichrome.RandomGenerator.Core
             }
 
             this[TileTypeLayers.GetLayerOfTile(type)] = type;
-        }
-
-        internal void SetValue(int value)
-        {
-            if (!IsValid) return;
-
-            _value = value;
-        }
-
-        internal void SetTypes(Tile other)
-        {
-            foreach (TileType type in other)
-                SetType(type);
         }
 
         public bool ContainsType(TileType type)
@@ -138,10 +150,5 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         public TileType GetTypeInLayer(LayerType layer) => this[layer];
-
-        public IEnumerator GetEnumerator()
-        {
-            return new List<TileType> { Ground, Wall, Object, Debug }.GetEnumerator();
-        }
     }
 }
