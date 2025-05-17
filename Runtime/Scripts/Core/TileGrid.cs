@@ -20,8 +20,6 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool Masked { get { return data.Masked; } }
 
-        internal NativeParallelHashSet<int2> excludePositions;
-
         private TileGridData data;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -55,8 +53,6 @@ namespace Dalichrome.RandomGenerator.Core
         {
             this.width = width;
             this.height = height;
-
-            excludePositions = new NativeParallelHashSet<int2>(64, Allocator.Persistent);
 
             data = new (width, height);
 
@@ -95,11 +91,6 @@ namespace Dalichrome.RandomGenerator.Core
         // Contains Type
         public bool ContainsType(int x, int y, TileType type)
         {
-            if (excludePositions.Contains(new(x, y)))
-            {
-                return false;
-            }
-
             return data.ContainsType(x, y, type);
         }
 
@@ -188,7 +179,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddExcludedPosition(int2 position)
         {
-            excludePositions.Add(position);
+            data.AddExcludedPosition(position);
         }
 
         public void AddExcludedPosition(Vector2Int position)
@@ -208,7 +199,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool IsExcluding(int2 position)
         {
-            return excludePositions.Contains(position);
+            return data.IsExcluding(position);
         }
 
         public bool IsExcluding(Tile tile)
@@ -249,7 +240,6 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void Dispose()
         {
-            excludePositions.Dispose();
             data.Dispose();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -300,6 +290,11 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         public ref TileGridData GetGridData() => ref data;
+
+        public TileGridData CloneGridData()
+        {
+            return TileGridData.DeepClone(data);
+        }
 
         public void OverrideGridData(TileGridData _data)
         {

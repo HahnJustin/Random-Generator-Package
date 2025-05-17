@@ -25,6 +25,8 @@ namespace Dalichrome.RandomGenerator.Core
         [ReadOnly] internal TileMask tileMask;
         [ReadOnly] private NativeParallelHashMap<int, LayerType> tileLayerLookup;
 
+        [ReadOnly] private NativeParallelHashSet<int2> excludePositions;
+
         // Validity
         public bool IsValid { get; internal set; }
 
@@ -64,6 +66,8 @@ namespace Dalichrome.RandomGenerator.Core
             masked = false;
 
             tileLayerLookup = TileTypeLayerLookup.CreateLookup(allocator);
+
+            excludePositions = new NativeParallelHashSet<int2>(64, Allocator.Persistent);
 
             IsValid = true;
 
@@ -115,16 +119,17 @@ namespace Dalichrome.RandomGenerator.Core
 
             gridData.IsValid = true;
 
-            //gridData.excludePositions = new NativeParallelHashSet<int2>(other.excludePositions.Count(), Allocator.Persistent);
-            //foreach (var pos in other.excludePositions)
-            //    gridData.excludePositions.Add(pos);
+            gridData.excludePositions.Dispose();
+            gridData.excludePositions = new NativeParallelHashSet<int2>(other.excludePositions.Count(), Allocator.Persistent);
+            foreach (var pos in other.excludePositions)
+                gridData.excludePositions.Add(pos);
 
             return gridData;
         }
 
         public bool SetTileType(int x, int y, TileType type)
         {
-            if (!IsInBounds(x, y)) return false;
+            if (!IsInBounds(x, y) || IsExcluding(x,y)) return false;
 
             Tile t = GetTileFromNativeArray(x, y);
             if (!t.IsValid || !CanModifyTile(t)) return false;
@@ -241,6 +246,21 @@ namespace Dalichrome.RandomGenerator.Core
             masked = on;
         }
 
+        public void AddExcludedPosition(int2 position)
+        {
+            excludePositions.Add(position);
+        }
+
+        public bool IsExcluding(int2 position)
+        {
+            return excludePositions.Contains(position);
+        }
+
+        public bool IsExcluding(int x, int y)
+        {
+            return excludePositions.Contains(new(x,y));
+        }
+
         public int2 GetNearestPosition(int x, int y, TileType type)
         {
             // Iterate through all distances from the center
@@ -321,6 +341,7 @@ namespace Dalichrome.RandomGenerator.Core
             tileMask.Dispose();
 
             tileLayerLookup.Dispose();
+            excludePositions.Dispose();
 
             IsValid = false;
         }

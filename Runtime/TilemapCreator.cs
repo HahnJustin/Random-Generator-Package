@@ -6,6 +6,8 @@ using UnityEngine.Tilemaps;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Random;
 using System.ComponentModel;
+using Unity.Mathematics;
+using System.Linq;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -15,6 +17,11 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private GameObject TilemapPrefab;
         [SerializeField] private List<SerialPair<LayerType, Tilemap>> tilemaps;
         [SerializeField] private bool instantiateMissingTilemaps = true;
+
+        [Header("Coroutine Loading")]
+        [SerializeField] private bool coroutineLoading = false;
+        [SerializeField] private int tilesPerFrame = 1000;
+        [SerializeField] private int blockSize = 3;
 
         [Header("GameObjects")]
         [SerializeField] private bool useGameObjects = false;
@@ -92,6 +99,71 @@ namespace Dalichrome.RandomGenerator
             }
 
             tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
+        }
+
+        public IEnumerator SetTilesCoroutine(LayerType layer, int tilesPerFrame = 500, float delay = 0f, int seed = 0)
+        {
+            if (layer == LayerType.NA) yield break;
+
+            Tilemap tilemap = tilemapDict[layer];
+            tilemap.ClearAllTiles();
+
+            int width = tileGrid.width;
+            int height = tileGrid.height;
+            Vector2 center = new Vector2(width / 2f, height / 2f);
+
+            System.Random rand = new(seed);
+            int blockCountX = Mathf.CeilToInt((float)width / blockSize);
+            int blockCountY = Mathf.CeilToInt((float)height / blockSize);
+
+            // Step 1: Create blocks with noise-weighted bias
+            List<(int startX, int startY, float sortKey)> blocks = new();
+
+            for (int by = 0; by < blockCountY; by++)
+            {
+                for (int bx = 0; bx < blockCountX; bx++)
+                {
+                    float blockCenterX = (bx + 0.5f) * blockSize;
+                    float blockCenterY = (by + 0.5f) * blockSize;
+                    float dist = Vector2.Distance(new Vector2(blockCenterX, blockCenterY), center);
+                    float bias = 1f / (dist + 1f);
+                    float noise = (float)rand.NextDouble();
+                    float sortKey = noise + (1f - bias) * 0.5f; // Center preference + randomness
+                    blocks.Add((bx * blockSize, by * blockSize, sortKey));
+                }
+            }
+
+            // Step 2: Sort blocks based on noise+bias
+            blocks = blocks.OrderBy(b => b.sortKey).ToList();
+
+            // Step 3: Load each block
+            foreach (var (startX, startY, _) in blocks)
+            {
+                for (int y = 0; y < blockSize; y++)
+                {
+                    for (int x = 0; x < blockSize; x++)
+                    {
+                        int tx = startX + x;
+                        int ty = startY + y;
+                        if (tx >= width || ty >= height) continue;
+
+                        int tempIndex = tx + ty * width;
+                        Core.Tile tile = tileGrid.GetTile(tx, ty);
+                        TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
+
+                        if (useGameObjects && SpawnTileGameObject(tile, layer))
+                        {
+                            tilemap.SetTile(new Vector3Int(tx, ty, 0), null);
+                        }
+                        else
+                        {
+                            tilemap.SetTile(new Vector3Int(tx, ty, 0), tileBase);
+                        }
+                    }
+                }
+
+                yield return new WaitForSeconds(delay);
+            }
         }
 
         private void SetNumberTiles()
@@ -183,13 +255,19 @@ namespace Dalichrome.RandomGenerator
             }
             this.tileGrid = tileGrid;
 
+            int seed = UnityEngine.Random.Range(0,1000000);
+            StopAllCoroutines();
             foreach (LayerType layer in Enum.GetValues(typeof(LayerType)))
             {
                 if (!tilemapDict.ContainsKey(layer) && instantiateMissingTilemaps)
                 {
                     CreateTileMap(layer);
                 }
-                SetTilesByLayer(layer);
+
+                if(!coroutineLoading)
+                    SetTilesByLayer(layer);
+                else
+                    StartCoroutine(SetTilesCoroutine(layer, tilesPerFrame: tilesPerFrame, delay: 0f, seed: seed));
             }
 
             if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();
