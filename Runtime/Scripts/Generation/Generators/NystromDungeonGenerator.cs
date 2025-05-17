@@ -6,7 +6,7 @@ using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
 using System.Linq;
 using Dalichrome.RandomGenerator.Random;
-using System;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -124,7 +124,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 grid[point.x, point.y] = filled;
 
-                //grid.SetNeighbors(x,y, neighborFunc);
+                //readGrid.SetNeighbors(x,y, neighborFunc);
                 foreach (Direction direction in eightDirections)
                 {
                     Vector2Int nextTo = GetPointInDirection(point, direction);
@@ -357,6 +357,8 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
+
+            return;
         }
     }
 }

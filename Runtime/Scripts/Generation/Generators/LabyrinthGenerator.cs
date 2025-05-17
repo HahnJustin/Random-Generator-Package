@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -26,6 +27,7 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 util.CreateMazeInRoom(room, random);
             }
+            return;
         }
     }
 }

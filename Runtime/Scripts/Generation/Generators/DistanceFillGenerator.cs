@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -26,6 +27,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 if(tile.Value >= config.LowerDepth && tile.Value <= config.UpperDepth) TileGrid.SetTileType(tile, config.FillTile);
                 CancelCheck();
             }
+            return;
         }
     }
 }

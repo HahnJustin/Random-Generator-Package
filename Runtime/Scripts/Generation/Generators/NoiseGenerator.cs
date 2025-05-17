@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -32,6 +33,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
                 CancelCheck();
             }
+            return;
         }
     }
 }

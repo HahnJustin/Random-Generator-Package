@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
+using Unity.Collections;
 
 namespace Dalichrome.RandomGenerator.Core {
     public static class ExtensionMethods
@@ -31,6 +32,14 @@ namespace Dalichrome.RandomGenerator.Core {
             }
 
             return clonedList;
+        }
+
+        public static NativeArray<T> DeepClone<T>(this NativeArray<T> source, Allocator allocator)
+            where T : struct
+        {
+            var clone = new NativeArray<T>(source.Length, allocator, NativeArrayOptions.UninitializedMemory);
+            NativeArray<T>.Copy(source, clone);
+            return clone;
         }
 
         public static void Shuffle<T>(this IList<T> list, AbstractRandom random)

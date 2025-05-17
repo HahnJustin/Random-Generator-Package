@@ -80,7 +80,7 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!left.IsValid || left.x > tile.x) left = tile;
         }
 
-        //Could definitely have issue with using bounds related to rooms wrapping around a grid
+        //Could definitely have issue with using bounds related to rooms wrapping around a readGrid
         public BoundsInt GetBounds()
         {
             return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x-left.x, top.y-bottom.y, 1));

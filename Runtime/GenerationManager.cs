@@ -129,7 +129,20 @@ namespace Dalichrome.RandomGenerator
 
         private void Start()
         {
-            if (generateOnStart) GenerateThreadSafe();
+            if (generateOnStart) GenerateAsync();
+        }
+
+        private void OnApplicationQuit()
+        {
+            Dispose();
+        }
+
+        private void Dispose()
+        {
+            if (lastGeneration != null)
+            {
+                lastGeneration.Dispose();
+            }
         }
 
         private async void Generate(CancellationToken token)
@@ -152,33 +165,30 @@ namespace Dalichrome.RandomGenerator
                 count += 1;
                 events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
 
-                Func<GenerationInfo> func = () =>
-                {
-                    AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                    return strategy.Do(generationInfo);
-                };
-                Task<GenerationInfo> task = Task.Run(func, token);
-
+                AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
                 try
                 {
-                    await task;
-                    generationInfo = task.Result;
+                    GenerationInfo result = await Task.Run(() => strategy.Do(generationInfo).Result);
+                    generationInfo = generationInfo = result;
                 }
                 catch (OperationCanceledException exception)
                 {
                     events.RaiseGenerationCancel();
                     Debug.Log("Generation Got Cancelled!" + exception.ToString());
+                    generationInfo.Dispose();
                     return;
                 }
                 catch (Exception exception)
                 {
                     events.RaiseGenerationError(exception.ToString());
+                    generationInfo.Dispose();
                     return;
                 }
             }
 
             watch.Stop();
 
+            Dispose();
             generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
             lastGeneration = generationInfo;
             lastGeneratedConfigs = generatingConfigs.DeepClone();
@@ -240,7 +250,7 @@ namespace Dalichrome.RandomGenerator
         }
 
         //Make clear this version lacks callbacks
-        public GenerationInfo GenerateThreadSafe(CancellationToken token = default)
+        public async Task<GenerationInfo> GenerateThreadSafe(CancellationToken token = default)
         {
             if (CannotGenerate()) return null;
             last = this;
@@ -263,7 +273,7 @@ namespace Dalichrome.RandomGenerator
                 if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
 
                 AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                generationInfo = strategy.Do(generationInfo);
+                generationInfo = await strategy.Do(generationInfo);
             }
 
             watch.Stop();
@@ -299,6 +309,7 @@ namespace Dalichrome.RandomGenerator
 
         public void SetGenerationResult(GenerationInfo result)
         {
+            Dispose();
             generationParameters.Seed = result.Seed;
             lastGeneration = result;
             events.RaiseGenerationEnd(lastGeneration);

@@ -57,5 +57,10 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             return util.GetPointInDirection(point, direction, movement);
         }
+
+        public OccupanceData GetOccupanceData()
+        {
+            return util.GetOccupanceData();
+        }
     }
 }

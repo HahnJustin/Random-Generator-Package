@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Jobs;
+using Unity.Collections;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -18,55 +21,38 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void Enact()
         {
-            bool noProbability = config.PlaceProbability >= 1;
+            // DeepClone readGrid twice: one as input, one as writeGrid
+            TileGridData inputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
+            TileGridData outputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
 
-            for (int i = 0; i < config.Repetitions; i++)
+            uint baseSeed = random.NextUInt();
+            OccupanceData occupance = GetOccupanceData();
+
+            for (int rep = 0; rep < config.Repetitions; rep++)
             {
-                int[,] caBuffer = new int[width, height];
-
-                for (int x = 0; x < width; x++)
+                var job = new CellularAutomataJob
                 {
-                    for (int y = 0; y < height; y++)
-                    {
-                        Tile tile = TileGrid.GetTile(x,y);
-                        int liveCellCount = IsOccupied(tile) + GetNeighbourCellCount(x, y);
-                        caBuffer[x, y] = liveCellCount > config.LiveNeighboursRequired ? 1 : 0;
-                    }
-                }
+                    readGrid = inputGrid,
+                    writeGrid = outputGrid,
+                    occupance = occupance,
+                    liveNeighborsRequired = config.LiveNeighboursRequired,
+                    placeProbability = config.PlaceProbability,
+                    fillType = config.Fill,
+                    emptyType = config.Empty,
+                    baseSeed = baseSeed,
+                    repetition = (uint)rep
+                };
 
-                for (int x = 0; x < width; ++x)
-                {
-                    for (int y = 0; y < height; ++y)
-                    {
-                        if (caBuffer[x, y] == 1 && (noProbability || random.NextFloat() < config.PlaceProbability))
-                        {
-                            TileGrid.SetTileType(x, y, config.Fill);
-                        }
-                        else{
-                            TileGrid.SetTileType(x, y, config.Empty);
-                        }
-                    }
-                }
+                JobHandle handle = job.Schedule(inputGrid.width * inputGrid.height, 64);
+                handle.Complete();
+
+                // Swap input/writeGrid for next round
+                (inputGrid, outputGrid) = (outputGrid, inputGrid);
             }
-        }
 
-        private int GetNeighbourCellCount(int x, int y)
-        {
-            int neighbourCellCount = 0;
-
-            neighbourCellCount += IsOccupied(x - 1, y);
-            neighbourCellCount += IsOccupied(x - 1, y - 1);
-
-            neighbourCellCount += IsOccupied(x, y - 1);
-            neighbourCellCount += IsOccupied(x + 1, y - 1);
-
-            neighbourCellCount += IsOccupied(x + 1, y);
-            neighbourCellCount += IsOccupied(x + 1, y + 1);
-
-            neighbourCellCount += IsOccupied(x, y + 1);
-            neighbourCellCount += IsOccupied(x - 1, y + 1);
-
-            return neighbourCellCount;
+            // Copy the final state back to the TileGrid's buffer
+            TileGrid.OverrideGridData(inputGrid);
+            outputGrid.Dispose();
         }
     }
 }

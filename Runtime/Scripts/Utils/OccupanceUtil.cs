@@ -2,6 +2,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Collections.Generic;
+using Dalichrome.RandomGenerator.Generators;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -173,5 +174,9 @@ namespace Dalichrome.RandomGenerator.Utils
             return occupanceGrid;
         }
 
+        public OccupanceData GetOccupanceData()
+        {
+            return new OccupanceData(config, OutOfBoundsOccupancy);
+        }
     }
 }

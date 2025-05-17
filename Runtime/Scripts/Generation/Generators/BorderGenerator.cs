@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -27,6 +28,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
+            return;
         }
     }
 }

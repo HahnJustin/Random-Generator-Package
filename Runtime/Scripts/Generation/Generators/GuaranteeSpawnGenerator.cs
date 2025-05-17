@@ -4,6 +4,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Numerics;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -48,6 +49,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 CancelCheck();
             }
+            return;
         }
     }
 }

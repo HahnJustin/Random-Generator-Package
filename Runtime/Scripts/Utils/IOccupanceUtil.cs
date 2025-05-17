@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Generators;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -18,5 +19,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public abstract bool GetIfOccupiedTileNextToPosition(int x, int y, int movement = 1);
 
         public abstract Vector2Int GetPointInDirection(Vector2Int point, Direction direction, int movement = 1);
+
+        public abstract OccupanceData GetOccupanceData();
     }
 }

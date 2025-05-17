@@ -35,5 +35,10 @@ namespace Dalichrome.RandomGenerator.Configs
 
             return string.Equals(thisJson, otherJson);
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

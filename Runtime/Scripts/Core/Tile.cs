@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -20,13 +22,15 @@ namespace Dalichrome.RandomGenerator.Core
 
         public Vector2Int Position => new(x, y);
 
+        public int2 Int2 => new(x, y);
+
         internal Tile(int x, int y)
         {
             this.x = x;
             this.y = y;
             _value = 0;
 
-            layerTypes[ConvertLayerTypeToIndex(LayerType.Ground)] = (int)TileType.Ground_NA;
+            layerTypes[ConvertLayerTypeToIndex(LayerType.Ground)] = (int)TileType.Ground_Light;
             layerTypes[ConvertLayerTypeToIndex(LayerType.Wall)] = (int)TileType.Wall_NA;
             layerTypes[ConvertLayerTypeToIndex(LayerType.Object)] = (int)TileType.Object_NA;
             layerTypes[ConvertLayerTypeToIndex(LayerType.Debug)] = (int)TileType.Debug_NA;
@@ -41,31 +45,31 @@ namespace Dalichrome.RandomGenerator.Core
                 if(layer == LayerType.NA) return TileType.NA;
                 return (TileType)layerTypes[ConvertLayerTypeToIndex(layer)];
             }
-            internal set => layerTypes[ConvertLayerTypeToIndex(layer)] = (int)Sanitize(value, layer);
+            internal set => layerTypes[ConvertLayerTypeToIndex(layer)] = (int)value;
         }
 
         public TileType Ground
         {
             get => this[LayerType.Ground];
-            internal set => this[LayerType.Ground] = value;
+            private set => this[LayerType.Ground] = value;
         }
 
         public TileType Wall
         {
             get => this[LayerType.Wall];
-            internal set => this[LayerType.Wall] = value;
+            private set => this[LayerType.Wall] = value;
         }
 
         public TileType Object
         {
             get => this[LayerType.Object];
-            internal set => this[LayerType.Object] = value;
+            private set => this[LayerType.Object] = value;
         }
 
         public TileType Debug
         {
             get => this[LayerType.Debug];
-            internal set => this[LayerType.Debug] = value;
+            private set => this[LayerType.Debug] = value;
         }
 
         public int Value
@@ -73,18 +77,6 @@ namespace Dalichrome.RandomGenerator.Core
             get => _value;
             private set => _value = value;
         }
-
-        private static TileType Sanitize(TileType type, LayerType layer) =>
-            TileTypeLayers.GetLayerOfTile(type) == layer
-                ? type
-                : layer switch
-        {
-            LayerType.Ground => TileType.Ground_NA,
-            LayerType.Wall => TileType.Wall_NA,
-            LayerType.Object => TileType.Object_NA,
-            LayerType.Debug => TileType.Debug_NA,
-            _ => TileType.NA,
-        };
 
         private static int ConvertLayerTypeToIndex(LayerType type)
         {
@@ -111,19 +103,33 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-
-        internal void SetType(TileType type)
+        internal void SetType(TileType type, LayerType layer)
         {
             if (!IsValid) return;
 
-            if (type == TileType.Wall_Object_NA)
+            if (layer == LayerType.NA)
+            {
+                return;
+            }
+            else if (type == TileType.Wall_Object_NA)
             {
                 Wall = TileType.Wall_NA;
                 Object = TileType.Object_NA;
                 return;
             }
+            else if (type == TileType.NA)
+            {
+                type = layer switch
+                {
+                    LayerType.Ground => TileType.Ground_NA,
+                    LayerType.Wall => TileType.Wall_NA,
+                    LayerType.Object => TileType.Object_NA,
+                    LayerType.Debug => TileType.Debug_NA,
+                    _ => TileType.NA,
+                };
+            }
 
-            this[TileTypeLayers.GetLayerOfTile(type)] = type;
+            this[layer] = type;
         }
 
         public bool ContainsType(TileType type)

@@ -133,7 +133,7 @@ namespace Dalichrome.RandomGenerator.Utils
             }
         }
 
-        //Optimization: Can fix that entire grid is iterated through per room if could find bounds of room
+        //Optimization: Can fix that entire readGrid is iterated through per room if could find bounds of room
         private void InitializeMazeCellsInRoom(Room room)
         {
             cellGrid = new MazeCell[width, height];

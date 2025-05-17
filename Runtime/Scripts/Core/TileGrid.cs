@@ -3,53 +3,52 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
+using Unity.Collections;
+using Unity.Mathematics;
+using static Unity.Collections.AllocatorManager;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    [Serializable]
-    public class TileGrid : IEnumerable
+    public class TileGrid : IDisposable, IEnumerable
     {
         public readonly int width;
         public readonly int height;
 
-        public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width/2,0,width), Mathf.Clamp(height /2, 0, height)); } }
+        public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width / 2, 0, width), Mathf.Clamp(height / 2, 0, height)); } }
 
-        public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } } 
+        public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } }
 
-        protected Tile[,] grid;
+        public bool Masked { get { return data.Masked; } }
 
-        protected readonly Tile invalidTile = new (){ IsValid = false };
+        internal NativeParallelHashSet<int2> excludePositions;
 
-        // Mask Variables
-        protected bool masked = true;
-        public bool Masked { get { return masked; } }
+        private TileGridData data;
 
-        protected TileMask tileMask;
-        protected List<Vector2Int> excludePositionList = new();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private string allocationStack;
+        private bool isDisposed = false;
+#endif
 
-        protected bool IsIncludingTiles
+        public bool IsDataValid 
+        {
+            get { return data.IsValid; }
+        }
+
+        public bool IsIncludingTiles
         {
             get
             {
-                if (tileMask == null) return false;
-                return tileMask.includeList.Count > 0;
+                if (!data.tileMask.IsValid) return false;
+                return data.tileMask.IsIncludingTiles;
             }
         }
-        protected bool IsExcludingTiles
+        public bool IsExcludingTiles
         {
             get
             {
-                if (tileMask == null) return false;
-                return tileMask.excludeList.Count > 0;
+                if (!data.tileMask.IsValid) return false;
+                return data.tileMask.IsExcludingTiles;
             }
-        }
-
-        public TileGrid(TileGrid other)
-        {
-            width = other.width;
-            height = other.height;
-
-            grid = other.grid;
         }
 
         public TileGrid(int width, int height)
@@ -57,72 +56,29 @@ namespace Dalichrome.RandomGenerator.Core
             this.width = width;
             this.height = height;
 
-            grid = new Tile[width, height];
+            excludePositions = new NativeParallelHashSet<int2>(64, Allocator.Persistent);
 
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    grid[i, j] = new(i, j);
-                }
-            }
-        }
-        private bool CanModifyTile(Tile tile)
-        {
-            if (excludePositionList.Contains(tile.Position))
-            {
-                return false;
-            }
+            data = new (width, height);
 
-            if (!Masked || tileMask == null) return true;
-
-            bool included = false;
-            bool excluded = false;
-
-            foreach (TileType type in tileMask.includeList)
-            {
-                if (tile.ContainsType(type))
-                {
-                    included = true;
-                    break;
-                }
-            }
-
-            foreach (TileType type in tileMask.excludeList)
-            {
-                if (tile.ContainsType(type))
-                {
-                    excluded = true;
-                    break;
-                }
-            }
-
-            if (IsExcludingTiles && excluded) return false;
-            else if (IsIncludingTiles && included) return true;
-            else return !IsIncludingTiles;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            allocationStack = Environment.StackTrace;
+#endif
         }
 
         public static TileGrid DeepClone(TileGrid other)
         {
-            TileGrid tileGrid = new(other.width, other.height);
-            tileGrid.grid = other.grid.DeepClone();
-
-            tileGrid.masked = other.masked;
-            if (other.tileMask != null) tileGrid.tileMask = (TileMask)other.tileMask.Clone();
-
-            return tileGrid;
+            TileGrid grid = new(other.width, other.height);
+            if(other.IsDataValid) grid.data = other.data.DeepClone();
+            return grid;
         }
 
+        // Private Funcs
+        public void SetGridData(TileGridData newData) => data = newData;
+
+        // Set Tile Type
         public bool SetTileType(int x, int y, TileType type)
         {
-            if (!IsInBounds(x, y)) return false;
-
-            Tile t = grid[x, y];
-            if (!t.IsValid || !CanModifyTile(t)) return false;
-
-            t.SetType(type);
-            grid[x, y] = t;
-            return true;
+            return data.SetTileType(x, y, type);
         }
 
         public bool SetTileType(Vector2Int position, TileType type)
@@ -132,13 +88,19 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool SetTileType(Tile tile, TileType type)
         {
-            return SetTileType(tile.Position, type);
+            return SetTileType(tile.x, tile.y, type);
         }
 
+
+        // Contains Type
         public bool ContainsType(int x, int y, TileType type)
         {
-            Tile tile = GetTile(x, y);
-            return tile.ContainsType(type);
+            if (excludePositions.Contains(new(x, y)))
+            {
+                return false;
+            }
+
+            return data.ContainsType(x, y, type);
         }
 
         public bool ContainsType(Vector2Int position, TileType type)
@@ -146,27 +108,33 @@ namespace Dalichrome.RandomGenerator.Core
             return ContainsType(position.x, position.y, type);
         }
 
+        // Get Tile
         public Tile GetTile(int x, int y)
         {
-            if (!IsInBounds(x, y)) return invalidTile;
-
-            return grid[x, y];
+            return data.GetTile(x, y);
         }
+
         public Tile GetTile(Vector2Int position)
         {
             return GetTile(position.x, position.y);
         }
 
+        public Tile GetTile(int2 position)
+        {
+            return GetTile(position.x, position.y);
+        }
+
+
+        // Set Tile
         public bool SetTile(int x, int y, Tile toSet)
         {
-            if (!IsInBounds(x, y)) return false;
-
-            Tile t = grid[x, y];
-            if (!t.IsValid || !CanModifyTile(t)) return false;
-
-            t.SetTypes(toSet);
-            grid[x, y] = t;
+            data.SetTile(x, y, toSet);
             return true;
+        }
+
+        public bool SetTile(int2 position, Tile toSet)
+        {
+            return SetTile(position.x, position.y, toSet);
         }
 
         public bool SetTile(Vector2Int position, Tile toSet)
@@ -179,17 +147,10 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTile(oldTile.Position, toSet);
         }
 
-        //Can still set the value for a masked tile
+        // Set Tile Value
         public bool SetTileValue(int x, int y, int value)
         {
-            if (!IsInBounds(x, y)) return false;
-
-            Tile t = grid[x, y];
-            if (!t.IsValid) return false;
-
-            t.SetValue(value);
-            grid[x, y] = t;
-            return true;
+            return data.SetTileValue(x, y, value);
         }
 
         public bool SetTileValue(Vector2Int position, int value)
@@ -197,77 +158,68 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTileValue(position.x, position.y, value);
         }
 
+        public bool SetTileValue(int2 position, int value)
+        {
+            return SetTileValue(position.x, position.y, value);
+        }
+
         public bool SetTileValue(Tile tile, int value)
         {
+            tile.SetValue(value);
             return SetTileValue(tile.x, tile.y, value);
-
         }
 
+        // Mask Funcs
         public void RemoveMask()
         {
-            masked = false;
-            tileMask = null;
+            data.RemoveMask();
         }
 
-        public void AddMask(TileMask mask)
+        public void CreateMask(List<TileType> includeList, List<TileType> excludeList)
         {
-            tileMask = mask;
+            data.CreateMask(includeList, excludeList);
+            SetGridData(data);
         }
 
         public void ToggleMasked(bool on)
         {
-            this.masked = on;
+            data.ToggleMasked(on);
+        }
+
+        public void AddExcludedPosition(int2 position)
+        {
+            excludePositions.Add(position);
         }
 
         public void AddExcludedPosition(Vector2Int position)
         {
-            excludePositionList.Add(position);
+            AddExcludedPosition(new int2(position.x, position.y));
+        }
+
+        public bool IsExcluding(int x, int y)
+        {
+            return IsExcluding(new int2(x, y));
         }
 
         public bool IsExcluding(Vector2Int position)
         {
-            return excludePositionList.Contains(position);
+            return IsExcluding(position.x, position.y);
+        }
+
+        public bool IsExcluding(int2 position)
+        {
+            return excludePositions.Contains(position);
         }
 
         public bool IsExcluding(Tile tile)
         {
-            return IsExcluding(tile.Position);
+            return IsExcluding(tile.Int2);
         }
 
         public Vector2Int GetNearestPosition(int x, int y, TileType type)
         {
-            // Iterate through all distances from the center
-            for (int d = 1; d < Mathf.Max(height, width); d++)
-            {
-                // Check all positions at distance `d`
-                for (int dx = -d; dx <= d; dx++)
-                {
-                    int dy1 = d - Mathf.Abs(dx); // Top and bottom edges
-                    int dy2 = -dy1;
-
-                    // Top edge
-                    int x1 = x + dx;
-                    int y1 = y + dy1;
-
-                    if (IsInBounds(x1, y1) && grid[x1, y1].ContainsType(type))
-                    {
-                        return new Vector2Int(x1, y1);
-                    }
-
-                    // Bottom edge (avoid duplicate check for middle row)
-                    if (dy1 != dy2)
-                    {
-                        int x2 = x + dx;
-                        int y2 = y + dy2;
-
-                        if (IsInBounds(x2, y2) && grid[x2, y2].ContainsType(type))
-                        {
-                            return new Vector2Int(x2, y2);
-                        }
-                    }
-                }
-            }
-            return Constants.OutsideGridVectorInt;
+            int2 pos = data.GetNearestPosition(x, y, type);
+            return new(pos.x, pos.y);
         }
 
         public Vector2Int GetNearestPosition(Vector2Int position, TileType type)
@@ -275,87 +227,84 @@ namespace Dalichrome.RandomGenerator.Core
             return GetNearestPosition(position.x, position.y, type);
         }
 
+        public Vector2Int GetNearestPosition(int2 position, TileType type)
+        {
+            return GetNearestPosition(position.x, position.y, type);
+        }
+
         public void ClearNumbers()
         {
-            for (int x = 0; x < grid.GetLength(0); x++)
-            {
-                for (int y = 0; y < grid.GetLength(1); y++)
-                {
-                    SetTileValue(x,y,0);
-                }
-            }
+            data.ClearNumbers();
         }
 
         public void ClearPositiveNumbers()
         {
-            for (int x = 0; x < grid.GetLength(0); x++)
+           data.ClearPositiveNumbers();
+        }
+
+        public bool CanHaveTiles()
+        {
+            return data.CanHaveTiles();
+        }
+
+        public void Dispose()
+        {
+            excludePositions.Dispose();
+            data.Dispose();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            isDisposed = true;
+#endif
+        }
+
+        ~TileGrid()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (!isDisposed)
             {
-                for (int y = 0; y < grid.GetLength(1); y++)
-                {
-                    Tile tile = grid[x, y];
-                    if (tile.Value > 0)
-                    {
-                        SetTileValue(tile, 0);
-                    }
-                }
+                Debug.LogError($"[TileGrid] Native memory leak detected! TileGrid was not disposed properly.\nAllocation stack:\n{allocationStack}");
             }
+#endif
         }
 
-        public bool IsValid()
-        {
-            return width > 0 && height > 0;
-        }
-
-        public IEnumerator GetEnumerator()
-        {
-            return grid.GetEnumerator();
-        }
 
         public List<Tile> GetEightNeighborTiles(Tile tile)
         {
-            List<Tile> tiles = new();
-            Vector2Int position = tile.Position;
-            tiles.Add(GetTile(position + Vector2Int.left));
-            tiles.Add(GetTile(position + Vector2Int.left + Vector2Int.up));
-            tiles.Add(GetTile(position + Vector2Int.up));
-            tiles.Add(GetTile(position + Vector2Int.right + Vector2Int.up));
-            tiles.Add(GetTile(position + Vector2Int.right));
-            tiles.Add(GetTile(position + Vector2Int.right + Vector2Int.down));
-            tiles.Add(GetTile(position + Vector2Int.down));
-            tiles.Add(GetTile(position + Vector2Int.left + Vector2Int.down));
-
-            tiles.RemoveAll(item => !item.IsValid);
-
-            return tiles;
+            return data.GetEightNeighborTiles(tile);
         }
 
         public List<Tile> GetFourNeighborTiles(Tile tile)
         {
-            List<Tile> tiles = new();
-            Vector2Int position = tile.Position;
-            tiles.Add(GetTile(position + Vector2Int.left));
-            tiles.Add(GetTile(position + Vector2Int.up));
-            tiles.Add(GetTile(position + Vector2Int.right));
-            tiles.Add(GetTile(position + Vector2Int.down));
-
-            tiles.RemoveAll(item => !item.IsValid);
-
-            return tiles;
+            return data.GetFourNeighborTiles(tile);
         }
 
         public Vector2Int GetRandomEdgePoint(AbstractRandom random)
         {
-            int value = random.NextInt(4);
+            int2 position = data.GetRandomEdgePoint(random);
+            return new(position.x, position.y);
+        }
 
-            if (value == 0) return new Vector2Int(width, random.NextInt(height));
-            if (value == 1) return new Vector2Int(0, random.NextInt(height));
-            if (value == 2) return new Vector2Int(random.NextInt(width), height);
-            else return new Vector2Int(random.NextInt(width), 0);
+        public int2 GetRandomEdgeInt2(AbstractRandom random)
+        {
+            return data.GetRandomEdgePoint(random);
         }
 
         public bool IsInBounds(int x, int y)
         {
-            return x >= 0 && x < grid.GetLength(0) && y >= 0 && y < grid.GetLength(1);
+            return data.IsInBounds(x, y);
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return data.AsNativeArray().GetEnumerator();
+        }
+
+        public ref TileGridData GetGridData() => ref data;
+
+        public void OverrideGridData(TileGridData _data)
+        {
+            data.Dispose();
+            data = _data;
         }
     }
 }

@@ -5,6 +5,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -72,7 +73,7 @@ namespace Dalichrome.RandomGenerator.Generators
             if (config.Placeable == EEPlaceableType.One_Side_Wall)
             {
                 TileGrid.ClearNumbers();
-                //Creates grid of applicalbe wall tiles
+                //Creates readGrid of applicalbe wall tiles
                 int[,] grid = new int[width, height];
                 foreach (Tile tile in TileGrid)
                 {
@@ -168,6 +169,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     TileGrid.AddExcludedPosition(pos);
                 }
             }
+            return;
         }
     }
 }

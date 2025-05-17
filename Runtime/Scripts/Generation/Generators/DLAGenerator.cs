@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -161,6 +162,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
 
             ApplyGraphNodeTreeToGrid(tree);
+            return;
         }
     }
 }

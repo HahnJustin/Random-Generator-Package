@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dalichrome.RandomGenerator.Configs;
 using UnityEngine;
 
@@ -62,7 +63,7 @@ namespace Dalichrome.RandomGenerator.Generators
             int occupiedCount = 0;
             int current = 0;
 
-            //Create base grid
+            //Create base readGrid
             int[,] baseGrid = new int[currentWidth, currentHeight];
             for (int x = 0; x < currentWidth; x++)
             {
@@ -115,6 +116,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if(baseGrid[x,y] == 1) TileGrid.SetTileType(x, y, config.FillTile);
                 }
             }
+            return;
         }
     }
 }

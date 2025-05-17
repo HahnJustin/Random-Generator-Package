@@ -1,12 +1,11 @@
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
+using System;
 
 namespace Dalichrome.RandomGenerator
 {
     public class GenerationInfo : AbstractOperationInfo
     {
-        public new TileGrid Grid { get; set; }
-
         public int Width { get { return Grid.width; } }
 
         public int Height { get { return Grid.height; } }

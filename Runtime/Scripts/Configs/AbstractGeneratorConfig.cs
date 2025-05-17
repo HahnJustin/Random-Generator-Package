@@ -25,7 +25,18 @@ namespace Dalichrome.RandomGenerator.Configs
         }
 
         //Mask Variables
-        [Hidden] public bool Masked { get { return _masked; } set { _masked = value; } }
+        [Hidden] public bool Masked { 
+
+            get 
+            {
+                return _masked && _includeList != null && _excludeList != null && (_includeList.Count > 0 || _excludeList.Count > 0); 
+            } 
+
+            set 
+            { 
+                _masked = value; 
+            } 
+        }
         [SerializeField] private bool _masked = false;
 
         [Hidden]
@@ -49,15 +60,6 @@ namespace Dalichrome.RandomGenerator.Configs
 
         [Condition("Masked", true), Color("#4d728f")] public List<TileType> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
         [SerializeField] private List<TileType> _excludeList = new() { TileType.Wall_Object_NA};
-
-
-        public TileMask TileMask
-        {
-            get
-            {
-                return new(_includeList,_excludeList);
-            }
-        }
 
         public override string ToString()
         {

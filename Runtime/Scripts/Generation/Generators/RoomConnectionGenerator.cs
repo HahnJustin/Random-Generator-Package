@@ -3,8 +3,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Diagnostics.Eventing.Reader;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -86,6 +85,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
             }
             TileGrid.ClearPositiveNumbers();
+            return;
         }
 
         private void CreatePathBetweenRooms(RoomInfo info, bool consolidateRooms)

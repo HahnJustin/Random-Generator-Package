@@ -6,6 +6,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
+using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -31,6 +32,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     finalGrid.SetTile(x, y, tile);
                 }
             }
+            TileGrid.Dispose();
         }
 
         private void InitializingTileGrid(GenerationInfo generationInfo)
@@ -40,7 +42,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             if (config.Masked)
             {
-                generationInfo.Grid.AddMask(config.TileMask);
+                generationInfo.Grid.CreateMask(config.IncludeList, config.ExcludeList);
                 generationInfo.Grid.ToggleMasked(config.Masked);
                 if (config.MaskTime == MaskTimeType.During) TileGrid = generationInfo.Grid;
             }
@@ -50,7 +52,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         private void SetingGenerationInfoGrid(GenerationInfo generationInfo)
         {
-            //Setting Generation Info's final tile grid
+            //Setting Generation Info's final tile readGrid
             if (config.Masked && config.MaskTime == MaskTimeType.After) ApplyAfterMask(generationInfo.Grid);
             else generationInfo.Grid = TileGrid;
 
@@ -60,7 +62,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected abstract void Enact();
 
-        public GenerationInfo Do(GenerationInfo generationInfo)
+        public async Task<GenerationInfo> Do(GenerationInfo generationInfo)
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();

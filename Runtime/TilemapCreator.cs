@@ -176,9 +176,9 @@ namespace Dalichrome.RandomGenerator
                 CreateDictionary();
             }
 
-            if (tileGrid == null)
+            if (tileGrid == null || !tileGrid.IsDataValid)
             {
-                Debug.LogError("TileGrid is null");
+                Debug.LogError("TileGrid is not valid");
                 return;
             }
             this.tileGrid = tileGrid;
