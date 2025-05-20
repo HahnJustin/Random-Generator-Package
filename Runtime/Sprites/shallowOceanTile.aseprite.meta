@@ -8,6 +8,7 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 62a9f0aa5b59740cfbadc7e5f9823bb0, type: 3}
+  importerVersion: 2
   textureImporterSettings:
     alphaSource: 1
     mipMapMode: 0
@@ -75,7 +76,7 @@ ScriptedImporter:
     importHiddenLayers: 0
     layerImportMode: 1
     defaultPivotSpace: 0
-    defaultPivotAlignment: 7
+    defaultPivotAlignment: 0
     customPivotPosition: {x: 0.5, y: 0.5}
     mosaicPadding: 4
     spritePadding: 0
@@ -88,7 +89,7 @@ ScriptedImporter:
     importHiddenLayers: 0
     layerImportMode: 1
     defaultPivotSpace: 0
-    defaultPivotAlignment: 7
+    defaultPivotAlignment: 0
     customPivotPosition: {x: 0.5, y: 0.5}
     mosaicPadding: 4
     spritePadding: 0
@@ -97,7 +98,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638821394358851452
+  platformSettingsDirtyTick: 638831087750823811
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -444,13 +445,18 @@ ScriptedImporter:
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: -99659324
+    uuid:
+      value0: 1698262484
+      value1: 0
+      value2: 0
+      value3: 0
+    guid: 1698262484
     name: shallowOceanTile
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: shallowOceanTile_Frame_0
+    - name: Frame_0
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
@@ -459,7 +465,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 303baefcf1aa4994e8b028ae26f91226
-    - name: shallowOceanTile_Frame_1
+    - name: Frame_1
       frameIndex: 1
       additiveSortOrder: 0
       cellRect:
@@ -468,7 +474,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 6a1dca37a321b664fbb577aa32c4911b
-    - name: shallowOceanTile_Frame_2
+    - name: Frame_2
       frameIndex: 2
       additiveSortOrder: 0
       cellRect:
@@ -477,7 +483,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: b3ebf4087232a3249bf825b42588bcaa
-    - name: shallowOceanTile_Frame_3
+    - name: Frame_3
       frameIndex: 3
       additiveSortOrder: 0
       cellRect:
@@ -486,7 +492,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 3c660b483db9f68409182fa2edecb9db
-    - name: shallowOceanTile_Frame_4
+    - name: Frame_4
       frameIndex: 4
       additiveSortOrder: 0
       cellRect:
@@ -495,7 +501,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: ea594d7aad5ade04aab098c39e15a132
-    - name: shallowOceanTile_Frame_5
+    - name: Frame_5
       frameIndex: 5
       additiveSortOrder: 0
       cellRect:
@@ -504,7 +510,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 1487b20bfa6db614abdbf1274e5a6d72
-    - name: shallowOceanTile_Frame_6
+    - name: Frame_6
       frameIndex: 6
       additiveSortOrder: 0
       cellRect:
@@ -513,7 +519,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 555f0e18c5bb2d74292bb07bf020e4be
-    - name: shallowOceanTile_Frame_7
+    - name: Frame_7
       frameIndex: 7
       additiveSortOrder: 0
       cellRect:
@@ -522,7 +528,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 2504f9286f1691a4f8f288807a134f98
-    - name: shallowOceanTile_Frame_8
+    - name: Frame_8
       frameIndex: 8
       additiveSortOrder: 0
       cellRect:
@@ -531,7 +537,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 5a84f500afcbe5b44acf8d719c6466e0
-    - name: shallowOceanTile_Frame_9
+    - name: Frame_9
       frameIndex: 9
       additiveSortOrder: 0
       cellRect:
@@ -540,7 +546,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: e43ee54e925f06940a200eda361882b8
-    - name: shallowOceanTile_Frame_10
+    - name: Frame_10
       frameIndex: 10
       additiveSortOrder: 0
       cellRect:
@@ -549,7 +555,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 54278835e4c8e4842a0fd19767711c4e
-    - name: shallowOceanTile_Frame_11
+    - name: Frame_11
       frameIndex: 11
       additiveSortOrder: 0
       cellRect:
@@ -558,7 +564,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: bbc5ae8b257416e4f864ef55526ce539
-    - name: shallowOceanTile_Frame_12
+    - name: Frame_12
       frameIndex: 12
       additiveSortOrder: 0
       cellRect:
@@ -567,7 +573,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 00233f0555477bd45b6591e76d14f4d6
-    - name: shallowOceanTile_Frame_13
+    - name: Frame_13
       frameIndex: 13
       additiveSortOrder: 0
       cellRect:
@@ -576,7 +582,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: fcfe5358ff77a3b4882fe2d4aa0915ef
-    - name: shallowOceanTile_Frame_14
+    - name: Frame_14
       frameIndex: 14
       additiveSortOrder: 0
       cellRect:
@@ -585,7 +591,7 @@ ScriptedImporter:
         width: 16
         height: 16
       spriteId: 8204c86a877ce23478ff7ac97d0cca75
-    - name: shallowOceanTile_Frame_15
+    - name: Frame_15
       frameIndex: 15
       additiveSortOrder: 0
       cellRect:
@@ -625,3 +631,4 @@ ScriptedImporter:
   secondarySpriteTextures: []
   spritePackingTag: 
   canvasSize: {x: 16, y: 16}
+  previousTextureSize: {x: 128, y: 128}

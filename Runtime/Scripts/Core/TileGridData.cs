@@ -24,7 +24,6 @@ namespace Dalichrome.RandomGenerator.Core
 
         [ReadOnly] internal TileMask tileMask;
         [ReadOnly] private NativeParallelHashMap<int, LayerType> tileLayerLookup;
-
         [ReadOnly] private NativeParallelHashSet<int2> excludePositions;
 
         // Validity

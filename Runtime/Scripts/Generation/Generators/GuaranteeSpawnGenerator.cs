@@ -2,9 +2,13 @@ using System.Collections.Generic;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Numerics;
+using Dalichrome.RandomGenerator.Generators;
+using Unity.Collections;
+using Unity.Mathematics;
+using Unity.Jobs;
 using UnityEngine;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -19,37 +23,80 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void Enact()
         {
-            Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, TileType.Object_Entrance);
-            Vector2Int entranceAir = TileGrid.GetNearestPosition(position, TileType.Wall_Object_NA);
+            NativeList<int2> candidates;
 
-            if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return;
-
-            Room room = new(1);
-
-            RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
-
-            int value = random.NextInt(config.MinimumAmount, config.MaximumAmount);
-
-            while(value > 0 && room.Count > 0) 
+            // Using Entrance Distance
+            if (config.UseEntranceDistance)
             {
-                Tile tile = room.GetRandomTile(random);
-                if (tile.Value > -config.MinimumSpawnDistance || TileGrid.IsExcluding(tile))
-                {
-                    room.RemoveTile(tile);
-                    continue;
-                }
 
-                TileType type = config.TileTypes[random.NextInt(0, config.TileTypes.Count)];
-                TileGrid.SetTileType(tile.Position, type);
-                room.RemoveTile(tile);
+                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, TileType.Object_Entrance);
+                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, TileType.Wall_Object_NA);
 
-                if (config.AddSpawnsToMask) TileGrid.AddExcludedPosition(tile.Position);
+                if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return;
 
-                value -= 1;
+                Room room = new(1);
+                RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
+                List<Tile> tileList = room.ToList();
+                tileList.Shuffle(random);
 
-                CancelCheck();
+                // Build NativeList of candidates
+                candidates = new(tileList.Count, Allocator.Persistent);
+                foreach (var tile in tileList)
+                    candidates.Add(tile.Int2);
             }
-            return;
+            // Guaranteed spawn for unoccupied every tile
+            else
+            {
+                List<int2> roomTilePositions = new ();
+                RoomList.ForEach(room => roomTilePositions.AddRange(room.Int2TilesList));
+                roomTilePositions.Shuffle(random);
+
+                candidates = new(roomTilePositions.Count, Allocator.Persistent);
+                foreach (int2 pos in roomTilePositions)
+                    candidates.Add(pos);
+            }
+            AddDisposable(candidates);
+
+            // Build NativeArray of tile types
+            NativeArray<TileType> spawnTypes = new NativeArray<TileType>(config.TileTypes.ToArray(), Allocator.Persistent);
+            AddDisposable(spawnTypes);
+
+            // Create counter
+            NativeReference<int> spawnCounter = new NativeReference<int>(0, Allocator.Persistent);
+            AddDisposable(spawnCounter);
+
+            // Max Spawns and Universal Mask Exclusion List
+            int maxSpawns = random.NextInt(config.MinimumAmount, config.MaximumAmount);
+            var tempExcludes = new NativeList<int2>(maxSpawns, Allocator.Persistent);
+            AddDisposable(tempExcludes);
+
+            // Create Grid to Read From
+            TileGridData inputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
+            AddDisposable(inputGrid);
+
+            var job = new GuaranteeSpawnJob
+            {
+                candidateTiles = candidates.AsArray(),
+                inputGrid = inputGrid,
+                outputGrid = TileGrid.GetGridData(),
+                outputExcludes = tempExcludes.AsParallelWriter(),
+                spawnTypes = spawnTypes,
+                spawnCounter = spawnCounter,
+                maxSpawns = maxSpawns,
+                minDistance = config.MinimumDistanceFromEntrance,
+                updateMask = config.AddSpawnsToMask,
+                useEntranceDistance = config.UseEntranceDistance,
+                seed = random.NextUInt()
+            };
+
+            JobHandle handle = job.Schedule(candidates.Length, 64);
+            handle.Complete();
+            
+            // Update Excluded Positions / Universal Mask 
+            foreach (var pos in tempExcludes)
+                TileGrid.AddExcludedPosition(pos);
+
+            Dispose();
         }
     }
 }

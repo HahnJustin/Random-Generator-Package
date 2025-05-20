@@ -12,6 +12,8 @@ using System.Linq;
 using System.Collections.Concurrent;
 using UnityEngine.Tilemaps;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
+using UnityEditor.PackageManager;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -168,8 +170,7 @@ namespace Dalichrome.RandomGenerator
                 AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
                 try
                 {
-                    GenerationInfo result = await Task.Run(() => strategy.Do(generationInfo).Result);
-                    generationInfo = generationInfo = result;
+                    await Task.Run(() => strategy.Do(generationInfo));
                 }
                 catch (OperationCanceledException exception)
                 {
@@ -250,13 +251,13 @@ namespace Dalichrome.RandomGenerator
         }
 
         //Make clear this version lacks callbacks
-        public async Task<GenerationInfo> GenerateThreadSafe(CancellationToken token = default)
+        public GenerationInfo GenerateThreadSafe(CancellationToken token = default, uint seed = 0)
         {
             if (CannotGenerate()) return null;
             last = this;
 
-            uint seed = generationParameters.Seed;
-            if (!generationParameters.IsSeeded || generationParameters.Seed == 0)
+            if ( seed == 0) seed = generationParameters.Seed;
+            if (!generationParameters.IsSeeded || seed == 0)
             {
                 seed = GetRandomSeed();
             }
@@ -265,21 +266,28 @@ namespace Dalichrome.RandomGenerator
 
             if (generatingConfigs == null || Height == 0 || Width == 0) return generationInfo;
 
-            var watch = new System.Diagnostics.Stopwatch();
-            watch.Start();
-
-            foreach (AbstractGeneratorConfig config in blockingConfigs)
+            try
             {
-                if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
+                var watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
 
-                AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                generationInfo = await strategy.Do(generationInfo);
+                foreach (AbstractGeneratorConfig config in blockingConfigs)
+                {
+                    if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
+
+                    AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
+                    strategy.Do(generationInfo);
+                }
+
+                watch.Stop();
+
+                generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
+
             }
-
-            watch.Stop();
-
-            generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-
+            catch (Exception ex)
+            {
+                generationInfo?.Dispose();
+            }
             return generationInfo;
         }
 

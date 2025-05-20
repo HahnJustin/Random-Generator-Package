@@ -19,7 +19,10 @@ namespace Dalichrome.RandomGenerator.Configs
 
         [Hidden] public bool ShowUniversalMask { get { return _addSpawnsToMask; } }
 
-        public int MinimumSpawnDistance { get { return _minimumSpawnDistance; } set { _minimumSpawnDistance = value; } }
+        public bool UseEntranceDistance { get { return _useEntranceDistance; } set { _useEntranceDistance = value; } }
+        [SerializeField] private bool _useEntranceDistance = true;
+
+        [Condition("UseEntranceDistance", true)] public int MinimumDistanceFromEntrance { get { return _minimumSpawnDistance; } set { _minimumSpawnDistance = value; } }
         [SerializeField] private int _minimumSpawnDistance = 10;
 
         public int MinimumAmount { get { return _minimumAmount; } set { _minimumAmount = value; } }

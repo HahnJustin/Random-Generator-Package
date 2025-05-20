@@ -5,13 +5,15 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using System;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractGridOperation
+    public abstract class AbstractGridOperation: IDisposable
     {
         protected CancellationToken token;
         protected List<AbstractUtil> utils = new();
+        private List<IDisposable> disposables = new();
 
         private TileGrid tileGrid;
 
@@ -54,12 +56,29 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected void CancelCheck()
         {
+            Dispose();
             token.ThrowIfCancellationRequested();
         }
 
         protected void AddUtil(AbstractUtil util)
         {
             utils.Add(util);
+        }
+
+        protected void AddDisposable(IDisposable disposable)
+        {
+            disposables.Add(disposable);
+        }
+
+        protected void ClearDisposables()
+        {
+            disposables.Clear();
+        }
+
+        public void Dispose()
+        {
+            disposables.ForEach(x => x.Dispose());
+            ClearDisposables();
         }
     }
 }

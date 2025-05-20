@@ -62,7 +62,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected abstract void Enact();
 
-        public async Task<GenerationInfo> Do(GenerationInfo generationInfo)
+        public void Do(GenerationInfo generationInfo)
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
@@ -81,8 +81,6 @@ namespace Dalichrome.RandomGenerator.Generators
             generationInfo.AddOperationTime(watch.ElapsedMilliseconds);
 
             CancelCheck();
-
-            return generationInfo;
         }
     }
 }

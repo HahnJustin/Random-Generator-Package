@@ -101,7 +101,10 @@ namespace Dalichrome.RandomGenerator
             tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
         }
 
-        public IEnumerator SetTilesCoroutine(LayerType layer, int tilesPerFrame = 500, float delay = 0f, int seed = 0)
+        public IEnumerator SetTilesCoroutine(
+                LayerType layer,
+                int tilesPerFrame = 2_000,   // how many tiles youÅfre OK pushing in one frame
+                int seed = 0)
         {
             if (layer == LayerType.NA) yield break;
 
@@ -110,61 +113,76 @@ namespace Dalichrome.RandomGenerator
 
             int width = tileGrid.width;
             int height = tileGrid.height;
-            Vector2 center = new Vector2(width / 2f, height / 2f);
+            int blocksX = Mathf.CeilToInt((float)width / blockSize);
+            int blocksY = Mathf.CeilToInt((float)height / blockSize);
+            Vector2 centre = new Vector2(width * 0.5f, height * 0.5f);
 
-            System.Random rand = new(seed);
-            int blockCountX = Mathf.CeilToInt((float)width / blockSize);
-            int blockCountY = Mathf.CeilToInt((float)height / blockSize);
+            // ---------- 1.  build + sort block list  ----------
+            var rng = new System.Random(seed);
+            var blocks = new List<(int sx, int sy, float key)>(blocksX * blocksY);
 
-            // Step 1: Create blocks with noise-weighted bias
-            List<(int startX, int startY, float sortKey)> blocks = new();
-
-            for (int by = 0; by < blockCountY; by++)
+            for (int by = 0; by < blocksY; ++by)
             {
-                for (int bx = 0; bx < blockCountX; bx++)
+                for (int bx = 0; bx < blocksX; ++bx)
                 {
-                    float blockCenterX = (bx + 0.5f) * blockSize;
-                    float blockCenterY = (by + 0.5f) * blockSize;
-                    float dist = Vector2.Distance(new Vector2(blockCenterX, blockCenterY), center);
-                    float bias = 1f / (dist + 1f);
-                    float noise = (float)rand.NextDouble();
-                    float sortKey = noise + (1f - bias) * 0.5f; // Center preference + randomness
-                    blocks.Add((bx * blockSize, by * blockSize, sortKey));
+                    float cx = (bx + 0.5f) * blockSize;
+                    float cy = (by + 0.5f) * blockSize;
+                    float dist = Vector2.Distance(new Vector2(cx, cy), centre);
+                    float bias = 1f / (dist + 1f);              // centre-weighted
+                    float key = (float)rng.NextDouble() + (1f - bias) * .5f;
+
+                    blocks.Add((bx * blockSize, by * blockSize, key));
                 }
             }
+            blocks.Sort((a, b) => a.key.CompareTo(b.key));
+            // -----------------------------------------------
 
-            // Step 2: Sort blocks based on noise+bias
-            blocks = blocks.OrderBy(b => b.sortKey).ToList();
+            // reusable buffer (no per-frame GC allocs)
+            TileBase[] buf = new TileBase[blockSize * blockSize];
 
-            // Step 3: Load each block
-            foreach (var (startX, startY, _) in blocks)
+            int tilesDoneThisFrame = 0;
+
+            // ---------- 2.  stream blocks ----------
+            foreach (var (sx, sy, _) in blocks)
             {
-                for (int y = 0; y < blockSize; y++)
+                // fill buf ------------------------------------------------------------
+                for (int y = 0; y < blockSize; ++y)
                 {
-                    for (int x = 0; x < blockSize; x++)
+                    int ty = sy + y;
+                    bool tyOut = ty >= height;
+
+                    for (int x = 0; x < blockSize; ++x)
                     {
-                        int tx = startX + x;
-                        int ty = startY + y;
-                        if (tx >= width || ty >= height) continue;
+                        int tx = sx + x;
+                        int bufIdx = x + y * blockSize;
 
-                        int tempIndex = tx + ty * width;
-                        Core.Tile tile = tileGrid.GetTile(tx, ty);
-                        TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
+                        if (tyOut || tx >= width)
+                        {   // outside map Å® clear
+                            buf[bufIdx] = null;
+                            continue;
+                        }
 
+                        var tile = tileGrid.GetTile(tx, ty);
                         if (useGameObjects && SpawnTileGameObject(tile, layer))
-                        {
-                            tilemap.SetTile(new Vector3Int(tx, ty, 0), null);
-                        }
+                            buf[bufIdx] = null;
                         else
-                        {
-                            tilemap.SetTile(new Vector3Int(tx, ty, 0), tileBase);
-                        }
+                            buf[bufIdx] =
+                                randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
                     }
                 }
+                // push one bulk call --------------------------------------------------
+                var bounds = new BoundsInt(sx, sy, 0, blockSize, blockSize, 1);
+                tilemap.SetTilesBlock(bounds, buf);
 
-                yield return new WaitForSeconds(delay);
+                tilesDoneThisFrame += blockSize * blockSize;
+                if (tilesDoneThisFrame >= tilesPerFrame)
+                {
+                    tilesDoneThisFrame = 0;
+                    yield return new WaitForEndOfFrame();   // optional breather
+                }
             }
         }
+
 
         private void SetNumberTiles()
         {
@@ -267,7 +285,7 @@ namespace Dalichrome.RandomGenerator
                 if(!coroutineLoading)
                     SetTilesByLayer(layer);
                 else
-                    StartCoroutine(SetTilesCoroutine(layer, tilesPerFrame: tilesPerFrame, delay: 0f, seed: seed));
+                    StartCoroutine(SetTilesCoroutine(layer, tilesPerFrame: tilesPerFrame, seed: seed));
             }
 
             if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();

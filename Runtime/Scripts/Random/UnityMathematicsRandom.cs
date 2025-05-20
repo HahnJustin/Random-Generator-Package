@@ -10,7 +10,7 @@ namespace Dalichrome.RandomGenerator.Random
 
         public UnityMathematicsRandom() : base()
         {
-            random = new((uint)DateTime.Now.Millisecond);
+            random = new((uint)DateTime.Now.Millisecond + 1);
         }
 
         public UnityMathematicsRandom(uint seed)

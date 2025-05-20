@@ -5,7 +5,8 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
-using UnityEngine.UIElements;
+using Unity.Mathematics;
+using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -36,6 +37,17 @@ namespace Dalichrome.RandomGenerator.Utils
                 BoundsInt bounds = GetBounds();
                 return bounds.yMax - bounds.y;
             }
+        }
+
+        public List<int2> Int2TilesList
+        {
+            get { return tiles.Select(tile => tile.Int2).ToList(); }
+        }
+
+
+        public List<int2> Int2EdgesList
+        {
+            get { return edges.Select(tile => tile.Int2).ToList(); }
         }
 
         public int Value { get; private set; }
