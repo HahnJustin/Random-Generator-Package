@@ -17,7 +17,7 @@ using UnityEditor.PackageManager;
 
 namespace Dalichrome.RandomGenerator
 {
-    public class GenerationManager : MonoBehaviour, ITileInfoGrabber, ILayerInfoGrabber
+    public class GenerationManager : MonoBehaviour
     {
         [SerializeField] private GenerationParams generationParameters;
 
@@ -81,6 +81,16 @@ namespace Dalichrome.RandomGenerator
         }
 
         //Properties
+        public TileInfoGrabber TileInfoGrabber
+        {
+            get { return tileGrabber; }
+        }
+
+        public LayerInfoGrabber LayerInfoGrabber
+        {
+            get { return layerGrabber; }
+        }
+
         public GenerationEvents Events
         {
             get { return events; }
@@ -379,66 +389,6 @@ namespace Dalichrome.RandomGenerator
             return !lastGeneratedConfigs.SequenceEqual(Configs);
         }
 
-        public GameObject GetGameObject(TileType type)
-        {
-            return tileGrabber.GetGameObject(type);
-        }
-
-        public Sprite GetTileSprite(TileType type)
-        {
-            return tileGrabber.GetTileSprite(type);
-        }
-
-        public Color GetTileColor(TileType type)
-        {
-            return tileGrabber.GetTileColor(type);
-        }
-
-        public TileBase GetTileBase(TileType type)
-        {
-            return tileGrabber.GetTileBase(type);
-        }
-
-        public TileBase GetNumberTileBase(int value)
-        {
-            return tileGrabber.GetNumberTileBase(value);
-        }
-
-        public int GetSortingOrder(LayerType layer)
-        {
-            return layerGrabber.GetSortingOrder(layer);
-        }
-
-        public int GetSortingLayerID(LayerType layer)
-        {
-            return layerGrabber.GetSortingLayerID(layer);
-        }
-
-        public int GetLayerID(LayerType layer)
-        {
-            return layerGrabber.GetLayerID(layer);
-        }
-
-        public bool GetHasCollider(LayerType layer)
-        {
-            return layerGrabber.GetHasCollider(layer);
-        }
-
-        public string GetTag(LayerType layer)
-        {
-            return layerGrabber.GetTag(layer);
-        }
-
-        public bool GetUseCompositeCollider(LayerType layer)
-        {
-            return layerGrabber.GetUseCompositeCollider(layer);
-        }
-
-        public Material GetMaterial(LayerType layer)
-        {
-            return layerGrabber.GetMaterial(layer);
-        }
-
         public Texture2D CreateTexture(TileGrid grid)
         {
             // Create a new x by y texture ARGB32 (32 bit with alpha) and no mipmaps
@@ -454,15 +404,15 @@ namespace Dalichrome.RandomGenerator
                     Color color;
                     if (!Enum.GetName(typeof(TileType), tile.Object).Contains("NA"))
                     {
-                        color = GetTileColor(tile.Object);
+                        color = tileGrabber.GetTileColor(tile.Object);
                     }
                     else if (!Enum.GetName(typeof(TileType), tile.Wall).Contains("NA"))
                     {
-                        color = GetTileColor(tile.Wall);
+                        color = tileGrabber.GetTileColor(tile.Wall);
                     }
                     else
                     {
-                        color = GetTileColor(tile.Ground);
+                        color = tileGrabber.GetTileColor(tile.Ground);
                     }
                     texture.SetPixel(x, y, color);
                 }

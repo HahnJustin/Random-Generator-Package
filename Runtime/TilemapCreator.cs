@@ -34,6 +34,8 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private bool makeNumberLayer = false;
 
         private GenerationManager randomGenerator;
+        private TileInfoGrabber tileInfoGrabber;
+        private LayerInfoGrabber layerInfoGrabber;
 
         private Dictionary<LayerType, Tilemap> tilemapDict;
         private Tilemap numberTilemap;
@@ -58,7 +60,7 @@ namespace Dalichrome.RandomGenerator
         {
             TileType type = tile.GetTypeInLayer(layer);
 
-            GameObject prefab = randomGenerator.GetGameObject(type);
+            GameObject prefab = tileInfoGrabber.GetGameObject(type);
             if (prefab == null) return false;
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
@@ -87,7 +89,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     int tempIndex = x + (y * tileGrid.width);
                     Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
+                    TileBase tileBase = tileInfoGrabber.GetTileBase(tile.GetTypeInLayer(layer));
                     if (useGameObjects && SpawnTileGameObject(tile, layer)) {
                         tileBaseArray[tempIndex] = null;
                     }
@@ -115,7 +117,7 @@ namespace Dalichrome.RandomGenerator
             int height = tileGrid.height;
             int blocksX = Mathf.CeilToInt((float)width / blockSize);
             int blocksY = Mathf.CeilToInt((float)height / blockSize);
-            Vector2 centre = new Vector2(width * 0.5f, height * 0.5f);
+            Vector2 centre = new (width * 0.5f, height * 0.5f);
 
             // ---------- 1.  build + sort block list  ----------
             var rng = new System.Random(seed);
@@ -127,9 +129,9 @@ namespace Dalichrome.RandomGenerator
                 {
                     float cx = (bx + 0.5f) * blockSize;
                     float cy = (by + 0.5f) * blockSize;
-                    float dist = Vector2.Distance(new Vector2(cx, cy), centre);
+                    float dist = Vector2.Distance(new (cx, cy), centre);
                     float bias = 1f / (dist + 1f);              // centre-weighted
-                    float key = (float)rng.NextDouble() + (1f - bias) * .5f;
+                    float key = (float) rng.NextDouble() + (1f - bias) * .5f;
 
                     blocks.Add((bx * blockSize, by * blockSize, key));
                 }
@@ -167,7 +169,7 @@ namespace Dalichrome.RandomGenerator
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                randomGenerator.GetTileBase(tile.GetTypeInLayer(layer));
+                                tileInfoGrabber.GetTileBase(tile.GetTypeInLayer(layer));
                     }
                 }
                 // push one bulk call --------------------------------------------------
@@ -199,7 +201,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     int tempIndex = x + (y * tileGrid.width);
                     Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = randomGenerator.GetNumberTileBase(tile.Value);
+                    TileBase tileBase = tileInfoGrabber.GetNumberTileBase(tile.Value);
                     tileBaseArray[tempIndex] = tileBase;
                 }
             }
@@ -211,22 +213,22 @@ namespace Dalichrome.RandomGenerator
         {
             if (layer == LayerType.NA) return;
             GameObject tilemapObject = Instantiate(TilemapPrefab, transform);
-            int sortingOrder = randomGenerator.GetSortingOrder(layer);
+            int sortingOrder = layerInfoGrabber.GetSortingOrder(layer);
             tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = sortingOrder;
-            tilemapObject.GetComponent<Renderer>().sortingLayerID = randomGenerator.GetSortingLayerID(layer);
+            tilemapObject.GetComponent<Renderer>().sortingLayerID = layerInfoGrabber.GetSortingLayerID(layer);
 
-            Material material = randomGenerator.GetMaterial(layer);
+            Material material = layerInfoGrabber.GetMaterial(layer);
             if(material != null)tilemapObject.GetComponent<Renderer>().material = material;
 
-            int number = randomGenerator.GetLayerID(layer);
+            int number = layerInfoGrabber.GetLayerID(layer);
             tilemapObject.layer = number;
 
-            tilemapObject.tag = randomGenerator.GetTag(layer);
+            tilemapObject.tag = layerInfoGrabber.GetTag(layer);
 
-            if (randomGenerator.GetHasCollider(layer))
+            if (layerInfoGrabber.GetHasCollider(layer))
             {
                 TilemapCollider2D tilemapCollider = tilemapObject.AddComponent<TilemapCollider2D>();
-                if (randomGenerator.GetUseCompositeCollider(layer))
+                if (layerInfoGrabber.GetUseCompositeCollider(layer))
                 {
                     CompositeCollider2D compColl = tilemapObject.AddComponent<CompositeCollider2D>();
 
@@ -303,6 +305,8 @@ namespace Dalichrome.RandomGenerator
             }
 
             this.randomGenerator = randomGenerator;
+            tileInfoGrabber = randomGenerator.TileInfoGrabber;
+            layerInfoGrabber = randomGenerator.LayerInfoGrabber;
         }
 
         public Dictionary<LayerType,Tilemap> GetTilemapDictionary()
