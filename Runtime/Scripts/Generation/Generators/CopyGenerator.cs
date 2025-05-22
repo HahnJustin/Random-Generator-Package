@@ -27,9 +27,9 @@ namespace Dalichrome.RandomGenerator.Generators
 
                     foreach (SerialPair<TileType,TileType> pair in config.FromTo)
                     {
-                        if (tile.ContainsType(pair.Key))
+                        if (tile.ContainsId((int)pair.Key))
                         {
-                            TileGrid.SetTileType(tile, pair.Value);
+                            TileGrid.SetTileId(tile, (int)pair.Value);
                         }
                     }
                 }

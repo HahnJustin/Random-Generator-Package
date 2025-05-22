@@ -327,7 +327,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 Debug.Log("Connectors Left:" + connectors.Count);
                 foreach (Vector2Int position in connectors)
                 {
-                    TileGrid.SetTileType(position, TileType.Debug_Circle_Red);
+                    TileGrid.SetTileId(position, (int)TileType.Debug_Circle_Red);
                 }
 
                 //must redefine pruning to consider all values of 'maze' rooms
@@ -344,15 +344,15 @@ namespace Dalichrome.RandomGenerator.Generators
                         //Room Floor 
                         if (gridValue <= MAZE_FLOOR_VALUE)
                         {
-                            TileGrid.SetTileType(x, y, config.HallwayTile);
+                            TileGrid.SetTileId(x, y, (int)config.HallwayTile);
                         }
                         //Room Wall
                         else if(gridValue >= MAZE_WALL_VALUE || gridValue == DOOR_VALUE)
                         {
-                            TileGrid.SetTileType(x, y, config.WallTile);
-                            if(gridValue == DOOR_VALUE) TileGrid.SetTileType(x, y, config.DoorTile);
+                            TileGrid.SetTileId(x, y, (int)config.WallTile);
+                            if(gridValue == DOOR_VALUE) TileGrid.SetTileId(x, y, (int)config.DoorTile);
                         }
-                        TileGrid.SetTileType(x, y, config.FloorTile);
+                        TileGrid.SetTileId(x, y, (int)config.FloorTile);
                         TileGrid.SetTileValue(x,y, gridValue);
                     }
                 }

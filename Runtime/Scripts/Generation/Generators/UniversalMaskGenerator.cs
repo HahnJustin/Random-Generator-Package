@@ -26,7 +26,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                     foreach (TileType type in config.AddToUniversalMaskTiles)
                     {
-                        if (tile.ContainsType(type))
+                        if (tile.ContainsId((int)type))
                         {
                             TileGrid.AddExcludedPosition(tile.Position);
                             break;

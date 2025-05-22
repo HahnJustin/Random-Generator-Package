@@ -56,18 +56,18 @@ namespace Dalichrome.RandomGenerator.Core
             bool included = false;
             bool excluded = false;
 
-            foreach (int type in includeSet)
+            foreach (int id in includeSet)
             {
-                if (tile.ContainsType((TileType)type))
+                if (tile.ContainsId(id))
                 {
                     included = true;
                     break;
                 }
             }
 
-            foreach (int type in excludeSet)
+            foreach (int id in excludeSet)
             {
-                if (tile.ContainsType((TileType)type))
+                if (tile.ContainsId(id))
                 {
                     excluded = true;
                     break;

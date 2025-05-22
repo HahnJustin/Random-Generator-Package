@@ -73,7 +73,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         finalPositon.x >= 0 && finalPositon.y >= 0 && finalPositon.x < width && finalPositon.y < height)
                     {
                         Tile tile = TileGrid.GetTile(finalPositon);
-                        TileGrid.SetTileType(tile, config.StickTo);
+                        TileGrid.SetTileId(tile, (int)config.StickTo);
                     }
                 }
             }

@@ -56,11 +56,11 @@ namespace Dalichrome.RandomGenerator.Utils
             }
             else if (config.Occupance == OccupanceType.Contains_A)
             {
-                value = tile.ContainsType(config.TileA) ? 1 : 0;
+                value = tile.ContainsId((int)config.TileA) ? 1 : 0;
             }
             else if (config.Occupance == OccupanceType.Doors_WO_Not_NA)
             {
-                if(tile.ContainsType(TileType.Object_Door)) value = 0;
+                if(tile.ContainsId((int)TileType.Object_Door)) value = 0;
                 else value = tile.GetOccupied();
             }
             else
@@ -79,16 +79,16 @@ namespace Dalichrome.RandomGenerator.Utils
                 switch (config.OccupyLayer)
                 {
                     case LayerType.Ground:
-                        tileGrid.SetTileType(tile, TileType.Ground_Light);
+                        tileGrid.SetTileId(tile, (int)TileType.Ground_Light);
                         break;
                     case LayerType.Wall:
-                        tileGrid.SetTileType(tile, TileType.Wall_Cave);
+                        tileGrid.SetTileId(tile, (int)TileType.Wall_Cave);
                         break;
                     case LayerType.Object:
-                        tileGrid.SetTileType(tile, TileType.Object_Stalagmite);
+                        tileGrid.SetTileId(tile, (int)TileType.Object_Stalagmite);
                         break;
                     case LayerType.Debug:
-                        tileGrid.SetTileType(tile, TileType.Debug_Star_Red);
+                        tileGrid.SetTileId(tile, (int)TileType.Debug_Star_Red);
                         break;
                     default:
                         break;
@@ -96,11 +96,11 @@ namespace Dalichrome.RandomGenerator.Utils
             }
             else if (config.Occupance == OccupanceType.Contains_A)
             {
-                tileGrid.SetTileType(tile, config.TileA);
+                tileGrid.SetTileId(tile, (int)config.TileA);
             }
             else
             {
-                tileGrid.SetTileType(tile, TileType.Wall_Cave);
+                tileGrid.SetTileId(tile, (int)TileType.Wall_Cave);
             }
         }
 

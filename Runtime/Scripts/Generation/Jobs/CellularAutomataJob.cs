@@ -31,7 +31,7 @@ public struct CellularAutomataJob : IJobParallelFor
         bool shouldLive = (occupied + neighbors) >= liveNeighborsRequired;
         bool place = placeProbability >= 1f || rng.NextFloat() < placeProbability;
 
-        writeGrid.SetTileType(pos, shouldLive && place ? fillType : emptyType);
+        writeGrid.SetTileId(pos, shouldLive && place ? (int)fillType : (int)emptyType);
     }
 
     private int CountLiveNeighbors(int2 pos)

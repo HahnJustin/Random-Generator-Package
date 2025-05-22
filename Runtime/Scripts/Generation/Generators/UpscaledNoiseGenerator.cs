@@ -113,7 +113,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 for (int y = 0; y < height; y++)
                 {
                     if(x >= baseGrid.GetLength(0) && y >= baseGrid.GetLength(1)) continue;
-                    if(baseGrid[x,y] == 1) TileGrid.SetTileType(x, y, config.FillTile);
+                    if(baseGrid[x,y] == 1) TileGrid.SetTileId(x, y, (int)config.FillTile);
                 }
             }
             return;

@@ -50,7 +50,7 @@ public unsafe struct GuaranteeSpawnJob : IJobParallelFor
         int result = Interlocked.Increment(ref counter);
         if (result <= maxSpawns)
         {
-            outputGrid.SetTileType(pos, chosenType);
+            outputGrid.SetTileId(pos, (int)chosenType);
             if (updateMask)
                 outputExcludes.AddNoResize(pos);
         }

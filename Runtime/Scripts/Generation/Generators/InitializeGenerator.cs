@@ -21,10 +21,10 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 for (int y = 0; y < height; y++)
                 {
-                    TileGrid.SetTileType(x, y, config.Ground);
-                    TileGrid.SetTileType(x, y, config.Wall);
-                    TileGrid.SetTileType(x, y, config.ContainedObject);
-                    TileGrid.SetTileType(x, y, config.Debug);
+                    TileGrid.SetTileId(x, y, (int)config.Ground);
+                    TileGrid.SetTileId(x, y, (int)config.Wall);
+                    TileGrid.SetTileId(x, y, (int)config.ContainedObject);
+                    TileGrid.SetTileId(x, y, (int)config.Debug);
                 }
             }
             return;

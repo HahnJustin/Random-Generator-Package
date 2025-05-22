@@ -199,5 +199,17 @@ namespace Dalichrome.RandomGenerator.Core {
             // Return a constant for "not found"
             return Constants.OutsideGridVectorInt;
         }
+
+        public static bool TryToEnum<TEnum>(this int value, out TEnum result) where TEnum : struct, Enum
+        {
+            if (Enum.IsDefined(typeof(TEnum), value))
+            {
+                result = (TEnum)(object)value;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
     }
 }

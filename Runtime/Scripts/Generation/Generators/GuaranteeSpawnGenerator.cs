@@ -29,8 +29,8 @@ namespace Dalichrome.RandomGenerator.Generators
             if (config.UseEntranceDistance)
             {
 
-                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, TileType.Object_Entrance);
-                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, TileType.Wall_Object_NA);
+                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileType.Object_Entrance);
+                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, (int)TileType.Wall_Object_NA);
 
                 if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return;
 

@@ -38,35 +38,35 @@ namespace Dalichrome.RandomGenerator.Core
             IsValid = true;
         }
 
-        public TileType this[LayerType layer]
+        public int this[LayerType layer]
         {
             get 
             {
-                if(layer == LayerType.NA) return TileType.NA;
-                return (TileType)layerTypes[ConvertLayerTypeToIndex(layer)];
+                if(layer == LayerType.NA) return (int)TileType.NA;
+                return layerTypes[ConvertLayerTypeToIndex(layer)];
             }
             internal set => layerTypes[ConvertLayerTypeToIndex(layer)] = (int)value;
         }
 
-        public TileType Ground
+        public int Ground
         {
             get => this[LayerType.Ground];
             private set => this[LayerType.Ground] = value;
         }
 
-        public TileType Wall
+        public int Wall
         {
             get => this[LayerType.Wall];
             private set => this[LayerType.Wall] = value;
         }
 
-        public TileType Object
+        public int Object
         {
             get => this[LayerType.Object];
             private set => this[LayerType.Object] = value;
         }
 
-        public TileType Debug
+        public int Debug
         {
             get => this[LayerType.Debug];
             private set => this[LayerType.Debug] = value;
@@ -95,7 +95,7 @@ namespace Dalichrome.RandomGenerator.Core
             _value = value;
         }
 
-        internal void SetTypes(Tile other)
+        internal void SetLayersByTile(Tile other)
         {
             for (int i = 0; i < layerCount; i++)
             {
@@ -103,7 +103,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        internal void SetType(TileType type, LayerType layer)
+        internal void SetId(int id, LayerType layer)
         {
             if (!IsValid) return;
 
@@ -111,50 +111,50 @@ namespace Dalichrome.RandomGenerator.Core
             {
                 return;
             }
-            else if (type == TileType.Wall_Object_NA)
+            else if (id == (int)TileType.Wall_Object_NA)
             {
-                Wall = TileType.Wall_NA;
-                Object = TileType.Object_NA;
+                Wall = (int)TileType.Wall_NA;
+                Object = (int)TileType.Object_NA;
                 return;
             }
-            else if (type == TileType.NA)
+            else if (id == (int)TileType.NA)
             {
-                type = layer switch
+                id = layer switch
                 {
-                    LayerType.Ground => TileType.Ground_NA,
-                    LayerType.Wall => TileType.Wall_NA,
-                    LayerType.Object => TileType.Object_NA,
-                    LayerType.Debug => TileType.Debug_NA,
-                    _ => TileType.NA,
+                    LayerType.Ground => (int)TileType.Ground_NA,
+                    LayerType.Wall => (int)TileType.Wall_NA,
+                    LayerType.Object => (int)TileType.Object_NA,
+                    LayerType.Debug => (int)TileType.Debug_NA,
+                    _ => (int)TileType.NA,
                 };
             }
 
-            this[layer] = type;
+            this[layer] = id;
         }
 
-        public bool ContainsType(TileType type)
+        public bool ContainsId(int id)
         {
-            if (type == TileType.Wall_Object_NA)
-                return Wall == TileType.Wall_NA && Object == TileType.Object_NA;
+            if (id == (int)TileType.Wall_Object_NA)
+                return Wall == (int)TileType.Wall_NA && Object == (int)TileType.Object_NA;
 
-            return Ground == type || Wall == type || Object == type || Debug == type;
+            return Ground == id || Wall == id || Object == id || Debug == id;
         }
 
         public int GetOccupied() =>
-            (Wall == TileType.NA || Wall == TileType.Wall_NA) &&
-            (Object == TileType.NA || Object == TileType.Object_NA) ? 0 : 1;
+            (Wall == (int)TileType.NA || Wall == (int)TileType.Wall_NA) &&
+            (Object == (int)TileType.NA || Object == (int)TileType.Object_NA) ? 0 : 1;
 
         public int GetOccupied(LayerType layer)
         {
             var type = this[layer];
-            return type == TileType.NA ||
-                   type == TileType.Ground_NA ||
-                   type == TileType.Wall_NA ||
-                   type == TileType.Object_NA ||
-                   type == TileType.Debug_NA
+            return type == (int)TileType.NA ||
+                   type == (int)TileType.Ground_NA ||
+                   type == (int)TileType.Wall_NA ||
+                   type == (int)TileType.Object_NA ||
+                   type == (int)TileType.Debug_NA
                    ? 0 : 1;
         }
 
-        public TileType GetTypeInLayer(LayerType layer) => this[layer];
+        public int GetIdInLayer(LayerType layer) => this[layer];
     }
 }

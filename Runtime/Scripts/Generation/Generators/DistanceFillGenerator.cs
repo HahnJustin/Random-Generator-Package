@@ -24,7 +24,7 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             foreach (Tile tile in TileGrid)
             {
-                if(tile.Value >= config.LowerDepth && tile.Value <= config.UpperDepth) TileGrid.SetTileType(tile, config.FillTile);
+                if(tile.Value >= config.LowerDepth && tile.Value <= config.UpperDepth) TileGrid.SetTileId(tile, (int)config.FillTile);
                 CancelCheck();
             }
             return;

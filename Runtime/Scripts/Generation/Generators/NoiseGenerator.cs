@@ -28,7 +28,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     for (int y = 0; y < height; y++)
                     {
                         if (random.NextFloat() < config.Density)
-                            TileGrid.SetTileType(x, y, tileTypes[random.NextInt(0, tileTypes.Count)]);
+                            TileGrid.SetTileId(x, y, (int)tileTypes[random.NextInt(0, tileTypes.Count)]);
                     }
                 }
                 CancelCheck();

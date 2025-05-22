@@ -51,7 +51,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         float separation = config.Cutoff / (float)config.Tiles.Count;
                         float roughIndex = sample / separation;
                         int index = Mathf.Clamp(Mathf.RoundToInt(roughIndex), 0, config.Tiles.Count-1);
-                        TileGrid.SetTileType(tile, config.Tiles[index]);
+                        TileGrid.SetTileId(tile, (int)config.Tiles[index]);
                     }
                 }
             }

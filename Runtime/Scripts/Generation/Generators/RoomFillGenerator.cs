@@ -33,7 +33,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     {
                         foreach (Tile roomTile in room)
                         {
-                            TileGrid.SetTileType(tile, TileType.Debug_Path_Red);
+                            TileGrid.SetTileId(tile, (int)TileType.Debug_Path_Red);
                         }
                     }
                 }

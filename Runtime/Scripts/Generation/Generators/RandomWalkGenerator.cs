@@ -69,19 +69,19 @@ namespace Dalichrome.RandomGenerator.Generators
             Vector2Int intOrigin = Vector2Int.RoundToInt(origin);
 
             Walker drunkGuy = new(intOrigin.x, intOrigin.y);
-            TileGrid.SetTileType(intOrigin, config.Path);
+            TileGrid.SetTileId(intOrigin, (int)config.Path);
 
-            if (config.DebugEnds) TileGrid.SetTileType(drunkGuy.GetPosition(),TileType.Debug_Star_Green);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Green);
 
             for (int step = 0; step < config.Steps; step++)
             {
                 int value = random.NextInt(0, 4);
                 drunkGuy.Step(value);
-                TileGrid.SetTileType(drunkGuy.GetPosition(), config.Path);
+                TileGrid.SetTileId(drunkGuy.GetPosition(), (int)config.Path);
                 CancelCheck();
             }
 
-            if (config.DebugEnds) TileGrid.SetTileType(drunkGuy.GetPosition(), TileType.Debug_Star_Red);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Red);
 
             return;
         }

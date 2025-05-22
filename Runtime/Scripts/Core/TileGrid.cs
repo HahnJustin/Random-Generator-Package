@@ -72,31 +72,31 @@ namespace Dalichrome.RandomGenerator.Core
         public void SetGridData(TileGridData newData) => data = newData;
 
         // Set Tile Type
-        public bool SetTileType(int x, int y, TileType type)
+        public bool SetTileId(int x, int y, int id)
         {
-            return data.SetTileType(x, y, type);
+            return data.SetTileId(x, y, id);
         }
 
-        public bool SetTileType(Vector2Int position, TileType type)
+        public bool SetTileId(Vector2Int position, int id)
         {
-            return SetTileType(position.x, position.y, type);
+            return SetTileId(position.x, position.y, id);
         }
 
-        public bool SetTileType(Tile tile, TileType type)
+        public bool SetTileId(Tile tile, int id)
         {
-            return SetTileType(tile.x, tile.y, type);
+            return SetTileId(tile.x, tile.y, id);
         }
 
 
         // Contains Type
-        public bool ContainsType(int x, int y, TileType type)
+        public bool ContainsId(int x, int y, int id)
         {
-            return data.ContainsType(x, y, type);
+            return data.ContainsId(x, y, id);
         }
 
-        public bool ContainsType(Vector2Int position, TileType type)
+        public bool ContainsId(Vector2Int position, int id)
         {
-            return ContainsType(position.x, position.y, type);
+            return ContainsId(position.x, position.y, id);
         }
 
         // Get Tile
@@ -207,20 +207,20 @@ namespace Dalichrome.RandomGenerator.Core
             return IsExcluding(tile.Int2);
         }
 
-        public Vector2Int GetNearestPosition(int x, int y, TileType type)
+        public Vector2Int GetNearestPosition(int x, int y, int id)
         {
-            int2 pos = data.GetNearestPosition(x, y, type);
+            int2 pos = data.GetNearestPosition(x, y, id);
             return new(pos.x, pos.y);
         }
 
-        public Vector2Int GetNearestPosition(Vector2Int position, TileType type)
+        public Vector2Int GetNearestPosition(Vector2Int position, int id)
         {
-            return GetNearestPosition(position.x, position.y, type);
+            return GetNearestPosition(position.x, position.y, id);
         }
 
-        public Vector2Int GetNearestPosition(int2 position, TileType type)
+        public Vector2Int GetNearestPosition(int2 position, int id)
         {
-            return GetNearestPosition(position.x, position.y, type);
+            return GetNearestPosition(position.x, position.y, id);
         }
 
         public void ClearNumbers()

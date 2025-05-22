@@ -294,7 +294,7 @@ namespace Dalichrome.RandomGenerator
                 generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 generationInfo?.Dispose();
             }

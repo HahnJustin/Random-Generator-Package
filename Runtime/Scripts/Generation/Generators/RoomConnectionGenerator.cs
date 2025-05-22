@@ -117,7 +117,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             foreach (Tile pathTile in path)
             {
-                TileGrid.SetTileType(pathTile.Position, config.HallwayTile);
+                TileGrid.SetTileId(pathTile.Position, (int)config.HallwayTile);
                 if (consolidateRooms)
                 {
                     room.AddEdge(pathTile);

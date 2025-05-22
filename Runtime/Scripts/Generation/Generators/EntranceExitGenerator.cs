@@ -77,7 +77,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 int[,] grid = new int[width, height];
                 foreach (Tile tile in TileGrid)
                 {
-                    if (!tile.ContainsType(config.SpawnInTile)) continue;
+                    if (!tile.ContainsId((int)config.SpawnInTile)) continue;
                     int x = tile.x;
                     int y = tile.y;
 
@@ -117,10 +117,10 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
 
                 entrancePos = grid.GetNearestPosition(entranceBorder, 1);
-                entranceAir = TileGrid.GetNearestPosition(entrancePos, TileType.Wall_Object_NA);
+                entranceAir = TileGrid.GetNearestPosition(entrancePos, (int)TileType.Wall_Object_NA);
 
                 exitPos = grid.GetNearestPosition(exitBorder, 1);
-                exitAir = TileGrid.GetNearestPosition(exitPos, TileType.Wall_Object_NA);
+                exitAir = TileGrid.GetNearestPosition(exitPos, (int)TileType.Wall_Object_NA);
 
                 Debug.Log("ent:" + entranceBorder + " " + entrancePos + " air: " + entranceAir);
                 Debug.Log("ext:" + exitBorder + " " + exitPos + " air: " + exitAir);
@@ -128,11 +128,11 @@ namespace Dalichrome.RandomGenerator.Generators
             else
             {
                 //Finding nearest air tile, then nearest wall then spawing entrance/exit
-                entranceAir = TileGrid.GetNearestPosition(entranceBorder, TileType.Wall_Object_NA);
-                exitAir = TileGrid.GetNearestPosition(exitBorder, TileType.Wall_Object_NA);
+                entranceAir = TileGrid.GetNearestPosition(entranceBorder, (int)TileType.Wall_Object_NA);
+                exitAir = TileGrid.GetNearestPosition(exitBorder, (int)TileType.Wall_Object_NA);
 
-                entrancePos = TileGrid.GetNearestPosition(entranceAir, config.SpawnInTile);
-                exitPos = TileGrid.GetNearestPosition(exitAir, config.SpawnInTile);
+                entrancePos = TileGrid.GetNearestPosition(entranceAir, (int)config.SpawnInTile);
+                exitPos = TileGrid.GetNearestPosition(exitAir, (int)config.SpawnInTile);
             }
 
 
@@ -144,8 +144,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 return;
             }
 
-            TileGrid.SetTileType(entrancePos, TileType.Object_Entrance);
-            TileGrid.SetTileType(exitPos, TileType.Object_Exit);
+            TileGrid.SetTileId(entrancePos, (int)TileType.Object_Entrance);
+            TileGrid.SetTileId(exitPos, (int)TileType.Object_Exit);
 
             //Add Entrance Exit to Universal Mask
             if (config.AddEntranceExitToMask)
@@ -162,7 +162,7 @@ namespace Dalichrome.RandomGenerator.Generators
             foreach (Vector2Int pos in path)
             {
                 if (config.DebugPath) {
-                    TileGrid.SetTileType(pos, TileType.Debug_Path_Green);
+                    TileGrid.SetTileId(pos, (int)TileType.Debug_Path_Green);
                 }
                 if (config.AddPathToMask)
                 {

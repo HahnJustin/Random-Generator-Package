@@ -7,6 +7,7 @@ using UnityEngine.Tilemaps;
 using Dalichrome.RandomGenerator;
 using Dalichrome.RandomGenerator.Databases;
 using Dalichrome.RandomGenerator.Core;
+using System.Security.Cryptography;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -15,7 +16,7 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private TileInfoDatabase database;
         [SerializeField] private NumberSpriteDatabase numberSpriteDB;
 
-        private static Dictionary<TileType, TileBase> tileBases = new();
+        private static Dictionary<int, TileBase> tileBases = new();
         private static Dictionary<int, TileBase> numberTileBases = new();
 
         private record ExtractedValue(GameObject gameObject, Sprite SpriteValue, Color ColorValue, TileBase TileValue);
@@ -35,41 +36,69 @@ namespace Dalichrome.RandomGenerator
             this.numberSpriteDB = numberSpriteDatabase;
         }
 
-        public GameObject GetGameObject(TileType type)
+        public GameObject GetGameObject(int id)
         {
-            return GetInfoHelper(type, TileInfoType.gameObject).gameObject;
-        }
-
-        public Sprite GetTileSprite(TileType type)
-        {
-            ExtractedValue value = GetInfoHelper(type, TileInfoType.sprite);
-            if (value == null) return null;
-
-            return value.SpriteValue;
-        }
-
-        public Color GetTileColor(TileType type)
-        {
-            return GetInfoHelper(type, TileInfoType.color).ColorValue;
-        }
-
-        public TileBase GetTileBase(TileType type)
-        {
-            if (tileBases.ContainsKey(type))
+            if (id.TryToEnum(out TileType type))
             {
-                return tileBases[type];
+                return GetInfoHelperByType(type, TileInfoType.gameObject).gameObject;
             }
 
-            TileBase tile = GetInfoHelper(type, TileInfoType.tile).TileValue;
+            //Add logic for custom typelss tiles;
+
+            return null;
+        }
+
+        public Sprite GetTileSprite(int id)
+        {
+            if (id.TryToEnum(out TileType type))
+            {
+                ExtractedValue value = GetInfoHelperByType(type, TileInfoType.sprite);
+                if (value == null) return null;
+
+                return value.SpriteValue;
+            }
+
+            //Add logic for custom typelss tiles;
+
+            return null;
+        }
+
+        public Color GetTileColor(int id)
+        {
+            if (id.TryToEnum(out TileType type))
+            {
+                return GetInfoHelperByType(type, TileInfoType.color).ColorValue;
+            }
+
+            //Add logic for custom typelss tiles;
+
+            return Color.white;
+        }
+
+        public TileBase GetTileBase(int id)
+        {
+
+            if (tileBases.ContainsKey(id))
+            {
+                return tileBases[id];
+            }
+
+            TileBase tile;
+            if (id.TryToEnum(out TileType type))
+            {
+                tile = GetInfoHelperByType(type, TileInfoType.tile).TileValue;
+            }
+            else tile = null; // Add logic for custom typeless tiles
+            
             if (tile != null)
             {
-                tileBases[type] = tile;
+                tileBases[id] = tile;
             }
-            else if (!tileBases.ContainsKey(type))
+            else if (!tileBases.ContainsKey(id))
             {
-                tileBases[type] = CreateCustomTile(type);
+                tileBases[id] = CreateCustomTile(id);
             }
-            return tileBases[type];
+            return tileBases[id];
         }
 
         public TileBase GetNumberTileBase(int value)
@@ -90,7 +119,7 @@ namespace Dalichrome.RandomGenerator
             return numberTileBases[value];
         }
 
-        private ExtractedValue GetInfoHelper(TileType type, TileInfoType infoType)
+        private ExtractedValue GetInfoHelperByType(TileType type, TileInfoType infoType)
         {
             if (database == null)
             {
@@ -118,10 +147,10 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private TileBase CreateCustomTile(TileType type)
+        private TileBase CreateCustomTile(int id)
         {
             CustomTileBase tile = (CustomTileBase)ScriptableObject.CreateInstance(typeof(CustomTileBase));
-            tile.sprite = GetTileSprite(type);
+            tile.sprite = GetTileSprite(id);
             return tile;
         }
 

@@ -58,9 +58,9 @@ namespace Dalichrome.RandomGenerator
 
         private bool SpawnTileGameObject(Core.Tile tile, LayerType layer)
         {
-            TileType type = tile.GetTypeInLayer(layer);
+            int tileId = tile.GetIdInLayer(layer);
 
-            GameObject prefab = tileInfoGrabber.GetGameObject(type);
+            GameObject prefab = tileInfoGrabber.GetGameObject(tileId);
             if (prefab == null) return false;
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
@@ -89,7 +89,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     int tempIndex = x + (y * tileGrid.width);
                     Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = tileInfoGrabber.GetTileBase(tile.GetTypeInLayer(layer));
+                    TileBase tileBase = tileInfoGrabber.GetTileBase(tile.GetIdInLayer(layer));
                     if (useGameObjects && SpawnTileGameObject(tile, layer)) {
                         tileBaseArray[tempIndex] = null;
                     }
@@ -169,7 +169,7 @@ namespace Dalichrome.RandomGenerator
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                tileInfoGrabber.GetTileBase(tile.GetTypeInLayer(layer));
+                                tileInfoGrabber.GetTileBase(tile.GetIdInLayer(layer));
                     }
                 }
                 // push one bulk call --------------------------------------------------

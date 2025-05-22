@@ -77,9 +77,9 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        private LayerType GetLayerFromTile(TileType type)
+        private LayerType GetLayerFromId(int id)
         {
-            return tileLayerLookup[(int)type];
+            return tileLayerLookup[id];
         }
 
         private Tile GetTileFromNativeArray(int x, int y)
@@ -126,38 +126,38 @@ namespace Dalichrome.RandomGenerator.Core
             return gridData;
         }
 
-        public bool SetTileType(int x, int y, TileType type)
+        public bool SetTileId(int x, int y, int id)
         {
             if (!IsInBounds(x, y) || IsExcluding(x,y)) return false;
 
             Tile t = GetTileFromNativeArray(x, y);
             if (!t.IsValid || !CanModifyTile(t)) return false;
 
-            t.SetType(type, GetLayerFromTile(type));
+            t.SetId(id, GetLayerFromId(id));
             tiles[PositionToIndex(x, y)] = t;
             return true;
         }
 
-        public bool SetTileType(int2 position, TileType type)
+        public bool SetTileId(int2 position, int id)
         {
-            return SetTileType(position.x, position.y, type);
+            return SetTileId(position.x, position.y, id);
         }
 
-        public bool SetTileType(Tile tile, TileType type)
+        public bool SetTileId(Tile tile, int id)
         {
-            tile.SetType(type, GetLayerFromTile(type));
-            return SetTileType(tile.Int2, type);
+            tile.SetId(id, GetLayerFromId(id));
+            return SetTileId(tile.Int2, id);
         }
 
-        public bool ContainsType(int x, int y, TileType type)
+        public bool ContainsId(int x, int y, int id)
         {
             Tile tile = GetTile(x, y);
-            return tile.ContainsType(type);
+            return tile.ContainsId(id);
         }
 
-        public bool ContainsType(int2 position, TileType type)
+        public bool ContainsId(int2 position, int id)
         {
-            return ContainsType(position.x, position.y, type);
+            return ContainsId(position.x, position.y, id);
         }
 
         public Tile GetTile(int x, int y)
@@ -179,7 +179,7 @@ namespace Dalichrome.RandomGenerator.Core
             Tile t = GetTileFromNativeArray(x, y);
             if (!t.IsValid || !CanModifyTile(t)) return false;
 
-            t.SetTypes(toSet);
+            t.SetLayersByTile(toSet);
             tiles[PositionToIndex(x, y)] = t;
             return true;
         }
@@ -260,7 +260,7 @@ namespace Dalichrome.RandomGenerator.Core
             return excludePositions.Contains(new(x,y));
         }
 
-        public int2 GetNearestPosition(int x, int y, TileType type)
+        public int2 GetNearestPosition(int x, int y, int id)
         {
             // Iterate through all distances from the center
             for (int d = 1; d < Math.Max(height, width); d++)
@@ -275,7 +275,7 @@ namespace Dalichrome.RandomGenerator.Core
                     int x1 = x + dx;
                     int y1 = y + dy1;
 
-                    if (IsInBounds(x1, y1) && GetTileFromNativeArray(x1, y1).ContainsType(type))
+                    if (IsInBounds(x1, y1) && GetTileFromNativeArray(x1, y1).ContainsId(id))
                     {
                         return new int2(x1, y1);
                     }
@@ -286,7 +286,7 @@ namespace Dalichrome.RandomGenerator.Core
                         int x2 = x + dx;
                         int y2 = y + dy2;
 
-                        if (IsInBounds(x2, y2) && GetTileFromNativeArray(x2, y2).ContainsType(type))
+                        if (IsInBounds(x2, y2) && GetTileFromNativeArray(x2, y2).ContainsId(id))
                         {
                             return new int2(x2, y2);
                         }
@@ -296,9 +296,9 @@ namespace Dalichrome.RandomGenerator.Core
             return Constants.OutsideGridInt2;
         }
 
-        public int2 GetNearestPosition(int2 position, TileType type)
+        public int2 GetNearestPosition(int2 position, int id)
         {
-            return GetNearestPosition(position.x, position.y, type);
+            return GetNearestPosition(position.x, position.y, id);
         }
 
         public void ClearNumbers()

@@ -31,11 +31,11 @@ namespace Dalichrome.RandomGenerator.Generators
                     if (Mathf.Pow(x - xOrg, 2) / Mathf.Pow(xOrg, 2) + 
                         Mathf.Pow(y - yOrg, 2) / Mathf.Pow(yOrg, 2) <= config.Radius)
                     {
-                        TileGrid.SetTileType(tile, config.Interior);
+                        TileGrid.SetTileId(tile, (int)config.Interior);
                     }
                     else
                     {
-                        TileGrid.SetTileType(tile, config.Exterior);
+                        TileGrid.SetTileId(tile, (int)config.Exterior);
                     }
                 }
             }

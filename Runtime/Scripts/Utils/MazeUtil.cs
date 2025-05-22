@@ -119,15 +119,15 @@ namespace Dalichrome.RandomGenerator.Utils
                 for (int y = 0; y < height; y++)
                 {
                     Tile tile = tileGrid.GetTile(x, y);
-                    if (tile.ContainsType(TileType.Debug_Technical))
+                    if (tile.ContainsId((int)TileType.Debug_Technical))
                     {
-                        tileGrid.SetTileType(tile, TileType.Debug_NA);
-                        tileGrid.SetTileType(tile, config.WallTile);
+                        tileGrid.SetTileId(tile, (int)TileType.Debug_NA);
+                        tileGrid.SetTileId(tile, (int)config.WallTile);
                     }
-                    else if (tile.ContainsType(TileType.Debug_Technical2))
+                    else if (tile.ContainsId((int)TileType.Debug_Technical2))
                     {
-                        tileGrid.SetTileType(tile, TileType.Debug_NA);
-                        tileGrid.SetTileType(tile, config.HallwayTile);
+                        tileGrid.SetTileId(tile, (int)TileType.Debug_NA);
+                        tileGrid.SetTileId(tile, (int)config.HallwayTile);
                     }
                 }
             }
@@ -148,11 +148,11 @@ namespace Dalichrome.RandomGenerator.Utils
                     if (x % 2 == 1 && y % 2 == 1)
                     {
                         cellGrid[x, y] = CreateMazeCell(tile);
-                        tileGrid.SetTileType(tile, TileType.Debug_Technical2);
+                        tileGrid.SetTileId(tile, (int)TileType.Debug_Technical2);
                     }
                     else
                     {
-                        tileGrid.SetTileType(tile, TileType.Debug_Technical);
+                        tileGrid.SetTileId(tile, (int)TileType.Debug_Technical);
                     }
                 }
             }
@@ -328,7 +328,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
                     Tile betweenTile = tileGrid.GetTile((currentCell.X + neighborCell.X) / 2,
                                                         (currentCell.Y + neighborCell.Y) / 2);
-                    tileGrid.SetTileType(betweenTile, TileType.Debug_Technical2);
+                    tileGrid.SetTileValue(betweenTile, (int)TileType.Debug_Technical2);
                     currentCell = neighborCell;
                     break;
                 }
