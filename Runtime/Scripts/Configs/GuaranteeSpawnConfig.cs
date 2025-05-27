@@ -31,8 +31,8 @@ namespace Dalichrome.RandomGenerator.Configs
         public int MaximumAmount { get { return _maximumAmount; } set { _maximumAmount = value; } }
         [SerializeField] private int _maximumAmount = 10;
 
-        [TileDisplay] public List<int> TileTypes { get { return _tileTypes; } set { _tileTypes = value; } }
-        [SerializeField] private List<int> _tileTypes = new List<int>() { (int)TileType.Object_Sack_Grub };
+        [TileDisplay, Probability] public List<SerialPair<int,int>> TileWeights { get { return _tileWeights; } set { _tileWeights = value; } }
+        [SerializeField] private List<SerialPair<int, int>> _tileWeights = new () { new((int)TileType.Object_Sack_Grub, 1) };
 
         public bool AddSpawnsToMask { get { return _addSpawnsToMask; } set { _addSpawnsToMask = value; } }
         [SerializeField] private bool _addSpawnsToMask = true;

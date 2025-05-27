@@ -7,13 +7,13 @@ using Dalichrome.RandomGenerator.Core;
 [BurstCompile]
 public struct GuaranteeSpawnJob : IJob
 {
-    /* „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ inputs „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ */
+    /* inputs */
     [ReadOnly] public NativeArray<int2> candidateTiles;
     [ReadOnly] public TileGridData inputGrid;
-    [ReadOnly] public NativeArray<int> tileTypes;
-    public uint seed;          // unique per job
+    [ReadOnly] public NativeArray<int2> tilePairs;   // (id, weight)
+    public uint seed;
 
-    /* „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ outputs „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ */
+    /* outputs */
     [NativeDisableParallelForRestriction] public TileGridData outputGrid;
     public NativeList<int2> outputExcludes;
 
@@ -24,9 +24,14 @@ public struct GuaranteeSpawnJob : IJob
 
     public void Execute()
     {
-        var rng = new Random(seed);        // deterministic per job run
-        int placed = 0;
+        var rng = new Random(seed);
 
+        /* total weight */
+        int total = 0;
+        for (int i = 0; i < tilePairs.Length; ++i)
+            total += tilePairs[i].y;          // y = weight
+
+        int placed = 0;
         for (int i = 0; i < candidateTiles.Length && placed < maxSpawns; ++i)
         {
             int2 pos = candidateTiles[i];
@@ -36,8 +41,20 @@ public struct GuaranteeSpawnJob : IJob
                 inputGrid.IsExcluding(pos))
                 continue;
 
-            /* pick a new random ID for this spawn */
-            int tileId = tileTypes[rng.NextInt(tileTypes.Length)];
+            /* weighted pick */
+            int roll = rng.NextInt(total);  // 0..total-1
+            int accum = 0;
+            int tileId = tilePairs[0].x;      // fallback
+
+            for (int j = 0; j < tilePairs.Length; ++j)
+            {
+                accum += tilePairs[j].y;
+                if (roll < accum)
+                {
+                    tileId = tilePairs[j].x;  // x = id
+                    break;
+                }
+            }
 
             outputGrid.SetTileId(pos, tileId);
             if (updateMask)

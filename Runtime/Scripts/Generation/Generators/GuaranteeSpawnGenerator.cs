@@ -67,9 +67,14 @@ namespace Dalichrome.RandomGenerator.Generators
             AddDisposable(tempExcludes);
 
             // Tile Id List
-            var tileTypesNative = new NativeArray<int>(
-            config.TileTypes.ToArray(), Allocator.TempJob);
-            AddDisposable(tileTypesNative);
+            var pairsNative = new NativeArray<int2>(
+            config.TileWeights.Count, Allocator.Persistent);
+            for (int i = 0; i < pairsNative.Length; ++i)
+            {
+                var p = config.TileWeights[i];
+                pairsNative[i] = new int2(p.Key, p.Value);   // x = id, y = weight
+            }
+            AddDisposable(pairsNative);
 
             // Create Grid to Read From
             TileGridData inputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
@@ -85,7 +90,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 minDistance = config.MinimumDistanceFromEntrance,
                 updateMask = config.AddSpawnsToMask,
                 useEntranceDistance = config.UseEntranceDistance,
-                tileTypes = tileTypesNative,
+                tilePairs = pairsNative,
                 seed = random.NextUInt()
             };
 
