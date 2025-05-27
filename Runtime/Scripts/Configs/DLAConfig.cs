@@ -35,8 +35,8 @@ namespace Dalichrome.RandomGenerator.Configs
         public bool HasHeadAtCenter { get { return _hasHeadAtCenter; } set { _hasHeadAtCenter = value; } }
         [SerializeField] private bool _hasHeadAtCenter = true;
 
-        public TileType StickTo { get { return _stickTo; } set { _stickTo = value; } }
-        [SerializeField] private TileType _stickTo = TileType.Wall_NA;
+        [TileDisplay] public int StickTo { get { return _stickTo; } set { _stickTo = value; } }
+        [SerializeField] private int _stickTo = (int)TileType.Wall_NA;
 
         public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
         [SerializeField] protected OccupanceType _occupance = OccupanceType.Contains_A;
@@ -44,8 +44,8 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
         [SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
-        [Condition("Occupance", OccupanceType.Contains_A)] public TileType TileA { get { return _tileA; } set { _tileA = value; } }
-        [SerializeField] protected TileType _tileA = TileType.Wall_NA;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [SerializeField] protected int _tileA = (int)TileType.Wall_NA;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

@@ -8,6 +8,7 @@ using Dalichrome.RandomGenerator;
 using Dalichrome.RandomGenerator.Databases;
 using Dalichrome.RandomGenerator.Core;
 using System.Security.Cryptography;
+using Dalichrome.RandomGenerator.UserData;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -18,6 +19,8 @@ namespace Dalichrome.RandomGenerator
 
         private static Dictionary<int, TileBase> tileBases = new();
         private static Dictionary<int, TileBase> numberTileBases = new();
+
+        private Dictionary<int, TileObject> tileObjects = new();
 
         private record ExtractedValue(GameObject gameObject, Sprite SpriteValue, Color ColorValue, TileBase TileValue);
 
@@ -33,7 +36,12 @@ namespace Dalichrome.RandomGenerator
         public void SetDatabase(TileInfoDatabase database, NumberSpriteDatabase numberSpriteDatabase = null)
         {
             this.database = database;
-            this.numberSpriteDB = numberSpriteDatabase;
+            numberSpriteDB = numberSpriteDatabase;
+        }
+
+        public void SetTileObjects(Dictionary<int,TileObject> tileObjects)
+        {
+            this.tileObjects = tileObjects;
         }
 
         public GameObject GetGameObject(int id)
@@ -42,8 +50,10 @@ namespace Dalichrome.RandomGenerator
             {
                 return GetInfoHelperByType(type, TileInfoType.gameObject).gameObject;
             }
-
-            //Add logic for custom typelss tiles;
+            else if (tileObjects.ContainsKey(id) && tileObjects[id].tileSpawn.spawnType == TileSpawnType.GameObject)
+            {
+                return tileObjects[id].tileSpawn.gameObject;
+            }
 
             return null;
         }
@@ -57,8 +67,10 @@ namespace Dalichrome.RandomGenerator
 
                 return value.SpriteValue;
             }
-
-            //Add logic for custom typelss tiles;
+            else if (tileObjects.ContainsKey(id) && tileObjects[id].tileSpawn.spawnType == TileSpawnType.Sprite)
+            {
+                return tileObjects[id].tileSpawn.sprite;
+            }
 
             return null;
         }
@@ -69,10 +81,29 @@ namespace Dalichrome.RandomGenerator
             {
                 return GetInfoHelperByType(type, TileInfoType.color).ColorValue;
             }
-
-            //Add logic for custom typelss tiles;
+            else if (tileObjects.ContainsKey(id))
+            {
+                return tileObjects[id].color;
+            }
 
             return Color.white;
+        }
+
+        public string GetTileName(int id)
+        {
+            if (id.TryToEnum(out TileType type))
+            {
+                return type.ToString()
+                    .Replace("_", " ")
+                    .Replace("-", " ");
+            }
+            else if (tileObjects.ContainsKey(id))
+            {
+                return string.IsNullOrEmpty(tileObjects[id].name) ? "Tile ID " + id : tileObjects[id].name;
+            }
+
+
+            return "Tile ID " + id;
         }
 
         public TileBase GetTileBase(int id)
@@ -83,13 +114,16 @@ namespace Dalichrome.RandomGenerator
                 return tileBases[id];
             }
 
-            TileBase tile;
+            TileBase tile = null;
             if (id.TryToEnum(out TileType type))
             {
                 tile = GetInfoHelperByType(type, TileInfoType.tile).TileValue;
             }
-            else tile = null; // Add logic for custom typeless tiles
-            
+            else if (tileObjects.ContainsKey(id) && tileObjects[id].tileSpawn.spawnType == TileSpawnType.TileBase)
+            {
+                tile = tileObjects[id].tileSpawn.tileBase;
+            }
+
             if (tile != null)
             {
                 tileBases[id] = tile;

@@ -14,6 +14,7 @@ using UnityEngine.Tilemaps;
 using System.Threading.Tasks;
 using System.Reflection.Emit;
 using UnityEditor.PackageManager;
+using Dalichrome.RandomGenerator.UserData;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -31,6 +32,9 @@ namespace Dalichrome.RandomGenerator
 
         private TileInfoGrabber tileGrabber = new();
         private LayerInfoGrabber layerGrabber = new();
+
+        private Dictionary<int, LayerType> tileObjectLayerLookup = new();
+        private List<int> ids = new();
 
         private List<AbstractGeneratorConfig> lastGeneratedConfigs;
         private List<AbstractGeneratorConfig> generatingConfigs;
@@ -135,7 +139,25 @@ namespace Dalichrome.RandomGenerator
             if (tilemapCreator != null) tilemapCreator.SetRandomGenerator(this);
             ThreadSafeRandom.InitState();
 
+            ids.Clear();
+            foreach (TileType tile in Enum.GetValues(typeof(TileType)))
+            {
+                ids.Add((int)tile);
+            }
+
+            Dictionary<int, TileObject> tileObjects = new();
+            tileObjectLayerLookup.Clear();
+            TileObject[] tileObjectArray = Resources.LoadAll<TileObject>("TileObjects/");
+            foreach (TileObject tileObject in tileObjectArray)
+            {
+                tileObjects[tileObject.tileId] = tileObject;
+                tileObjectLayerLookup[tileObject.tileId] = tileObject.layer;
+                ids.Add(tileObject.tileId);
+            }
+
             tileGrabber.SetDatabase(tileDatabase, numberSpriteDatabase);
+            tileGrabber.SetTileObjects(tileObjects);
+
             layerGrabber.SetDatabase(layerDatabase);
         }
 
@@ -214,8 +236,9 @@ namespace Dalichrome.RandomGenerator
 
         private GenerationInfo CreateGenerationInfo(CancellationToken token)
         {
-            GenerationInfo generationInfo = new(generationParameters);
+            GenerationInfo generationInfo = new (generationParameters);
             generationInfo.Token = token;
+            generationInfo.AddLayersLookups(tileObjectLayerLookup);
             return generationInfo;
         }
 
@@ -389,6 +412,12 @@ namespace Dalichrome.RandomGenerator
             return !lastGeneratedConfigs.SequenceEqual(Configs);
         }
 
+        public List<int> GetTileIds() 
+        { 
+            return ids; 
+        }
+
+        //TODO Move these functions
         public Texture2D CreateTexture(TileGrid grid)
         {
             // Create a new x by y texture ARGB32 (32 bit with alpha) and no mipmaps
@@ -402,11 +431,11 @@ namespace Dalichrome.RandomGenerator
                     Core.Tile tile = grid.GetTile(x, y);
 
                     Color color;
-                    if (!Enum.GetName(typeof(TileType), tile.Object).Contains("NA"))
+                    if (!tileGrabber.GetTileName(tile.Object).Contains("NA"))
                     {
                         color = tileGrabber.GetTileColor(tile.Object);
                     }
-                    else if (!Enum.GetName(typeof(TileType), tile.Wall).Contains("NA"))
+                    else if (!tileGrabber.GetTileName(tile.Wall).Contains("NA"))
                     {
                         color = tileGrabber.GetTileColor(tile.Wall);
                     }

@@ -26,7 +26,7 @@ namespace Dalichrome.RandomGenerator
         [Header("GameObjects")]
         [SerializeField] private bool useGameObjects = false;
         [SerializeField] private float gameObjectVariance = 0.2f;
-        [SerializeField] private Vector2 gameObjectOffset = new Vector2(0.5f,0.5f);
+        [SerializeField] private Vector2 gameObjectOffset = new (0.5f,0.5f);
         [SerializeField] private Transform gameObjectParent;
         private List<GameObject> spawnedObjects = new();
 

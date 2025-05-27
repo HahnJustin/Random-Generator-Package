@@ -32,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public TileMask(List<TileType> includeList, List<TileType> excludeList)
+        public TileMask(List<int> includeList, List<int> excludeList)
         {
             AbstractRandom random = new UnityMathematicsRandom(1);
             id = random.NextInt(100000000);

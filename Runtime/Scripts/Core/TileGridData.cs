@@ -79,7 +79,10 @@ namespace Dalichrome.RandomGenerator.Core
 
         private LayerType GetLayerFromId(int id)
         {
-            return tileLayerLookup[id];
+            if (tileLayerLookup.TryGetValue(id, out LayerType layer))
+                return layer;
+            
+            return LayerType.NA;
         }
 
         private Tile GetTileFromNativeArray(int x, int y)
@@ -109,19 +112,31 @@ namespace Dalichrome.RandomGenerator.Core
         {
             TileGridData gridData = new(other.width, other.height);
 
+            // Tiles
             gridData.tiles.Dispose();
             gridData.tiles = other.tiles.DeepClone(Allocator.Persistent);
 
+            // Tile Mask
             gridData.tileMask.Dispose();
             gridData.masked = other.masked;
             if (other.tileMask.IsValid) gridData.tileMask = other.tileMask.DeepClone();
 
-            gridData.IsValid = true;
+            // Tile Layer Lookup
+            gridData.tileLayerLookup.Dispose();
+            gridData.tileLayerLookup = new (
+                    other.tileLayerLookup.Capacity,
+                    Allocator.Persistent);
 
+            foreach (var kvp in other.tileLayerLookup)
+                gridData.tileLayerLookup.TryAdd(kvp.Key, kvp.Value);
+
+            // Exclude Positions List
             gridData.excludePositions.Dispose();
             gridData.excludePositions = new NativeParallelHashSet<int2>(other.excludePositions.Count(), Allocator.Persistent);
             foreach (var pos in other.excludePositions)
                 gridData.excludePositions.Add(pos);
+
+            gridData.IsValid = true;
 
             return gridData;
         }
@@ -232,7 +247,7 @@ namespace Dalichrome.RandomGenerator.Core
             };
         }
 
-        public void CreateMask(List<TileType> includeList, List<TileType> excludeList)
+        public void CreateMask(List<int> includeList, List<int> excludeList)
         {
             tileMask.Dispose();
             tileMask = new(includeList, excludeList);
@@ -400,6 +415,26 @@ namespace Dalichrome.RandomGenerator.Core
         public NativeArray<Tile> AsNativeArray()
         {
             return tiles;
+        }
+
+        public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
+        {
+            int needed = tileLayerLookup.Count() + layerLookup.Count;
+            if (needed > tileLayerLookup.Capacity)
+            {
+                int newCap = math.ceilpow2(needed);  // power-of-two rule
+                var bigger = new NativeParallelHashMap<int, LayerType>(newCap, Allocator.Persistent);
+
+                // Copy existing pairs
+                foreach (var kvp in tileLayerLookup)
+                    bigger.TryAdd(kvp.Key, kvp.Value);
+
+                tileLayerLookup.Dispose();
+                tileLayerLookup = bigger;
+            }
+
+            foreach (var pair in layerLookup)
+                tileLayerLookup[pair.Key] = pair.Value;
         }
     }
 }

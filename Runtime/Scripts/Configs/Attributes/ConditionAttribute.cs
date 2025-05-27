@@ -5,14 +5,20 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public class ConditionAttribute : Attribute
+    /// <summary>
+    /// Draw the field only when the value of <paramref name="dependentPropertyName"/>
+    /// equals <paramref name="compareAgainst"/>.
+    /// </summary>
+    public sealed class ConditionAttribute : PropertyAttribute
     {
-        public string dependentVariable;
-        public object objectToEqual;
-        public ConditionAttribute(string dependentVariable, object objectToEqual)
+        public readonly string DependentPropertyName;
+        public readonly object CompareAgainst;
+
+        // The CLR lets us pass enums, ints, strings, bools, floats, etc.
+        public ConditionAttribute(string dependentPropertyName, object compareAgainst)
         {
-            this.dependentVariable = dependentVariable;
-            this.objectToEqual = objectToEqual;
+            DependentPropertyName = dependentPropertyName;
+            CompareAgainst        = compareAgainst;
         }
     }
 }

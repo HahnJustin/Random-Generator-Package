@@ -10,7 +10,7 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public OccupanceType occupanceType;
         public LayerType occupyLayer;
-        public TileType tileA;
+        public int tileA;
         public bool invert;
         public int outOfBoundsValue;
 
@@ -37,7 +37,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     value = tile.GetOccupied(occupyLayer);
                     break;
                 case OccupanceType.Contains_A:
-                    value = tile.ContainsId((int)tileA) ? 1 : 0;
+                    value = tile.ContainsId(tileA) ? 1 : 0;
                     break;
                 case OccupanceType.Doors_WO_Not_NA:
                     value = tile.ContainsId((int)TileType.Object_Door) ? 0 : tile.GetOccupied();

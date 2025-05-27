@@ -166,7 +166,7 @@ namespace Dalichrome.RandomGenerator.Core
             data.RemoveMask();
         }
 
-        public void CreateMask(List<TileType> includeList, List<TileType> excludeList)
+        public void CreateMask(List<int> includeList, List<int> excludeList)
         {
             data.CreateMask(includeList, excludeList);
             SetGridData(data);
@@ -300,6 +300,11 @@ namespace Dalichrome.RandomGenerator.Core
         {
             data.Dispose();
             data = _data;
+        }
+
+        public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
+        {
+            data.AddLayersLookups(layerLookup);
         }
     }
 }

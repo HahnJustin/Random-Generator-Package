@@ -96,7 +96,7 @@ namespace Dalichrome.RandomGenerator.Utils
             }
             else if (config.Occupance == OccupanceType.Contains_A)
             {
-                tileGrid.SetTileId(tile, (int)config.TileA);
+                tileGrid.SetTileId(tile, config.TileA);
             }
             else
             {

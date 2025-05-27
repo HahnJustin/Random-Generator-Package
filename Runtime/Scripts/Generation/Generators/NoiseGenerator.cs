@@ -17,7 +17,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void Enact()
         {
-            List<TileType> tileTypes = config.Tiles;
+            List<int> tileTypes = config.Tiles;
             if (tileTypes == null || tileTypes.Count == 0) return;
 
 

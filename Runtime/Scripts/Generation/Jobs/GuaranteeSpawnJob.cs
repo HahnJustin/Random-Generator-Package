@@ -1,58 +1,49 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator.Generators;
-using System.Threading;
 
 [BurstCompile]
-public unsafe struct GuaranteeSpawnJob : IJobParallelFor
+public struct GuaranteeSpawnJob : IJob
 {
+    /* „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ inputs „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ */
     [ReadOnly] public NativeArray<int2> candidateTiles;
     [ReadOnly] public TileGridData inputGrid;
+    [ReadOnly] public NativeArray<int> tileTypes;
+    public uint seed;          // unique per job
+
+    /* „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ outputs „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ */
     [NativeDisableParallelForRestriction] public TileGridData outputGrid;
-
-    [ReadOnly] public NativeArray<TileType> spawnTypes;
-    [NativeDisableParallelForRestriction] public NativeReference<int> spawnCounter;
-
-    public NativeList<int2>.ParallelWriter outputExcludes;
+    public NativeList<int2> outputExcludes;
 
     public int maxSpawns;
     public int minDistance;
     public bool updateMask;
     public bool useEntranceDistance;
-    public uint seed;
 
-    public void Execute(int index)
+    public void Execute()
     {
-        // Early out if we already hit the max
-        if (spawnCounter.Value >= maxSpawns) return;
+        var rng = new Random(seed);        // deterministic per job run
+        int placed = 0;
 
-        int2 pos = candidateTiles[index];
-        Tile tile = inputGrid.GetTile(pos);
-
-        // Check distance and exclusion rules
-        if ((useEntranceDistance && tile.Value > -minDistance) || inputGrid.IsExcluding(pos))
-            return;
-
-        // Choose a spawn type randomly
-        uint perTileSeed = seed + (uint)(index * 73856093);
-        var rng = new Random(perTileSeed);
-        TileType chosenType = spawnTypes[rng.NextInt(spawnTypes.Length)];
-
-        // Get unsafe pointer to NativeReference value and use atomic increment
-        ref int counter = ref UnsafeUtility.AsRef<int>(
-            NativeReferenceUnsafeUtility.GetUnsafePtr(spawnCounter)
-        );
-
-        int result = Interlocked.Increment(ref counter);
-        if (result <= maxSpawns)
+        for (int i = 0; i < candidateTiles.Length && placed < maxSpawns; ++i)
         {
-            outputGrid.SetTileId(pos, (int)chosenType);
+            int2 pos = candidateTiles[i];
+            Tile tile = inputGrid.GetTile(pos);
+
+            if ((useEntranceDistance && tile.Value > -minDistance) ||
+                inputGrid.IsExcluding(pos))
+                continue;
+
+            /* pick a new random ID for this spawn */
+            int tileId = tileTypes[rng.NextInt(tileTypes.Length)];
+
+            outputGrid.SetTileId(pos, tileId);
             if (updateMask)
                 outputExcludes.AddNoResize(pos);
+
+            ++placed;
         }
     }
 }

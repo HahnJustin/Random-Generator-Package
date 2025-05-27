@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using System.Collections.Generic;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -107,5 +108,10 @@ namespace Dalichrome.RandomGenerator
             }
         }
 #endif
+
+        public void AddLayersLookups(Dictionary<int,LayerType> layerLookup)
+        {
+            Grid.AddLayersLookups(layerLookup);
+        }
     }
 }

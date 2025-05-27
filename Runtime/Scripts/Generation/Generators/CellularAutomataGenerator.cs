@@ -40,8 +40,8 @@ namespace Dalichrome.RandomGenerator.Generators
                     occupance = occupance,
                     liveNeighborsRequired = config.LiveNeighboursRequired,
                     placeProbability = config.PlaceProbability,
-                    fillType = config.Fill,
-                    emptyType = config.Empty,
+                    fillId = config.Fill,
+                    emptyId = config.Empty,
                     baseSeed = baseSeed,
                     repetition = (uint)rep
                 };

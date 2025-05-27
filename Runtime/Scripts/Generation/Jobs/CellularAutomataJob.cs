@@ -13,8 +13,8 @@ public struct CellularAutomataJob : IJobParallelFor
 
     public int liveNeighborsRequired;
     public float placeProbability;
-    public TileType fillType;
-    public TileType emptyType;
+    public int fillId;
+    public int emptyId;
     public uint baseSeed;
     public uint repetition;
 
@@ -31,7 +31,7 @@ public struct CellularAutomataJob : IJobParallelFor
         bool shouldLive = (occupied + neighbors) >= liveNeighborsRequired;
         bool place = placeProbability >= 1f || rng.NextFloat() < placeProbability;
 
-        writeGrid.SetTileId(pos, shouldLive && place ? (int)fillType : (int)emptyType);
+        writeGrid.SetTileId(pos, shouldLive && place ? fillId : emptyId);
     }
 
     private int CountLiveNeighbors(int2 pos)

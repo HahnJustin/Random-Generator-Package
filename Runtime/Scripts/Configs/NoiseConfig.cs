@@ -22,7 +22,7 @@ namespace Dalichrome.RandomGenerator.Configs
         public int Repetitions { get { return _repetitions; } set { _repetitions = value; } }
         [SerializeField] private int _repetitions = 1;
 
-        public List<TileType> Tiles { get { return _tiles; } set { _tiles = value; } }
-        [SerializeField] private List<TileType> _tiles = new() { TileType.Wall_Cave };
+        [TileDisplay] public List<int> Tiles { get { return _tiles; } set { _tiles = value; } }
+        [SerializeField] private List<int> _tiles = new() { (int)TileType.Wall_Cave };
     }
 }

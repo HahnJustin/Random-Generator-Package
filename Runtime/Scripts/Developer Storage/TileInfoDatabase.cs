@@ -5,7 +5,7 @@ using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Databases
 {
-    [CreateAssetMenu(menuName = "Databases/TileInfoDatabase")]
+    [CreateAssetMenu(menuName = "RandomGenerator/Databases/TileInfoDatabase")]
     public class TileInfoDatabase : Database<TileType, TileInfo>
     {
     }

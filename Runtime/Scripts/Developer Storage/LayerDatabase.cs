@@ -6,7 +6,7 @@ using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Databases
 {
-    [CreateAssetMenu(menuName = "Databases/LayerDatabase")]
+    [CreateAssetMenu(menuName = "RandomGenerator/Databases/LayerDatabase")]
     public class LayerDatabase : Database<LayerType, LayerInfo>
     {
 

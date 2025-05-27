@@ -24,7 +24,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if(x < config.Depth || width - x < config.Depth ||
                        y < config.Depth || height - y < config.Depth)
                     {
-                        TileGrid.SetTileId(x, y, (int)config.Border);
+                        TileGrid.SetTileId(x, y, config.Border);
                     }
                 }
             }

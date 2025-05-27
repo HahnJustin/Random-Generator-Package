@@ -29,17 +29,17 @@ namespace Dalichrome.RandomGenerator.Configs
         public int RoomMaxSize { get { return _roomMax; } set { _roomMax = value; } }
         [SerializeField] private int _roomMax = 12;
 
-        public TileType FloorTile { get { return _floorTile; } set { _floorTile = value; } }
-        [SerializeField] private TileType _floorTile = TileType.Ground_Cobble;
+        [TileDisplay] public int FloorTile { get { return _floorTile; } set { _floorTile = value; } }
+        [SerializeField] private int _floorTile = (int)TileType.Ground_Cobble;
 
-        public TileType WallTile { get { return _wallTile; } set { _wallTile = value; } }
-        [SerializeField] private TileType _wallTile = TileType.Wall_Cobble;
+        [TileDisplay] public int WallTile { get { return _wallTile; } set { _wallTile = value; } }
+        [SerializeField] private int _wallTile = (int)TileType.Wall_Cobble;
 
-        public TileType HallwayTile { get { return _hallwayTile; } set { _hallwayTile = value; } }
-        [SerializeField] private TileType _hallwayTile = TileType.Wall_Object_NA;
+        [TileDisplay] public int HallwayTile { get { return _hallwayTile; } set { _hallwayTile = value; } }
+        [SerializeField] private int _hallwayTile = (int)TileType.Wall_Object_NA;
 
-        public TileType DoorTile { get { return _doorTile; } set { _doorTile = value; } }
-        [SerializeField] private TileType _doorTile = TileType.Object_Door;
+        [TileDisplay] public int DoorTile { get { return _doorTile; } set { _doorTile = value; } }
+        [SerializeField] private int _doorTile = (int)TileType.Object_Door;
 
         public float ExtraDoorOdds { get { return _extraDoorOdds; } set { _extraDoorOdds = value; } }
         [SerializeField] private float _extraDoorOdds = 0.02f;
@@ -53,8 +53,8 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
         [SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
-        [Condition("Occupance", OccupanceType.Contains_A)] public TileType TileA { get { return _tileA; } set { _tileA = value; } }
-        [SerializeField] protected TileType _tileA = TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = true;

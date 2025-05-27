@@ -55,11 +55,11 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Masked", true), Color("#4d728f")] public MaskTimeType MaskTime { get { return _maskTime; } set { _maskTime = value; } }
         [SerializeField] private MaskTimeType _maskTime = MaskTimeType.During;
 
-        [Condition("Masked", true), Color("#4d728f")] public List<TileType> IncludeList { get { return _includeList; } set { _includeList = value; } }
-        [SerializeField] private List<TileType> _includeList = new() {};
+        [Condition("Masked", true), Color("#4d728f"), TileDisplay] public List<int> IncludeList { get { return _includeList; } set { _includeList = value; } }
+        [SerializeField] private List<int> _includeList = new() {};
 
-        [Condition("Masked", true), Color("#4d728f")] public List<TileType> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
-        [SerializeField] private List<TileType> _excludeList = new() { TileType.Wall_Object_NA};
+        [Condition("Masked", true), Color("#4d728f"), TileDisplay] public List<int> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
+        [SerializeField] private List<int> _excludeList = new() { (int)TileType.Wall_Object_NA};
 
         public override string ToString()
         {

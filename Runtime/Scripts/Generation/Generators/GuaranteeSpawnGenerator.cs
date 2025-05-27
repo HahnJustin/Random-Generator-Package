@@ -57,18 +57,19 @@ namespace Dalichrome.RandomGenerator.Generators
             }
             AddDisposable(candidates);
 
-            // Build NativeArray of tile types
-            NativeArray<TileType> spawnTypes = new NativeArray<TileType>(config.TileTypes.ToArray(), Allocator.Persistent);
-            AddDisposable(spawnTypes);
-
             // Create counter
-            NativeReference<int> spawnCounter = new NativeReference<int>(0, Allocator.Persistent);
+            NativeReference<int> spawnCounter = new (0, Allocator.Persistent);
             AddDisposable(spawnCounter);
 
             // Max Spawns and Universal Mask Exclusion List
             int maxSpawns = random.NextInt(config.MinimumAmount, config.MaximumAmount);
             var tempExcludes = new NativeList<int2>(maxSpawns, Allocator.Persistent);
             AddDisposable(tempExcludes);
+
+            // Tile Id List
+            var tileTypesNative = new NativeArray<int>(
+            config.TileTypes.ToArray(), Allocator.TempJob);
+            AddDisposable(tileTypesNative);
 
             // Create Grid to Read From
             TileGridData inputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
@@ -79,22 +80,22 @@ namespace Dalichrome.RandomGenerator.Generators
                 candidateTiles = candidates.AsArray(),
                 inputGrid = inputGrid,
                 outputGrid = TileGrid.GetGridData(),
-                outputExcludes = tempExcludes.AsParallelWriter(),
-                spawnTypes = spawnTypes,
-                spawnCounter = spawnCounter,
+                outputExcludes = tempExcludes,
                 maxSpawns = maxSpawns,
                 minDistance = config.MinimumDistanceFromEntrance,
                 updateMask = config.AddSpawnsToMask,
                 useEntranceDistance = config.UseEntranceDistance,
+                tileTypes = tileTypesNative,
                 seed = random.NextUInt()
             };
 
-            JobHandle handle = job.Schedule(candidates.Length, 64);
+            JobHandle handle = job.Schedule();
             handle.Complete();
             
             // Update Excluded Positions / Universal Mask 
             foreach (var pos in tempExcludes)
                 TileGrid.AddExcludedPosition(pos);
+
 
             Dispose();
         }

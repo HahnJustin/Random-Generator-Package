@@ -17,8 +17,8 @@ namespace Dalichrome.RandomGenerator.Configs
         public override GeneratorType Type { get { return GeneratorType.Border; } }
 
 
-        public TileType Border { get { return _border; } set { _border = value; } }
-        [SerializeField] private TileType _border = TileType.Wall_Cave;
+        [TileDisplay] public int Border { get { return _border; } set { _border = value; } }
+        [SerializeField] private int _border = (int)TileType.Wall_Cave;
 
         public int Depth { get { return _depth; } set { _depth = value; } }
         [SerializeField] private int _depth = 5;

@@ -24,8 +24,8 @@ namespace Dalichrome.RandomGenerator.Configs
         public EEPlaceableType Placeable { get { return _placeable; } set { _placeable = value; } }
         [SerializeField] protected EEPlaceableType _placeable = EEPlaceableType.One_Side_Wall;
 
-        public TileType SpawnInTile { get { return _spawnInTile; } set { _spawnInTile = value; } }
-        [SerializeField] private TileType _spawnInTile = TileType.Wall_Cave;
+        [TileDisplay] public int SpawnInTile { get { return _spawnInTile; } set { _spawnInTile = value; } }
+        [SerializeField] private int _spawnInTile = (int)TileType.Wall_Cave;
 
         [Hidden] public bool ShowUniversalMask { get { return _addEntranceExitToMask || (_addPathToMask && _createPath); } }
 
@@ -47,8 +47,8 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
         [SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
-        [Condition("Occupance", OccupanceType.Contains_A)] public TileType TileA { get { return _tileA; } set { _tileA = value; } }
-        [SerializeField] protected TileType _tileA = TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

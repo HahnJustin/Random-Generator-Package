@@ -25,11 +25,11 @@ namespace Dalichrome.RandomGenerator.Generators
                 {
                     Tile tile = TileGrid.GetTile(x, y);
 
-                    foreach (SerialPair<TileType,TileType> pair in config.FromTo)
+                    foreach (SerialPair<int, int> pair in config.FromTo)
                     {
-                        if (tile.ContainsId((int)pair.Key))
+                        if (tile.ContainsId(pair.Key))
                         {
-                            TileGrid.SetTileId(tile, (int)pair.Value);
+                            TileGrid.SetTileId(tile, pair.Value);
                         }
                     }
                 }

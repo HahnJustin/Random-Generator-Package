@@ -23,11 +23,11 @@ namespace Dalichrome.RandomGenerator.Configs
         public int Repetitions { get { return _repetitions; } set { _repetitions = value; } }
         [SerializeField] private int _repetitions = 2;
 
-        public TileType Fill { get { return _fill; } set { _fill = value; } }
-        [SerializeField] private TileType _fill = TileType.Wall_Cave;
+        [TileDisplay] public int Fill { get { return _fill; } set { _fill = value; } }
+        [SerializeField] private int _fill = (int)TileType.Wall_Cave;
 
-        public TileType Empty { get { return _empty; } set { _empty = value; } }
-        [SerializeField] private TileType _empty = TileType.Wall_NA;
+        [TileDisplay] public int Empty { get { return _empty; } set { _empty = value; } }
+        [SerializeField] private int _empty = (int)TileType.Wall_NA;
 
         public float PlaceProbability { get { return _placeProbability; } set { _placeProbability = value; } }
         [SerializeField] private float _placeProbability = 1f;
@@ -41,8 +41,8 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
         [SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
-        [Condition("Occupance", OccupanceType.Contains_A)] public TileType TileA { get { return _tileA; } set { _tileA = value; } }
-        [SerializeField] protected TileType _tileA = TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

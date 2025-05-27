@@ -1,68 +1,83 @@
-using UnityEngine;
+﻿#if UNITY_EDITOR
 using UnityEditor;
+using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using System;
+using System.Collections;
+using System.Text.RegularExpressions;
 
 [CustomPropertyDrawer(typeof(ConditionAttribute))]
-public class ConditionAttributeDrawer : PropertyDrawer
+public class ConditionDrawer : PropertyDrawer
 {
-    private bool ShouldDisplay(SerializedProperty property, object objectToEqual)
+    public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
     {
-        bool shouldDisplay = false;
-
-        switch (property.propertyType)
-        {
-            case SerializedPropertyType.Boolean:
-                shouldDisplay = property.boolValue.Equals(objectToEqual);
-                break;
-            case SerializedPropertyType.Enum:
-                shouldDisplay = property.enumValueIndex.Equals(objectToEqual);
-                break;
-            case SerializedPropertyType.Float:
-                shouldDisplay = property.floatValue.Equals(objectToEqual);
-                break;
-            case SerializedPropertyType.Integer:
-                shouldDisplay = property.intValue.Equals(objectToEqual);
-                break;
-            case SerializedPropertyType.String:
-                shouldDisplay = property.stringValue.Equals(objectToEqual);
-                break;
-            case SerializedPropertyType.Vector2:
-                shouldDisplay = property.vector2Value.Equals(objectToEqual);
-                break;
-            //More cases to add
-        }
-
-        return shouldDisplay;
+        if (ConditionMet(prop, (ConditionAttribute)attribute))
+            EditorGUI.PropertyField(pos, prop, label, true);
     }
 
-    /*
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-
+    public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
     {
-        ConditionAttribute conditionAttribute = (ConditionAttribute)attribute;
-        object targetObject = property.serializedObject.targetObject;
-        object conditionValue = ReflectionHelper.GetFieldValue(targetObject, conditionAttribute.dependentVariable);
-
-        if (conditionValue != null && ShouldDisplay(property, conditionAttribute.objectToEqual))
-        {
-            EditorGUI.PropertyField(position, property, label, true);
-        }
+        return ConditionMet(prop, (ConditionAttribute)attribute)
+            ? EditorGUI.GetPropertyHeight(prop, label, true)
+            : -EditorGUIUtility.standardVerticalSpacing;   // ← removes residual gap
     }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    /* ---------- helpers (same as previous robust version) ---------- */
+    private static bool ConditionMet(SerializedProperty prop, ConditionAttribute cond)
     {
-        ConditionAttribute conditionAttribute = (ConditionAttribute)attribute;
-        object targetObject = property.serializedObject.targetObject;
-        object conditionValue = ReflectionHelper.GetFieldValue(targetObject, conditionAttribute.dependentVariable);
+        object host = GetHostObject(prop);
+        if (host == null) return true;
 
-        if (conditionValue != null && ShouldDisplay(property, conditionAttribute.objectToEqual))
-        {
-            return EditorGUI.GetPropertyHeight(property, label);
-        }
-        else
-        {
-            return 0;
-        }
+        object current = ReflectionHelper.GetFieldValue(host, cond.DependentPropertyName);
+        if (current is UnityEngine.Object uo && uo == null) current = null;
+
+        return EqualsRobust(current, cond.CompareAgainst);
     }
-    */
+
+    private static object GetHostObject(SerializedProperty prop)
+    {
+        object obj = prop.serializedObject.targetObject;
+        string path = prop.propertyPath;
+        int lastDot = path.LastIndexOf('.');
+        if (lastDot < 0) return obj;
+
+        string[] elements = path[..lastDot].Split('.');
+        Regex arrayElem = new(@"^data\[(\d+)\]$");
+
+        foreach (string element in elements)
+        {
+            if (element == "Array") continue;
+
+            var m = arrayElem.Match(element);
+            if (m.Success)
+            {
+                int index = int.Parse(m.Groups[1].Value);
+                if (obj is IList list && index < list.Count) obj = list[index];
+                else return null;
+            }
+            else
+            {
+                obj = ReflectionHelper.GetFieldValue(obj, element);
+            }
+            if (obj == null) break;
+        }
+        return obj;
+    }
+
+    private static bool EqualsRobust(object a, object b)
+    {
+        if (a == null || b == null) return a == b;
+
+        if (a is Enum && IsNumeric(b)) a = Convert.ToInt64(a);
+        else if (b is Enum && IsNumeric(a)) b = Convert.ToInt64(b);
+
+        if (a is UnityEngine.Object ao && b is UnityEngine.Object bo) return ao == bo;
+
+        return a.Equals(b);
+    }
+
+    private static bool IsNumeric(object o) =>
+        o is byte or sbyte or short or ushort or int or uint or long or ulong
+        or float or double or decimal;
 }
+#endif
