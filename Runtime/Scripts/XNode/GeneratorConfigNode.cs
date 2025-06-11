@@ -1,69 +1,35 @@
-﻿using UnityEngine;
-using XNode;
+﻿// GeneratorConfigNode.cs  (no behaviour change – just new base)
 using Dalichrome.RandomGenerator.Configs;
-using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator;
+using XNode;
+using UnityEditor;
+using UnityEngine;
 
-[CreateNodeMenu("Generator Node")]
-public class GeneratorConfigNode : Node
+public class GeneratorConfigNode
+        : ConfigNodeBase<AbstractGeneratorConfig>
 {
-    /* ────── Ports ────── */
-    [Input] public TileRegion input;
-    [Output] public TileRegion output;
+    /* one input, **single** output */
+    [Input(connectionType = ConnectionType.Override, typeConstraint = TypeConstraint.Strict)] public TileRegion Input;
 
-    /* ────── UI State ────── */
-    [SerializeField] private bool _enabled = true;
-    [SerializeField] private string _displayName = "";
-    [SerializeField] private bool _customName = false;
+    // “Override” ⇒ when the user drags a second wire on,
+    // the previous connection is replaced automatically
+    [Output(connectionType = ConnectionType.Override, typeConstraint = TypeConstraint.Strict)]
+    public TileRegion Output;
 
-    public bool Enabled { get => _enabled; set => _enabled = value; }
-    public string DisplayName
+    public override System.Type ConfigBaseType => typeof(AbstractGeneratorConfig);
+
+    public GeneratorType Type => Config?.Type ?? GeneratorType.NA;
+    public override int PaletteSeed => (int)Type;
+
+    public override void SyncNameWithType()
     {
-        get => _displayName;
-        set
-        {
-            _displayName = value?.Trim();                    // <-- trim
-            _customName = !string.IsNullOrEmpty(_displayName);
-        }
+        if (string.IsNullOrEmpty(DisplayName))
+            DisplayName = Type.ToString().Replace('_', ' ');
     }
 
-    public bool HasCustomName => _customName;
-
-    /* ────── Generator config embedded via managed-reference ────── */
-    [SerializeReference] private AbstractGeneratorConfig _config;
-
-    public GeneratorType Type => _config != null ? _config.Type : GeneratorType.NA;
-
-    public void SyncNameWithType()      // called by the editor when type changes
-    {
-        if (!_customName) _displayName = Type.ToString().Replace('_', ' ');
-    }
-
-    public AbstractGeneratorConfig CreateConfig()
-    {
-        if (_config != null)
-        {
-            _config.Name = DisplayName;
-            _config.Enabled = Enabled;
-        }
-        return _config;
-    }
-
-    public override object GetValue(NodePort port)
-    {
-        if (port.fieldName == nameof(output))
-            return Enabled ? GetInputValue<TileRegion>(nameof(input)) : null;
-
-        return null;
-    }
-
-    public T GetConfig<T>() where T : AbstractGeneratorConfig => _config as T;
-
-#if UNITY_EDITOR
-    private void OnValidate()      // no “override” – works on every version
-    {
-        UpdatePorts();             // forces port list refresh
-    }
-#endif
+    public override object GetValue(NodePort port) =>
+        port == GetOutputPort(nameof(Output)) && Enabled
+            ? GetInputValue<TileRegion>(nameof(Input))
+            : null;
 }

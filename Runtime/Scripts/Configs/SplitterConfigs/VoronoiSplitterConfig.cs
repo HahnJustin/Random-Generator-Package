@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public abstract class VoronoiSplitterConfig : AbstractRegionSplitterConfig
+    public class VoronoiSplitterConfig : AbstractRegionSplitterConfig
     {
         public VoronoiSplitterConfig()
         {
