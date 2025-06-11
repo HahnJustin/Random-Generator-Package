@@ -52,5 +52,7 @@ public enum StringType
     Description_Generator_DistanceFill,
     Description_Generator_GuaranteedSpawn,
     Description_Generator_BorderFill,
-    Tooltip_Layer_button_Heatmap
+    Tooltip_Layer_button_Heatmap,
+    Description_Splitter_Room,
+    Description_Splitter_Voronoi
 }

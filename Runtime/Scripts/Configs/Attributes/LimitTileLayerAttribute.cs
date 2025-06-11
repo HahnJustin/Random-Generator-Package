@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    [System.AttributeUsage(System.AttributeTargets.Property)]
+    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field)]
     public class LimitTileLayerAttribute : System.Attribute
     {
         public LayerType layer;

@@ -1,17 +1,12 @@
 {
-    "name": "dalichrome.randomgenerator.editor",
+    "name": "dalichrome.randomgenerator.nodes",
     "rootNamespace": "",
     "references": [
-        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
         "GUID:cedbd8dccc0a4b04e87e7ecc3f4c22cf",
         "GUID:ac422043113dd38479a01a1904702f3b",
-        "GUID:8f91eeaf1ca54fa46a2cc328cec310a4",
-        "GUID:002c1bbed08fa44d282ef34fd5edb138",
         "GUID:b8e24fd1eb19b4226afebb2810e3c19b"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

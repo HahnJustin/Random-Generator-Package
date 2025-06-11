@@ -1,0 +1,778 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7731236015187098286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -680, y: 184}
+  ports:
+    keys:
+    - output
+    - input
+    values:
+    - _fieldName: output
+      _node: {fileID: -7731236015187098286}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Source
+        node: {fileID: -5316303677751906821}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: input
+      _node: {fileID: -7731236015187098286}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: 3317107311172707737}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368358889881769
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368358889881769
+      type: {class: RoomConnectionConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _hallwayTile: 9996
+        _carveThroughTiles: 640000000c270000
+        _additionalConnections: 0
+        _additionalUpperBound: 30
+        _additionalLowerBound: 20
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 434
+        _invertOccupance: 0
+--- !u!114 &-5316303677751906821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4fff61b58f5e144b9776b754d7c8450, type: 3}
+  m_Name: Splitter
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -312, y: 168}
+  ports:
+    keys:
+    - Source
+    - SubRegions
+    - SubRegions 0
+    - SubRegions 1
+    values:
+    - _fieldName: Source
+      _node: {fileID: -5316303677751906821}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: -7731236015187098286}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: SubRegions
+      _node: {fileID: -5316303677751906821}
+      _typeQualifiedName: ConditionalRegion[], dalichrome.randomgenerator.nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: SubRegions 0
+      _node: {fileID: -5316303677751906821}
+      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Inputs 0
+        node: {fileID: 2009484233955106555}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+    - _fieldName: SubRegions 1
+      _node: {fileID: -5316303677751906821}
+      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Inputs 0
+        node: {fileID: -5303757775069623598}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+  SubRegions: []
+--- !u!114 &-5303757775069623598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40f9c64fa717a84a8b6b4eb263d3215, type: 3}
+  m_Name: Region Filter
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -56, y: 280}
+  ports:
+    keys:
+    - Result
+    - Inputs 0
+    values:
+    - _fieldName: Result
+      _node: {fileID: -5303757775069623598}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: 3335637755902848025}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: Inputs 0
+      _node: {fileID: -5303757775069623598}
+      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: SubRegions 1
+        node: {fileID: -5316303677751906821}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+--- !u!114 &-3760866098252577520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06f9f927c09c824f8f921be2022af3f, type: 3}
+  m_Name: Region Joiner
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 616, y: 184}
+  ports:
+    keys:
+    - Inputs
+    - Result
+    - Inputs 0
+    - Inputs 1
+    values:
+    - _fieldName: Inputs
+      _node: {fileID: -3760866098252577520}
+      _typeQualifiedName: TileRegion[], dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: Result
+      _node: {fileID: -3760866098252577520}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: Inputs 0
+      _node: {fileID: -3760866098252577520}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: 168463494629668809}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+    - _fieldName: Inputs 1
+      _node: {fileID: -3760866098252577520}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: 3335637755902848025}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+  Inputs: []
+--- !u!114 &-1874358054424365442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -1112, y: -184}
+  ports:
+    keys:
+    - output
+    - input
+    values:
+    - _fieldName: output
+      _node: {fileID: -1874358054424365442}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: 3317107311172707737}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: input
+      _node: {fileID: -1874358054424365442}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: 4722843175431601937}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 1
+  _config:
+    rid: 1480368358889881788
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368358889881788
+      type: {class: CellularAutomataConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 1
+        _maskTime: 0
+        _includeList: 
+        _excludeList: aa0f0000
+        _liveNeighboursRequired: 5
+        _repetitions: 2
+        _fill: 100
+        _empty: 9996
+        _placeProbability: 1
+        _borderOccupied: 1
+        _occupance: 2
+        _occupyLayer: 3
+        _tileA: 100
+        _invertOccupance: 0
+--- !u!114 &-671090215889253024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e13c63c9d5d525f44876a544359c66d1, type: 3}
+  m_Name: Generator
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -440, y: -120}
+  ports:
+    keys:
+    - result
+    - value
+    values:
+    - _fieldName: result
+      _node: {fileID: -671090215889253024}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: value
+        node: {fileID: 0}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: value
+      _node: {fileID: -671090215889253024}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: result
+        node: {fileID: 3786661734851645821}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  value: 0
+  result: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7744813fa4d254e48895159f32607bb7, type: 3}
+  m_Name: New Generator Graph
+  m_EditorClassIdentifier: 
+  nodes:
+  - {fileID: -7731236015187098286}
+  - {fileID: 4722843175431601937}
+  - {fileID: 3317107311172707737}
+  - {fileID: -1874358054424365442}
+  - {fileID: -5316303677751906821}
+  - {fileID: 168463494629668809}
+  - {fileID: 2009484233955106555}
+  - {fileID: -5303757775069623598}
+  - {fileID: -3760866098252577520}
+  - {fileID: 7374467903737889573}
+  - {fileID: 3335637755902848025}
+--- !u!114 &168463494629668809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 200, y: -56}
+  ports:
+    keys:
+    - input
+    - output
+    values:
+    - _fieldName: input
+      _node: {fileID: 168463494629668809}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Result
+        node: {fileID: 2009484233955106555}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: output
+      _node: {fileID: 168463494629668809}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Inputs 0
+        node: {fileID: -3760866098252577520}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368358889881781
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368358889881781
+      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _density: 0.5
+        _repetitions: 1
+        _tiles: aa0f0000aa0f0000
+--- !u!114 &2009484233955106555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40f9c64fa717a84a8b6b4eb263d3215, type: 3}
+  m_Name: Region Filter
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -56, y: 72}
+  ports:
+    keys:
+    - Result
+    - Inputs 0
+    values:
+    - _fieldName: Result
+      _node: {fileID: 2009484233955106555}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: 168463494629668809}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: Inputs 0
+      _node: {fileID: 2009484233955106555}
+      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: SubRegions 0
+        node: {fileID: -5316303677751906821}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 1
+--- !u!114 &3317107311172707737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -680, y: -104}
+  ports:
+    keys:
+    - output
+    - input
+    values:
+    - _fieldName: output
+      _node: {fileID: 3317107311172707737}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: -7731236015187098286}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: input
+      _node: {fileID: 3317107311172707737}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: output
+        node: {fileID: -1874358054424365442}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368358889881764
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368358889881764
+      type: {class: BorderConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _border: 1400
+        _depth: 4010
+--- !u!114 &3335637755902848025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 216, y: 440}
+  ports:
+    keys:
+    - input
+    - output
+    values:
+    - _fieldName: input
+      _node: {fileID: 3335637755902848025}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Result
+        node: {fileID: -5303757775069623598}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: output
+      _node: {fileID: 3335637755902848025}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Inputs 1
+        node: {fileID: -3760866098252577520}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368379480506616
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368379480506616
+      type: {class: GuaranteeSpawnConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 
+        _useEntranceDistance: 1
+        _minimumSpawnDistance: 10
+        _minimumAmount: 5
+        _maximumAmount: 10
+        _tileWeights:
+        - Key: 4010
+          Value: 1
+        _addSpawnsToMask: 1
+        _occupance: 1
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0
+--- !u!114 &3786661734851645821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e13c63c9d5d525f44876a544359c66d1, type: 3}
+  m_Name: Generator
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -648, y: -184}
+  ports:
+    keys:
+    - result
+    - value
+    values:
+    - _fieldName: result
+      _node: {fileID: 3786661734851645821}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: value
+        node: {fileID: -671090215889253024}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: value
+      _node: {fileID: 3786661734851645821}
+      _typeQualifiedName: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  value: 4
+  result: 0
+--- !u!114 &4722843175431601937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -1080, y: 360}
+  ports:
+    keys:
+    - output
+    - input
+    values:
+    - _fieldName: output
+      _node: {fileID: 4722843175431601937}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: -1874358054424365442}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: input
+      _node: {fileID: 4722843175431601937}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368358889881766
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368358889881766
+      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 
+        _density: 0.5
+        _repetitions: 1
+        _tiles: aa0f0000
+--- !u!114 &7374467903737889573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -264, y: 520}
+  ports:
+    keys:
+    - input
+    - output
+    values:
+    - _fieldName: input
+      _node: {fileID: 7374467903737889573}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: output
+      _node: {fileID: 7374467903737889573}
+      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  _enabled: 0
+  _displayName: 
+  _customName: 0
+  _config:
+    rid: 1480368379480506450
+  references:
+    version: 2
+    RefIds:
+    - rid: 1480368379480506450
+      type: {class: CopyConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+      data:
+        _enabled: 1
+        _masked: 1
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 
+        _fromTo:
+        - Key: 4010
+          Value: 4010
+        - Key: 4010
+          Value: 4010
