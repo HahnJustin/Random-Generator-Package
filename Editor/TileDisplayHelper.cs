@@ -14,6 +14,13 @@ internal static class TileDisplayHelper
     private static int[] _ids;
     private static double _nextRefresh;
 
+    public static void Invalidate()   // callable from the watcher
+    {
+        _names = null;                 // next EnsureCache() rebuilds everything
+        _ids   = null;
+        _nextRefresh = 0;
+    }
+
     public static void EnsureCache()
     {
         if (_names != null && EditorApplication.timeSinceStartup < _nextRefresh)

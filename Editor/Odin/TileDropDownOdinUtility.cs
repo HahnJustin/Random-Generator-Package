@@ -21,6 +21,12 @@ public static class TileDropdownOdinUtility
             return _cache;
         }
     }
+    
+    public static void Invalidate()        // ← call this when assets change
+    {
+        _cache   = null;
+        _layerOf = null;
+    }
 
     private static IEnumerable<ValueDropdownItem<int>> FilterBy(LayerType? limit)
         => limit == null ? _cache : _cache.Where(i => _layerOf[i.Value] == limit);

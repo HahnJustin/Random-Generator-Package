@@ -11,12 +11,9 @@ using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.UserData;
-
 using UnityEditor.UIElements;
 using XNode;
-
-
-
+using Dalichrome.RandomGenerator.EditorHelpers;
 
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
@@ -37,16 +34,21 @@ namespace Dalichrome.RandomGenerator.Editor
         private static readonly HashSet<string> Occ = new()
         { "_occupance","_occupyLayer","_tileA","_invertOccupance" };
         private static readonly HashSet<string> Skip = new()
-    { "_enabled", "enabled", "Enabled" };
+        { "_enabled", "enabled", "Enabled" };
 
 #if ODIN_INSPECTOR
-        private readonly Dictionary<GeneratorConfigNode, PropertyTree> treeCache = new();
+        internal static readonly HashSet<PropertyTree> _allTrees = new();
 #endif
 
         private readonly Dictionary<int, bool> maskFold = new(), occFold = new();
         private readonly Dictionary<int, bool> basicFold = new();
 
         private static readonly Type[] _cfgTypes;
+
+        static string[] _tileNames;
+        static int[] _tileIds;
+        static double _nextRefresh;
+
         static ConfigNodeEditor()
         {
             _cfgTypes = AppDomain.CurrentDomain.GetAssemblies()
@@ -84,10 +86,10 @@ namespace Dalichrome.RandomGenerator.Editor
             GUI.Label(new Rect(bar.x + 6, bar.y, bar.width - 12, bar.height), title, lbl);
 
             // ─── icon (right) ─────────────────────────────────────
-            GUIContent ico = GetHeaderIcon(n);
+            GUIContent ico = LoadIcon(IconFilename);
             if (ico?.image != null)
             {
-                const float SZ = 24f;
+                const float SZ = 32f;
                 Rect r = new Rect(bar.xMax - SZ - 4, bar.y + (bar.height - SZ) / 2, SZ, SZ);
 
                 // shadow + black pad
@@ -128,6 +130,12 @@ namespace Dalichrome.RandomGenerator.Editor
             /* 2  Config picker */
             var cfgProp = serializedObject.FindProperty("_config");
             Type cur = cfgProp.managedReferenceValue?.GetType();
+
+            if (cfgProp.managedReferenceValue == null && _cfgTypes.Length > 0)
+            {
+                cfgProp.managedReferenceValue = Activator.CreateInstance(_cfgTypes[0]);
+                n.SyncNameWithType();               // keep the node title in sync
+            }
 
             /* A: build the option list ------------------------------------------------- */
             string[] opt = _cfgTypes.Select(t => t.Name.Replace("Config", "")).ToArray();
@@ -196,72 +204,86 @@ namespace Dalichrome.RandomGenerator.Editor
             var cfgObj = (TCfg)cfgProp.managedReferenceValue;
             if (cfgObj == null) return;
 
-            // <2> Build / reuse PropertyTree so Odin can draw children
-            if (!_treeCache.TryGetValue(node, out var tree) ||
-                tree.WeakTargets[0] != cfgObj)
+            /* Dispose any tree that belongs to *another* config object */
+            if (_treeCache.TryGetValue(node, out var cached) &&
+                !ReferenceEquals(cached.WeakTargets[0], cfgObj))
+            {
+                cached.Dispose();
+                _treeCache.Remove(node);
+            }
+
+            /* Create (and track) the fresh tree if we don't already have it */
+            if (!_treeCache.TryGetValue(node, out var tree))
             {
                 tree = PropertyTree.Create(cfgObj);
                 _treeCache[node] = tree;
+
+                NodeEditorReloadHook.LiveTrees.Add(tree);
             }
 
-            tree.BeginDraw(false);                    // false → no prefab buttons
-
-            // <3> Bucket properties by name
-            var maskingProps = new List<InspectorProperty>();
-            var occupanceProps = new List<InspectorProperty>();
-            var otherProps = new List<InspectorProperty>();
-
-            foreach (var p in tree.RootProperty.Children)
+            try
             {
-                if (Skip.Contains(p.Name)) continue;              // hide
-                if (Mask.Contains(p.Name)) maskingProps.Add(p);
-                else if (Occ.Contains(p.Name)) occupanceProps.Add(p);
-                else otherProps.Add(p);
-            }
+                tree.BeginDraw(false);
 
-            // <4> MAIN group  ────────────────────────────────────────────
-            foreach (var p in otherProps) p.Draw();
+                // <3> Bucket properties by name
+                var maskingProps = new List<InspectorProperty>();
+                var occupanceProps = new List<InspectorProperty>();
+                var otherProps = new List<InspectorProperty>();
 
-            int id = node.GetInstanceID();
-
-            // <5> Masking fold-out
-            if (maskingProps.Count > 0)
-            {
-                bool open = _maskFold.TryGetValue(id, out var v) && v;
-                open = SirenixEditorGUI.Foldout(open, "Masking");
-                _maskFold[id] = open;
-
-                if (open)
+                foreach (var p in tree.RootProperty.Children)
                 {
-                    EditorGUI.indentLevel++;
-                    foreach (var p in maskingProps) p.Draw();
-                    EditorGUI.indentLevel--;
+                    if (Skip.Contains(p.Name)) continue;              // hide
+                    if (Mask.Contains(p.Name)) maskingProps.Add(p);
+                    else if (Occ.Contains(p.Name)) occupanceProps.Add(p);
+                    else otherProps.Add(p);
+                }
+
+                // <4> MAIN group  ────────────────────────────────────────────
+                foreach (var p in otherProps) p.Draw();
+
+                int id = node.GetInstanceID();
+
+                // <5> Masking fold-out
+                if (maskingProps.Count > 0)
+                {
+                    bool open = _maskFold.TryGetValue(id, out var v) && v;
+                    open = SirenixEditorGUI.Foldout(open, "Masking");
+                    _maskFold[id] = open;
+
+                    if (open)
+                    {
+                        EditorGUI.indentLevel++;
+                        foreach (var p in maskingProps) p.Draw();
+                        EditorGUI.indentLevel--;
+                    }
+                }
+
+                // <6> Occupance fold-out (only if cfg implements IOccupanceConfig)
+                if (cfgObj is Dalichrome.RandomGenerator.Configs.IOccupanceConfig &&
+                    occupanceProps.Count > 0)
+                {
+                    bool open = _occFold.TryGetValue(id, out var v) && v;
+                    open = SirenixEditorGUI.Foldout(open, "Occupance");
+                    _occFold[id] = open;
+
+                    if (open)
+                    {
+                        EditorGUI.indentLevel++;
+                        foreach (var p in occupanceProps) p.Draw();
+                        EditorGUI.indentLevel--;
+                    }
                 }
             }
-
-            // <6> Occupance fold-out (only if cfg implements IOccupanceConfig)
-            if (cfgObj is Dalichrome.RandomGenerator.Configs.IOccupanceConfig &&
-                occupanceProps.Count > 0)
+            finally
             {
-                bool open = _occFold.TryGetValue(id, out var v) && v;
-                open = SirenixEditorGUI.Foldout(open, "Occupance");
-                _occFold[id] = open;
-
-                if (open)
-                {
-                    EditorGUI.indentLevel++;
-                    foreach (var p in occupanceProps) p.Draw();
-                    EditorGUI.indentLevel--;
-                }
+                tree.EndDraw();
             }
-
-            tree.EndDraw();
         }
 #endif
 
         /*───────────────────────────────────────────────────────────────
-         *  ❷ DrawWithoutOdin — vanilla IMGUI path
-         *──────────────────────────────────────────────────────────────*/
+        *  ❷ DrawWithoutOdin — vanilla IMGUI path
+        *──────────────────────────────────────────────────────────────*/
         private void DrawWithoutOdin(TNode node, SerializedProperty cfgProp)
         {
             // Re-use the exact helper you already had.
@@ -344,11 +366,6 @@ namespace Dalichrome.RandomGenerator.Editor
             EditorGUI.indentLevel--;
         }
 
-        // ---------- cache & helpers ----------
-        static string[] _tileNames;
-        static int[] _tileIds;
-        static double _nextRefresh;           // in seconds
-
         static void EnsureTileCache()
         {
             if (_tileNames != null && EditorApplication.timeSinceStartup < _nextRefresh)
@@ -411,8 +428,7 @@ namespace Dalichrome.RandomGenerator.Editor
             // If Odin is present, let its own drawers handle everything;
             // we only need the custom path for non-Odin projects.
             EditorGUILayout.PropertyField(prop, true);
-            return;
-#endif
+#else
 
             bool isIntField = prop.propertyType == SerializedPropertyType.Integer;
 
@@ -453,6 +469,7 @@ namespace Dalichrome.RandomGenerator.Editor
                 // fallback to whatever drawer Unity/XNode would normally use
                 EditorGUILayout.PropertyField(prop, true);
             }
+#endif
         }
 
         /* --- small helper so we don't duplicate popup code --- */
@@ -491,7 +508,26 @@ namespace Dalichrome.RandomGenerator.Editor
             EditorGUILayout.Space(6);
         }
 
-        protected virtual GUIContent GetHeaderIcon(TNode node) => null;
+        // one-liner hook; default → null  (= no icon)
+        protected virtual string IconFilename => null;
+
+        // helper reused by the header drawer
+        private GUIContent LoadIcon(string fileName) =>
+            string.IsNullOrEmpty(fileName) ? null :
+                IconUtils.Get(fileName);
+
+#if ODIN_INSPECTOR
+        void OnDisable()            // message, not an override
+        {
+            foreach (var tree in _treeCache.Values)
+            {
+                tree?.Dispose();
+                NodeEditorReloadHook.LiveTrees.Remove(tree);
+            }
+            _treeCache.Clear();
+        }
+
+#endif
     }
 }
 #endif

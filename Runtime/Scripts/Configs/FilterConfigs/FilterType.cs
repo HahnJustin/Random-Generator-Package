@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public enum SplitterType
+    public enum FilterType
     {
         NA,
-        Room,
-        Voronoi
+        RegionSize,
+        Random,
+        Probability
     }
 }

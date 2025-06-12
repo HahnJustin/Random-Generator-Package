@@ -54,5 +54,9 @@ public enum StringType
     Description_Generator_BorderFill,
     Tooltip_Layer_button_Heatmap,
     Description_Splitter_Room,
-    Description_Splitter_Voronoi
+    Description_Splitter_Voronoi,
+    Description_Filter_RegionSize,
+    Description_Filter_Random,
+    Description_Joiner_RegionJoin,
+    Description_Joiner_MapJoin
 }

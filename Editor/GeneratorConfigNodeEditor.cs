@@ -7,9 +7,6 @@ using UnityEngine;
 public class GeneratorConfigNodeEditor
     : ConfigNodeEditor<GeneratorConfigNode, AbstractGeneratorConfig>
 {
-    protected override GUIContent GetHeaderIcon(GeneratorConfigNode n) =>
-    IconUtils.Find(
-        "d_ScriptableObject Icon",        // dark skin
-        "ScriptableObject Icon");         // light/old skin
+    protected override string IconFilename => "generator-icon";
 }
 #endif

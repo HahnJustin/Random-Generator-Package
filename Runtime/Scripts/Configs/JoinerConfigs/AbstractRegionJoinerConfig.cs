@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AbstractRegionJoinerConfig : MonoBehaviour
+namespace Dalichrome.RandomGenerator.Configs
 {
-    // Start is called before the first frame update
-    void Start()
+    public abstract class AbstractRegionJoinerConfig : AbstractConfig
     {
-        
-    }
+        [Hidden] public new virtual JoinerType Type { get; }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [Hidden]
+        public override string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = value;
+            }
+        }
     }
 }

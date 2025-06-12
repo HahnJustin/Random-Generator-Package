@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using Dalichrome.RandomGenerator;
 
+[CreateNodeMenu("Flow/Region Splitter")]
 [NodeTint(0.38f, 0.28f, 0.28f)]
 public class RegionSplitterNode
         : ConfigNodeBase<AbstractRegionSplitterConfig>

@@ -10,12 +10,6 @@ public class SplitterConfigNodeEditor
 {
     public override int GetWidth() => 220;
 
-    protected override GUIContent GetHeaderIcon(RegionSplitterNode n) =>
-        IconUtils.Find(
-            "d_TerrainInspector.TerrainToolSplit",
-            "TerrainInspector.TerrainToolSplit",
-            "d_AnimatorController Icon",
-            "AnimatorController Icon");
-
+    protected override string IconFilename => "splitter-icon";
 }
 #endif

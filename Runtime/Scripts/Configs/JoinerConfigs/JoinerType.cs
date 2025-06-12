@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public enum SplitterType
+    public enum JoinerType
     {
         NA,
-        Room,
-        Voronoi
+        RegionJoin,
+        MapJoin
     }
 }
