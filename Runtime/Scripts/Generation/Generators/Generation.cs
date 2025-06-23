@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Dalichrome.RandomGenerator
 {
-    public class GenerationInfo : AbstractOperationInfo, IDisposable
+    public class Generation : AbstractOperationData, IDisposable
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private static int _nextId;                    // thread-safe
@@ -37,26 +37,7 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        public AbstractRandom Random { get { return _random; } }
-        private AbstractRandom _random;
-        public uint Seed
-        {
-            get
-            {
-                return _seed;
-            }
-            set
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.Log($"[GI #{_id}] seedSet  seed={value} stack: {Environment.StackTrace}");
-#endif
-                _seed = value;
-                _random = new CSharpNativeRandom(value);
-            }
-        }
-        private uint _seed;
-
-        public GenerationInfo()
+        public Generation()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             _id = Interlocked.Increment(ref _nextId);
@@ -64,15 +45,14 @@ namespace Dalichrome.RandomGenerator
 #endif
         }
 
-        public GenerationInfo(GenerationParams genParams)
+        public Generation(GenerationParams genParams)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             _id = Interlocked.Increment(ref _nextId);
 #endif
 
             Grid = new(genParams.Width, genParams.Height);
-            _seed = genParams.Seed;
-            _random = new CSharpNativeRandom(_seed);
+            Seed = genParams.Seed;
         }
 
         public void Dispose()
@@ -96,15 +76,15 @@ namespace Dalichrome.RandomGenerator
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            ~GenerationInfo()
+            ~Generation()
         {
             if (!_disposed && grid != null)
             {
-                Debug.LogError($"[GI #{_id}] FINALIZER — leaked GenerationInfo! seed={_seed}");
+                Debug.LogError($"[GI #{_id}] FINALIZER — leaked GenerationInfo! seed={Seed}");
             }
             else
             {
-                Debug.Log($"[GI #{_id}] FINALIZER — no worries ! seed={_seed}");
+                Debug.Log($"[GI #{_id}] FINALIZER — no worries ! seed={Seed}");
             }
         }
 #endif

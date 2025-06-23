@@ -6,17 +6,19 @@ using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
 using System.Threading.Tasks;
+using UnityEngine.Diagnostics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class EntranceExitGenerator : OccupanceGenerator
+    public class EntranceExitGenerator : AbstractGenerator<EntranceExitConfig>
     {
-        protected new EntranceExitConfig config;
+        private OccupanceUtil util;
 
         public EntranceExitGenerator(EntranceExitConfig config) : base(config)
         {
             this.config = config;
-            OutOfBoundsOccupancy = 0;
+            util = new(config) { OutOfBoundsOccupancy = 0 };
+            AddUtil(util);
         }
 
         protected override void Enact()
@@ -92,7 +94,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                     foreach (Tile neighbor in neighbors)
                     {
-                        if (IsOccupied(neighbor) == 1)
+                        if (util.IsOccupied(neighbor) == 1)
                         {
                             if (neighbor.x == x || neighbor.y == y) cardinal += 1;
                             else corner += 1;
@@ -158,7 +160,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             //Create Path between entrance and air next to exit
             AStar astar = new();
-            List<Vector2Int> path = astar.FindPath(TileGrid, GetUtil(), entrancePos, exitAir);
+            List<Vector2Int> path = astar.FindPath(TileGrid, util, entrancePos, exitAir);
             foreach (Vector2Int pos in path)
             {
                 if (config.DebugPath) {

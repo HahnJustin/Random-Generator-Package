@@ -2,9 +2,9 @@ using Dalichrome.RandomGenerator.Configs;
 
 namespace Dalichrome.RandomGenerator
 {
-    public delegate void GenerationStartHandler(GenerationInfo info);
+    public delegate void GenerationStartHandler(GenerationParams genParams);
     public delegate void ConfigGeneratedHandler(AbstractGeneratorConfig config, float amount);
-    public delegate void GenerationEndHandler(GenerationInfo info);
+    public delegate void GenerationEndHandler(Generation output);
     public delegate void GenerationCancelHandler();
     public delegate void GenerationErrorHandler(string errorMessage);
     public delegate void UngeneratedChangeCheckHandler(bool ungeneratedChanges);
@@ -18,9 +18,9 @@ namespace Dalichrome.RandomGenerator
         public event GenerationErrorHandler OnGenerationError;
         public event UngeneratedChangeCheckHandler OnUngeneratedCheck;
 
-        public void RaiseGenerationEnd(GenerationInfo info) => OnGenerationEnd?.Invoke(info);
+        public void RaiseGenerationEnd(Generation output) => OnGenerationEnd?.Invoke(output);
         public void RaiseConfigGenerated(AbstractGeneratorConfig config, float amount) => OnConfigGenerated?.Invoke(config, amount);
-        public void RaiseGenerationStart(GenerationInfo info) => OnGenerationStart?.Invoke(info);
+        public void RaiseGenerationStart(GenerationParams genParams) => OnGenerationStart?.Invoke(genParams);
         public void RaiseGenerationCancel() => OnGenerationCancel?.Invoke();
         public void RaiseGenerationError(string errorMessage) => OnGenerationError?.Invoke(errorMessage);
 

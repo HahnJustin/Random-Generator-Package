@@ -5,15 +5,12 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
 using System.Linq;
-using Dalichrome.RandomGenerator.Random;
-using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
 
-    public class NystromDungeonGenerator: RoomGenerator
+    public class NystromDungeonGenerator: AbstractGenerator<NystromDungeonConfig>
     {
-        protected new NystromDungeonConfig config;
         private readonly MazeUtil util;
 
         private Dictionary<int,DungeonRoom> dungeonRoomDict;
@@ -127,7 +124,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 //readGrid.SetNeighbors(x,y, neighborFunc);
                 foreach (Direction direction in eightDirections)
                 {
-                    Vector2Int nextTo = GetPointInDirection(point, direction);
+                    Vector2Int nextTo = point.GetPointInDirection(direction);
                     if (!grid.InBounds(nextTo)) continue;
 
                     if (grid[nextTo.x, nextTo.y] == MAZE_WALL_VALUE)
@@ -148,7 +145,7 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             int[,] occupanceGrid = util.GetOccupanceGrid();
 
-            foreach (Room room in RoomList)
+            foreach (Room room in util.RoomList)
             {
                 BoundsInt bounds = room.GetBounds();
                 if (room.Height <= Mathf.Max(ROOM_HEIGHT_MIN, config.RoomMinSize) &&
@@ -264,7 +261,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         KeyValuePair<int, int> ids = new(0,0);
                         foreach (Direction direction in cardinalDirections)
                         {
-                            Vector2Int neighbor = GetPointInDirection(wallTile, direction);
+                            Vector2Int neighbor = wallTile.GetPointInDirection(direction);
                             if (!occupanceGrid.InBounds(neighbor)) continue;
 
                             int neighborValue = occupanceGrid[neighbor.x, neighbor.y];
@@ -299,7 +296,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                     foreach (Direction direction in cardinalDirections)
                     {
-                        Vector2Int neighbor = GetPointInDirection(connector, direction);
+                        Vector2Int neighbor = connector.GetPointInDirection(direction);
                         if (!occupanceGrid.InBounds(neighbor)) continue;
 
                         int connectingId = occupanceGrid[neighbor.x, neighbor.y];

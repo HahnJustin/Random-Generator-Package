@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class RoomConnectionGenerator : RoomGenerator
+    public class RoomConnectionGenerator : AbstractGenerator<RoomConnectionConfig>
     {
-        protected new RoomConnectionConfig config;
-
+        private RoomUtil util;
         private readonly int INITIAL_RING_VALUE = 1;
 
         private record RoomInfo(Room Room, Tile Tile, int ringCount);
@@ -20,11 +19,13 @@ namespace Dalichrome.RandomGenerator.Generators
         public RoomConnectionGenerator(RoomConnectionConfig config) : base(config)
         {
             this.config = config;
+            util = new(config);
+            AddUtil(util);
         }
 
         protected override void Enact()
         {
-            currentRooms = LargestFirstRoomList;
+            currentRooms = util.LargestFirstRoomList;
             List<Direction> directions = new() { Direction.Down, Direction.Up, Direction.Right, Direction.Left };
 
             for (int i = currentRooms.Count - 1; i >= 0; i--)
@@ -51,7 +52,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         directions.Shuffle(random);
                         foreach (Direction direction in directions)
                         {
-                            Vector2Int point = GetPointInDirection(tile.Position, direction);
+                            Vector2Int point = tile.Position.GetPointInDirection(direction);
                             Tile adjacentTile = TileGrid.GetTile(point);
 
                             if (!adjacentTile.IsValid) continue;
@@ -103,7 +104,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 directions.Shuffle(random);
                 foreach (Direction direction in directions)
                 {
-                    Vector2Int point = GetPointInDirection(tile.Position, direction);
+                    Vector2Int point = tile.Position.GetPointInDirection(direction);
                     Tile adjacentTile = TileGrid.GetTile(point);
                     if (!adjacentTile.IsValid) continue;
                     else if (adjacentTile.Value == value)
@@ -127,9 +128,9 @@ namespace Dalichrome.RandomGenerator.Generators
 
             if (consolidateRooms) 
             {
-                Room room2 = Rooms[info.Tile.Value];
+                Room room2 = util.Rooms[info.Tile.Value];
                 currentRooms.Remove(room2);
-                Rooms.Remove(room2.Value);
+                util.Rooms.Remove(room2.Value);
 
                 foreach (Tile roomTile in room2)
                 {

@@ -4,6 +4,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Generators;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -14,6 +15,7 @@ namespace Dalichrome.RandomGenerator.Utils
         private MazeCell[,] cellGrid;
 
         private List<MazeCell> cells;
+        private List<Direction> allDirections;
         
         public int RoomValue { get { return _roomValue; } set { _roomValue = value; } }
         private int _roomValue = -1;
@@ -29,14 +31,6 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public int FirstMazeFloorValue { get { return _mazeFloorValue; } set { _mazeFloorValue = value; } }
         private int _mazeFloorValue = 5;
-
-        private List<Direction> allDirections = new()
-        {
-            Direction.Right,
-            Direction.Down,
-            Direction.Left,
-            Direction.Up
-        };
 
         private class MazeCell
         {
@@ -67,6 +61,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public MazeUtil(IMazeConfig config) : base(config)
         {
             this.config = config;
+            allDirections = Direction.Left.GetCardinalDirections();
         }
 
         private MazeCell CreateMazeCell(Tile tile)
@@ -97,7 +92,7 @@ namespace Dalichrome.RandomGenerator.Utils
             Vector2Int position = new(x, y);
             foreach (Direction direction in allDirections)
             {
-                Vector2Int DirectedPoint = GetPointInDirection(position, direction, 2);
+                Vector2Int DirectedPoint = position.GetPointInDirection( direction, 2);
 
                 //Is occupied works here only due to use of debug technical tiles
                 if (IsOccupied(DirectedPoint) == 0 &&
@@ -186,7 +181,7 @@ namespace Dalichrome.RandomGenerator.Utils
             int wallAmount = 0;
             foreach (Direction direction in allDirections)
             {
-                Vector2Int neighbor = GetPointInDirection((Vector2Int)pos, direction);
+                Vector2Int neighbor = ((Vector2Int)pos).GetPointInDirection(direction);
                 if (!grid.InBounds(neighbor)) 
                 {
                     wallAmount += 1;

@@ -124,44 +124,6 @@ namespace Dalichrome.RandomGenerator.Utils
             return GetIfTileNextToPositionHelper(x, y, 0, movement);
         }
 
-        public Vector2Int GetPointInDirection(Vector2Int point, Direction direction, int movement = 1)
-        {
-            int searchX = point.x;
-            int searchY = point.y;
-            switch (direction)
-            {
-                case Direction.Up:
-                    searchY += movement;
-                    break;
-                case Direction.Up_Right:
-                    searchX += movement;
-                    searchY += movement;
-                    break;
-                case Direction.Right:
-                    searchX += movement;
-                    break;
-                case Direction.Down_Right:
-                    searchX += movement;
-                    searchY -= movement;
-                    break;
-                case Direction.Down:
-                    searchY -= movement;
-                    break;
-                case Direction.Down_Left:
-                    searchX -= movement;
-                    searchY -= movement;
-                    break;
-                case Direction.Left:
-                    searchX -= movement;
-                    break;
-                case Direction.Up_Left:
-                    searchX -= movement;
-                    searchY += movement;
-                    break;
-            }
-            return new Vector2Int(searchX, searchY);
-        }
-
         public int[,] GetOccupanceGrid()
         {
             int[,] occupanceGrid = new int[tileGrid.width, tileGrid.height];

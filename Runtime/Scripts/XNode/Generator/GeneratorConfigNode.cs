@@ -12,8 +12,6 @@ public class GeneratorConfigNode
     /* one input, **single** output */
     [Input(connectionType = ConnectionType.Override, typeConstraint = TypeConstraint.Strict)] public TileRegion Input;
 
-    // “Override” ⇒ when the user drags a second wire on,
-    // the previous connection is replaced automatically
     [Output(connectionType = ConnectionType.Override, typeConstraint = TypeConstraint.Strict)]
     public TileRegion Output;
 

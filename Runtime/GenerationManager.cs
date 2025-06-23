@@ -44,7 +44,7 @@ namespace Dalichrome.RandomGenerator
 
         private CancellationTokenSource manualCancellationSource;
 
-        private GenerationInfo lastGeneration = new();
+        private Generation lastGeneration = new();
 
         private static int seedsGenerated = 0;
 
@@ -74,7 +74,7 @@ namespace Dalichrome.RandomGenerator
             get { return Last.generationParameters.Configs; }
         }
 
-        public static GenerationInfo LastGeneration
+        public static Generation LastGeneration
         {
             get { return Last.lastGeneration; }
         }
@@ -183,8 +183,8 @@ namespace Dalichrome.RandomGenerator
         {
             SetGeneratingConfigs();
 
-            GenerationInfo generationInfo = CreateGenerationInfo(token);
-            events.RaiseGenerationStart(generationInfo);
+            Generation generation = CreateGenerationInput(token);
+            events.RaiseGenerationStart(generationParameters);
 
             //Background Thread Generating the TileGrid and Calculating Time
             var watch = new System.Diagnostics.Stopwatch();
@@ -199,22 +199,23 @@ namespace Dalichrome.RandomGenerator
                 count += 1;
                 events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
 
-                AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
+                Debug.Log("Generating Config of " + config.Type);
+                IGenerator generator = GeneratorTypeConversions.GetGeneratorFromConfig(config);
                 try
                 {
-                    await Task.Run(() => strategy.Do(generationInfo));
+                    await Task.Run(() => generator.Do(generation));
                 }
                 catch (OperationCanceledException exception)
                 {
                     events.RaiseGenerationCancel();
                     Debug.Log("Generation Got Cancelled!" + exception.ToString());
-                    generationInfo.Dispose();
+                    generation.Dispose();
                     return;
                 }
                 catch (Exception exception)
                 {
                     events.RaiseGenerationError(exception.ToString());
-                    generationInfo.Dispose();
+                    generation.Dispose();
                     return;
                 }
             }
@@ -222,8 +223,8 @@ namespace Dalichrome.RandomGenerator
             watch.Stop();
 
             Dispose();
-            generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-            lastGeneration = generationInfo;
+            generation.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
+            lastGeneration = generation;
             lastGeneratedConfigs = generatingConfigs.DeepClone();
             CheckUngeneratedChanges();
 
@@ -234,17 +235,17 @@ namespace Dalichrome.RandomGenerator
             events.RaiseGenerationEnd(lastGeneration);
         }
 
-        private GenerationInfo CreateGenerationInfo(CancellationToken token)
+        private Generation CreateGenerationInput(CancellationToken token)
         {
-            GenerationInfo generationInfo = new (generationParameters);
-            generationInfo.Token = token;
-            generationInfo.AddLayersLookups(tileObjectLayerLookup);
-            return generationInfo;
+            Generation generationInput = new (generationParameters);
+            generationInput.Token = token;
+            generationInput.AddLayersLookups(tileObjectLayerLookup);
+            return generationInput;
         }
 
-        private GenerationInfo CreateGenerationInfo(CancellationToken token, uint seed)
+        private Generation CreateGenerationInput(CancellationToken token, uint seed)
         {
-            GenerationInfo generationInfo = CreateGenerationInfo(token);
+            Generation generationInfo = CreateGenerationInput(token);
             generationInfo.Seed = seed;
             return generationInfo;
         }
@@ -284,7 +285,7 @@ namespace Dalichrome.RandomGenerator
         }
 
         //Make clear this version lacks callbacks
-        public GenerationInfo GenerateThreadSafe(CancellationToken token = default, uint seed = 0)
+        public Generation GenerateThreadSafe(CancellationToken token = default, uint seed = 0)
         {
             if (CannotGenerate()) return null;
             last = this;
@@ -295,9 +296,9 @@ namespace Dalichrome.RandomGenerator
                 seed = GetRandomSeed();
             }
 
-            GenerationInfo generationInfo = CreateGenerationInfo(token, seed);
+            Generation generationOutput = CreateGenerationInput(token, seed);
 
-            if (generatingConfigs == null || Height == 0 || Width == 0) return generationInfo;
+            if (generatingConfigs == null || Height == 0 || Width == 0) return generationOutput;
 
             try
             {
@@ -308,20 +309,20 @@ namespace Dalichrome.RandomGenerator
                 {
                     if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
 
-                    AbstractGenerator strategy = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                    strategy.Do(generationInfo);
+                    IGenerator generator = GeneratorTypeConversions.GetGeneratorFromConfig(config);
+                    generator.Do(generationOutput);
                 }
 
                 watch.Stop();
 
-                generationInfo.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
+                generationOutput.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
 
             }
             catch (Exception)
             {
-                generationInfo?.Dispose();
+                generationOutput?.Dispose();
             }
-            return generationInfo;
+            return generationOutput;
         }
 
         //TODO have callback and return generationInfo also maybe turn into generationResult
@@ -348,7 +349,7 @@ namespace Dalichrome.RandomGenerator
             manualCancellationSource = new();
         }
 
-        public void SetGenerationResult(GenerationInfo result)
+        public void SetGenerationResult(Generation result)
         {
             Dispose();
             generationParameters.Seed = result.Seed;
@@ -415,46 +416,6 @@ namespace Dalichrome.RandomGenerator
         public List<int> GetTileIds() 
         { 
             return ids; 
-        }
-
-        //TODO Move these functions
-        public Texture2D CreateTexture(TileGrid grid)
-        {
-            // Create a new x by y texture ARGB32 (32 bit with alpha) and no mipmaps
-            var texture = new Texture2D(grid.width, grid.height, TextureFormat.RGB24, false);
-
-            // set the pixel values
-            for (int x = 0; x < grid.width; x++)
-            {
-                for (int y = 0; y < grid.height; y++)
-                {
-                    Core.Tile tile = grid.GetTile(x, y);
-
-                    Color color;
-                    if (!tileGrabber.GetTileName(tile.Object).Contains("NA"))
-                    {
-                        color = tileGrabber.GetTileColor(tile.Object);
-                    }
-                    else if (!tileGrabber.GetTileName(tile.Wall).Contains("NA"))
-                    {
-                        color = tileGrabber.GetTileColor(tile.Wall);
-                    }
-                    else
-                    {
-                        color = tileGrabber.GetTileColor(tile.Ground);
-                    }
-                    texture.SetPixel(x, y, color);
-                }
-            }
-
-            texture.filterMode = FilterMode.Point;
-            texture.Apply();
-            return texture;
-        }
-
-        public Texture2D CreateTexture()
-        {
-            return CreateTexture(Grid);
         }
     }
 }

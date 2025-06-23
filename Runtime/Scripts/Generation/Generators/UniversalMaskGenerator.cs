@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class UniversalMaskGenerator : AbstractGenerator
+    public class UniversalMaskGenerator : AbstractGenerator<UniversalMaskConfig>
     {
-        protected new UniversalMaskConfig config;
-
-        public UniversalMaskGenerator(UniversalMaskConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public UniversalMaskGenerator(UniversalMaskConfig config) : base(config) { }
 
         protected override void Enact()
         {

@@ -100,12 +100,12 @@ namespace Dalichrome.RandomGenerator.Utils
             return rooms;
         }
 
-        public void RoomFill(int x, int y, Room room, bool useNumbers)
+        public void RoomFill(int x, int y, Room room, bool useNumbers = false)
         {
             RoomFillHelper( tileGrid, x, y, room, useNumbers);
         }
 
-        public void RoomFill(TileGrid grid, int x, int y, Room room, bool useNumbers)
+        public void RoomFill(TileGrid grid, int x, int y, Room room, bool useNumbers = false)
         {
             RoomFillHelper(grid, x, y, room, useNumbers);
         }

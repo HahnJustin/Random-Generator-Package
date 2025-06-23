@@ -6,17 +6,20 @@ using Dalichrome.RandomGenerator.Core;
 using Unity.Jobs;
 using Unity.Collections;
 using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Utils;
+using UnityEngine.Diagnostics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class CellularAutomataGenerator : OccupanceGenerator
+    public class CellularAutomataGenerator : AbstractGenerator<CellularAutomataConfig>
     {
-        protected new CellularAutomataConfig config;
+        private OccupanceUtil util;
 
         public CellularAutomataGenerator(CellularAutomataConfig config) : base(config)
         {
             this.config = config;
-            OutOfBoundsOccupancy = this.config.BorderOccupied ? 1 : 0;
+            util = new(config) { OutOfBoundsOccupancy = config.BorderOccupied ? 1 : 0 };
+            AddUtil(util);
         }
 
         protected override void Enact()
@@ -29,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddDisposable(outputGrid);
 
             uint baseSeed = random.NextUInt();
-            OccupanceData occupance = GetOccupanceData();
+            OccupanceData occupance = util.GetOccupanceData();
 
             for (int rep = 0; rep < config.Repetitions; rep++)
             {

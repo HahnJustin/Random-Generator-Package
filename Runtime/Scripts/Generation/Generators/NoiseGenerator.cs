@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class NoiseGenerator : AbstractGenerator
+    public class NoiseGenerator : AbstractGenerator<NoiseConfig>
     {
-        protected new NoiseConfig config;
-
-        public NoiseGenerator(NoiseConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public NoiseGenerator(NoiseConfig config) : base(config) { }
 
         protected override void Enact()
         {

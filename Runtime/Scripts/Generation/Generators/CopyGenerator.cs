@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class CopyGenerator : AbstractGenerator
+    public class CopyGenerator : AbstractGenerator<CopyConfig>
     {
-        protected new CopyConfig config;
-
-        public CopyGenerator(CopyConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public CopyGenerator(CopyConfig config) : base(config) { }
 
         protected override void Enact()
         {

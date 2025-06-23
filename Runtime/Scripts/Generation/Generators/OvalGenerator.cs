@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class OvalGenerator : AbstractGenerator
+    public class OvalGenerator : AbstractGenerator<OvalConfig>
     {
-        protected new OvalConfig config;
-
-        public OvalGenerator(OvalConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public OvalGenerator(OvalConfig config) : base(config) { }
 
         protected override void Enact()
         {

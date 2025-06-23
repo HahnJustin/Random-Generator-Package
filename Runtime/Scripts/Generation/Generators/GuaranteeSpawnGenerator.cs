@@ -12,17 +12,21 @@ using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class GuaranteeSpawnGenerator : RoomGenerator
+    public class GuaranteeSpawnGenerator : AbstractGenerator<GuaranteeSpawnConfig>
     {
-        protected new GuaranteeSpawnConfig config;
-
+        private RoomUtil util;
         public GuaranteeSpawnGenerator(GuaranteeSpawnConfig config) : base(config)
         {
             this.config = config;
+            util = new(config);
+            AddUtil(util);
         }
 
         protected override void Enact()
         {
+            // Return if there are no tiles configured
+            if (config.TileWeights.Count <= 0) return;
+
             NativeList<int2> candidates;
 
             // Using Entrance Distance
@@ -35,7 +39,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return;
 
                 Room room = new(1);
-                RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
+                util.RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
                 List<Tile> tileList = room.ToList();
                 tileList.Shuffle(random);
 
@@ -48,7 +52,7 @@ namespace Dalichrome.RandomGenerator.Generators
             else
             {
                 List<int2> roomTilePositions = new ();
-                RoomList.ForEach(room => roomTilePositions.AddRange(room.Int2TilesList));
+                util.RoomList.ForEach(room => roomTilePositions.AddRange(room.Int2TilesList));
                 roomTilePositions.Shuffle(random);
 
                 candidates = new(roomTilePositions.Count, Allocator.Persistent);

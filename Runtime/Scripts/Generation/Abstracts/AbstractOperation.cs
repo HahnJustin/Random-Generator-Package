@@ -6,47 +6,32 @@ using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System;
+using Dalichrome.RandomGenerator.Random;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractGridOperation: IDisposable
+    public abstract class AbstractOperation<C, T> : IDisposable 
+        where C : AbstractConfig 
+        where T : AbstractOperationData
     {
         protected CancellationToken token;
+        protected AbstractRandom random;
         protected List<AbstractUtil> utils = new();
-        private List<IDisposable> disposables = new();
+        protected List<IDisposable> disposables = new();
 
-        private TileGrid tileGrid;
+        protected C config;
 
-        protected int width;
-        protected int height;
-        protected AbstractConfig config;
+        protected AbstractOperation()
+        {
+            config = default;
+        }
 
-        protected AbstractGridOperation(AbstractConfig config)
+        public AbstractOperation(C config)
         {
             this.config = config;
         }
 
-        protected void SetTileGrid(TileGrid tileGrid)
-        {
-            this.tileGrid = tileGrid;
-            width = tileGrid.width;
-            height = tileGrid.height;
-        }
-
-        protected TileGrid GetTileGrid()
-        {
-            return tileGrid;
-        }
-
-        protected void SetUtilsTileGrid()
-        {
-            foreach (AbstractUtil util in utils)
-            {
-                util.SetTileGrid(tileGrid);
-            }
-        }
-
-        protected void InitializeUtils()
+        protected virtual void InitializeUtils()
         {
             foreach (AbstractUtil util in utils)
             {
@@ -79,6 +64,31 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             disposables.ForEach(x => x.Dispose());
             ClearDisposables();
+        }
+
+        protected abstract void Initialize(T input);
+        protected abstract void Enact();
+        protected abstract void PostEnact(T input);
+
+        public void Do(T input)
+        {
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
+            random = input.Random;
+            token = input.Token;
+
+            Initialize(input);
+            InitializeUtils();
+
+            Enact();
+
+            PostEnact(input);
+
+            watch.Stop();
+            input.AddOperationTime(config, watch.ElapsedMilliseconds);
+
+            CancelCheck();
         }
     }
 }

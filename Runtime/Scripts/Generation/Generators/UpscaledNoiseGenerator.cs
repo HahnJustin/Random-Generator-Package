@@ -6,17 +6,12 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class UpscaledNoiseGenerator : AbstractGenerator
+    public class UpscaledNoiseGenerator : AbstractGenerator<UpscaledNoiseConfig>
     {
-        protected new UpscaledNoiseConfig config;
-
         private int SCALE_AMOUNT = 2;
 
-        public UpscaledNoiseGenerator(UpscaledNoiseConfig config) : base(config)
-        {
-            this.config = config;
-        }
-
+        public UpscaledNoiseGenerator(UpscaledNoiseConfig config) : base(config) { }
+        
         private int Mod(int x, int m)
         {
             return (x % m + m) % m;

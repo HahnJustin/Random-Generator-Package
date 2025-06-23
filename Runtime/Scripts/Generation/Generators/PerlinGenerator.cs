@@ -7,15 +7,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class PerlinGenerator : AbstractGenerator
+    public class PerlinGenerator : AbstractGenerator<PerlinConfig>
     {
-
-        protected new PerlinConfig config;
-
-        public PerlinGenerator(PerlinConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public PerlinGenerator(PerlinConfig config) : base(config) { }
 
         protected override void Enact()
         {

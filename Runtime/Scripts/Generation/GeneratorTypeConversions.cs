@@ -1,128 +1,66 @@
 using Dalichrome.RandomGenerator.Configs;
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-
     public static class GeneratorTypeConversions
     {
-        public static AbstractGeneratorConfig GetConfig(GeneratorType type)
+        public static AbstractGeneratorConfig GetConfig(GeneratorType type) => type switch
         {
-            switch (type)
-            {
-                case GeneratorType.Initial:
-                    return new InitialConfig();
-                case GeneratorType.Noise:
-                    return new NoiseConfig();
-                case GeneratorType.Oval:
-                    return new OvalConfig();
-                case GeneratorType.Perlin:
-                    return new PerlinConfig();
-                case GeneratorType.Random_Walk:
-                    return new RandomWalkConfig();
-                case GeneratorType.Cellular_Automata:
-                    return new CellularAutomataConfig();
-                case GeneratorType.Copy:
-                    return new CopyConfig();
-                case GeneratorType.Room_Connection:
-                    return new RoomConnectionConfig();
-                case GeneratorType.Entrance_Exit:
-                    return new EntranceExitConfig();
-                case GeneratorType.DLA:
-                    return new DLAConfig();
-                case GeneratorType.Labyrinth:
-                    return new LabyrinthConfig();
-                case GeneratorType.Room_Fill:
-                    return new RoomFillConfig();
-                case GeneratorType.Universal_Mask:
-                    return new UniversalMaskConfig();
-                case GeneratorType.In_Development:
-                    return new DevelopmentConfig();
-                case GeneratorType.Upscaled_Noise:
-                    return new UpscaledNoiseConfig();
-                case GeneratorType.Distance_Fill:
-                    return new DistanceFillConfig();
-                case GeneratorType.Nystrom_Dungeon:
-                    return new NystromDungeonConfig();
-                case GeneratorType.Guarantee_Spawn:
-                    return new GuaranteeSpawnConfig();
-                case GeneratorType.Border:
-                    return new BorderConfig();
-                default:
-                    Debug.LogWarning("[GeneratorDataManager] A Config without a related strategy was found");
-                    return null;
-            }
+            GeneratorType.Initial => new InitialConfig(),
+            GeneratorType.Noise => new NoiseConfig(),
+            GeneratorType.Oval => new OvalConfig(),
+            GeneratorType.Perlin => new PerlinConfig(),
+            GeneratorType.Random_Walk => new RandomWalkConfig(),
+            GeneratorType.Cellular_Automata => new CellularAutomataConfig(),
+            GeneratorType.Copy => new CopyConfig(),
+            GeneratorType.Room_Connection => new RoomConnectionConfig(),
+            GeneratorType.Entrance_Exit => new EntranceExitConfig(),
+            GeneratorType.DLA => new DLAConfig(),
+            GeneratorType.Labyrinth => new LabyrinthConfig(),
+            GeneratorType.Room_Fill => new RoomFillConfig(),
+            GeneratorType.Universal_Mask => new UniversalMaskConfig(),
+            GeneratorType.In_Development => new DevelopmentConfig(),
+            GeneratorType.Upscaled_Noise => new UpscaledNoiseConfig(),
+            GeneratorType.Distance_Fill => new DistanceFillConfig(),
+            GeneratorType.Nystrom_Dungeon => new NystromDungeonConfig(),
+            GeneratorType.Guarantee_Spawn => new GuaranteeSpawnConfig(),
+            GeneratorType.Border => new BorderConfig(),
+            _ => LogAndReturnNull(type)
+        };
+
+        private static AbstractGeneratorConfig LogAndReturnNull(GeneratorType type)
+        {
+            Debug.LogError($"[GeneratorDataManager] No config found for generator type: {type}");
+            return null;
         }
 
-        public static AbstractGenerator GetGeneratorFromConfig(AbstractGeneratorConfig config)
+        public static IGenerator GetGeneratorFromConfig(AbstractGeneratorConfig config)
         {
-            AbstractGenerator generator = null;
-            switch (config)
+            return config switch
             {
-                case InitialConfig iConfig:
-                    generator = new InitializeGenerator(iConfig);
-                    break;
-                case NoiseConfig nConfig:
-                    generator = new NoiseGenerator(nConfig);
-                    break;
-                case OvalConfig oConfig:
-                    generator = new OvalGenerator(oConfig);
-                    break;
-                case PerlinConfig pConfig:
-                    generator = new PerlinGenerator(pConfig);
-                    break;
-                case RandomWalkConfig rConfig:
-                    generator = new RandomWalkGenerator(rConfig);
-                    break;
-                case CellularAutomataConfig cConfig:
-                    generator = new CellularAutomataGenerator(cConfig);
-                    break;
-                case CopyConfig coConfig:
-                    generator = new CopyGenerator(coConfig);
-                    break;
-                case RoomConnectionConfig rcConfig:
-                    generator = new RoomConnectionGenerator(rcConfig);
-                    break;
-                case EntranceExitConfig eConfig:
-                    generator = new EntranceExitGenerator(eConfig);
-                    break;
-                case DLAConfig dConfig:
-                    generator = new DLAGenerator(dConfig);
-                    break;
-                case LabyrinthConfig lConfig:
-                    generator = new LabyrinthGenerator(lConfig);
-                    break;
-                case RoomFillConfig rfConfig:
-                    generator = new RoomFillGenerator(rfConfig);
-                    break;
-                case UniversalMaskConfig umConfig:
-                    generator = new UniversalMaskGenerator(umConfig);
-                    break;
-                case DevelopmentConfig devConfig:
-                    generator = new DevelopmentGenerator(devConfig);
-                    break;
-                case UpscaledNoiseConfig upnConfig:
-                    generator = new UpscaledNoiseGenerator(upnConfig);
-                    break;
-                case DistanceFillConfig distConfig:
-                    generator = new DistanceFillGenerator(distConfig);
-                    break;
-                case NystromDungeonConfig nyDunConfig:
-                    generator = new NystromDungeonGenerator(nyDunConfig);
-                    break;
-                case GuaranteeSpawnConfig guSpConfig:
-                    generator = new GuaranteeSpawnGenerator(guSpConfig);
-                    break;
-                case BorderConfig boConfig:
-                    generator = new BorderGenerator(boConfig);
-                    break;
-                default:
-                    Debug.LogError("[GeneratorDataManager] A Config without a related generator was found");
-                    break;
-            }
-            return generator;
+                InitialConfig iConfig => new InitializeGenerator(iConfig),
+                NoiseConfig nConfig => new NoiseGenerator(nConfig),
+                OvalConfig oConfig => new OvalGenerator(oConfig),
+                PerlinConfig pConfig => new PerlinGenerator(pConfig),
+                RandomWalkConfig rConfig => new RandomWalkGenerator(rConfig),
+                CellularAutomataConfig cConfig => new CellularAutomataGenerator(cConfig),
+                CopyConfig coConfig => new CopyGenerator(coConfig),
+                RoomConnectionConfig rcConfig => new RoomConnectionGenerator(rcConfig),
+                EntranceExitConfig eConfig => new EntranceExitGenerator(eConfig),
+                DLAConfig dConfig => new DLAGenerator(dConfig),
+                LabyrinthConfig lConfig => new LabyrinthGenerator(lConfig),
+                RoomFillConfig rfConfig => new RoomFillGenerator(rfConfig),
+                UniversalMaskConfig umConfig => new UniversalMaskGenerator(umConfig),
+                DevelopmentConfig devConfig => new DevelopmentGenerator(devConfig),
+                UpscaledNoiseConfig upnConfig => new UpscaledNoiseGenerator(upnConfig),
+                DistanceFillConfig distConfig => new DistanceFillGenerator(distConfig),
+                NystromDungeonConfig nyDunConfig => new NystromDungeonGenerator(nyDunConfig),
+                GuaranteeSpawnConfig guSpConfig => new GuaranteeSpawnGenerator(guSpConfig),
+                BorderConfig boConfig => new BorderGenerator(boConfig),
+                _ => throw new ArgumentException($"No generator found for config type {config.GetType().Name}")
+            };
         }
     }
 }

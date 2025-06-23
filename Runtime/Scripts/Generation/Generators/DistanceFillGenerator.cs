@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class DistanceFillGenerator : AbstractGenerator
+    public class DistanceFillGenerator : AbstractGenerator<DistanceFillConfig>
     {
-        protected new DistanceFillConfig config;
         private readonly DistanceUtil util;
 
         public DistanceFillGenerator(DistanceFillConfig config) : base(config)
         {
-            this.config = config;
             util = new(config);
             util.OutOfBoundsOccupancy = config.FillOccupied ? 1 : 0;
             AddUtil(util);

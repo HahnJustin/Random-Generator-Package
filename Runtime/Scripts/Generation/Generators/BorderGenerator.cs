@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class BorderGenerator : AbstractGenerator
+    public class BorderGenerator : AbstractGenerator<BorderConfig>
     {
-        protected new BorderConfig config;
-
-        public BorderGenerator(BorderConfig config) : base(config)
-        {
-            this.config = config;
-        }
+        public BorderGenerator(BorderConfig config) : base(config) { }
 
         protected override void Enact()
         {

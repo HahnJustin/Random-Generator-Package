@@ -6,15 +6,13 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class LabyrinthGenerator : RoomGenerator
+    public class LabyrinthGenerator : AbstractGenerator<LabyrinthConfig>
     {
-        protected new LabyrinthConfig config;
         private readonly MazeUtil util;
 
         public LabyrinthGenerator(LabyrinthConfig config) : base(config)
         {
             this.config = config;
-            OutOfBoundsOccupancy = 1;
 
             util = new(config);
             util.OutOfBoundsOccupancy = 1;
@@ -23,7 +21,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void Enact()
         {
-            foreach (Room room in RoomList)
+            foreach (Room room in util.RoomList)
             {
                 util.CreateMazeInRoom(room, random);
             }

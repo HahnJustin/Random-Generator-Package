@@ -5,12 +5,14 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Threading.Tasks;
+using UnityEngine.Diagnostics;
+using Dalichrome.RandomGenerator.Utils;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class DLAGenerator : OccupanceGenerator
+    public class DLAGenerator : AbstractGenerator<DLAConfig>
     {
-        protected new DLAConfig config;
+        private OccupanceUtil util;
 
         private class DLANode
         {
@@ -43,7 +45,8 @@ namespace Dalichrome.RandomGenerator.Generators
         public DLAGenerator(DLAConfig config) : base(config)
         {
             this.config = config;
-            //outOfBoundsOccupancy = 0;
+            util = new(config);
+            AddUtil(util);
         }
 
         private void ApplyGraphNodeTreeToGrid(List<DLANode> tree)
@@ -89,7 +92,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 int x = Mathf.RoundToInt(node.position.x + node.radius * (float) Mathf.Cos(increment * i));
                 int y = Mathf.RoundToInt(node.position.y + node.radius * (float) Mathf.Sin(increment * i));
 
-                if (GetIfOccupiedTileNextToPosition(x, y))
+                if (util.GetIfOccupiedTileNextToPosition(x, y))
                 {
                     return true;
                 }

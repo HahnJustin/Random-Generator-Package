@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class RandomWalkGenerator : AbstractGenerator
+    public class RandomWalkGenerator : AbstractGenerator<RandomWalkConfig>
     {
-        protected new RandomWalkConfig config;
+        public RandomWalkGenerator(RandomWalkConfig config) : base(config) { }
 
         public class Walker
         {
@@ -50,11 +50,6 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 return choice;
             }
-        }
-
-        public RandomWalkGenerator(RandomWalkConfig config) : base(config)
-        {
-            this.config = config;
         }
 
         protected override void Enact()
