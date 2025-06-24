@@ -10,10 +10,10 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public NoiseGenerator(NoiseConfig config) : base(config) { }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             List<int> tileTypes = config.Tiles;
-            if (tileTypes == null || tileTypes.Count == 0) return;
+            if (tileTypes == null || tileTypes.Count == 0) return input;
 
 
             for (int iteration = 0; iteration < config.Repetitions; iteration++)
@@ -28,7 +28,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
                 CancelCheck();
             }
-            return;
+            return input;
         }
     }
 }

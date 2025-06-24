@@ -10,7 +10,7 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public InitializeGenerator(InitialConfig config) : base(config) { }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             for (int x = 0; x < width; x++)
             {
@@ -22,7 +22,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     TileGrid.SetTileId(x, y, config.Debug);
                 }
             }
-            return;
+            return input;
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             Walker.TileGrid = TileGrid;
 
@@ -78,7 +78,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Red);
 
-            return;
+            return input;
         }
     }
 }

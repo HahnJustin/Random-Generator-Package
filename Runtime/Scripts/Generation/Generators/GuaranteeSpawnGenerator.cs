@@ -22,10 +22,10 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // Return if there are no tiles configured
-            if (config.TileWeights.Count <= 0) return;
+            if (config.TileWeights.Count <= 0) return input;
 
             NativeList<int2> candidates;
 
@@ -36,7 +36,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileType.Object_Entrance);
                 Vector2Int entranceAir = TileGrid.GetNearestPosition(position, (int)TileType.Wall_Object_NA);
 
-                if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return;
+                if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return input;
 
                 Room room = new(1);
                 util.RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
@@ -105,8 +105,8 @@ namespace Dalichrome.RandomGenerator.Generators
             foreach (var pos in tempExcludes)
                 TileGrid.AddExcludedPosition(pos);
 
-
             Dispose();
+            return input;
         }
     }
 }

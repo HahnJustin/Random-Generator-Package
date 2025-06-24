@@ -12,7 +12,7 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public OvalGenerator(OvalConfig config) : base(config) { }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             float xOrg = width / 2f;
             float yOrg = height / 2f;
@@ -34,7 +34,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }

@@ -127,7 +127,7 @@ namespace Dalichrome.RandomGenerator.Generators
             else return new Vector2Int(random.NextInt(0, width), 0);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // Setting all of the graphnode values
             float radius = config.Radius;
@@ -172,7 +172,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
 
             ApplyGraphNodeTreeToGrid(tree);
-            return;
+            return input;
         }
     }
 }

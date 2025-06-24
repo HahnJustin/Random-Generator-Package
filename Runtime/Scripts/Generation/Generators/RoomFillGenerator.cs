@@ -19,7 +19,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             //Culling Small Rooms, Skips calculation on biggest room otherwise (i >= 0)
             List<Room> roomList = util.LargestFirstRoomList;
@@ -43,7 +43,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
                 else break;
             }
-            return;
+            return input;
         }
     }
 }

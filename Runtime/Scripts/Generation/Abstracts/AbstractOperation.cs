@@ -10,9 +10,10 @@ using Dalichrome.RandomGenerator.Random;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractOperation<C, T> : IDisposable 
+    public abstract class AbstractOperation<C, D, R> : IDisposable 
         where C : AbstractConfig 
-        where T : AbstractOperationData
+        where D : AbstractOperationData
+        where R : AbstractOperationData
     {
         protected CancellationToken token;
         protected AbstractRandom random;
@@ -66,11 +67,11 @@ namespace Dalichrome.RandomGenerator.Generators
             ClearDisposables();
         }
 
-        protected abstract void Initialize(T input);
-        protected abstract void Enact();
-        protected abstract void PostEnact(T input);
+        protected abstract void Initialize(D input);
+        protected abstract R Enact(D input);
+        protected abstract void PostEnact(R output);
 
-        public void Do(T input)
+        public R Do(D input)
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
@@ -81,14 +82,15 @@ namespace Dalichrome.RandomGenerator.Generators
             Initialize(input);
             InitializeUtils();
 
-            Enact();
+            R output = Enact(input);
 
-            PostEnact(input);
+            PostEnact(output);
 
             watch.Stop();
             input.AddOperationTime(config, watch.ElapsedMilliseconds);
 
             CancelCheck();
+            return output;
         }
     }
 }

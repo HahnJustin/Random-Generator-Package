@@ -23,7 +23,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             currentRooms = util.LargestFirstRoomList;
             List<Direction> directions = new() { Direction.Down, Direction.Up, Direction.Right, Direction.Left };
@@ -86,7 +86,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
             }
             TileGrid.ClearPositiveNumbers();
-            return;
+            return input;
         }
 
         private void CreatePathBetweenRooms(RoomInfo info, bool consolidateRooms)

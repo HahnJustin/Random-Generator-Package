@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             Vector2Int vector1;
             Vector2Int vector2;
@@ -143,7 +143,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 entrancePos == Constants.OutsideGridVectorInt ||
                 exitPos == Constants.OutsideGridVectorInt)
             {
-                return;
+                return input;
             }
 
             TileGrid.SetTileId(entrancePos, (int)TileType.Object_Entrance);
@@ -156,7 +156,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 TileGrid.AddExcludedPosition(exitPos);
             }
 
-            if (!config.CreatePath) return;
+            if (!config.CreatePath) return input;
 
             //Create Path between entrance and air next to exit
             AStar astar = new();
@@ -171,7 +171,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     TileGrid.AddExcludedPosition(pos);
                 }
             }
-            return;
+            return input;
         }
     }
 }

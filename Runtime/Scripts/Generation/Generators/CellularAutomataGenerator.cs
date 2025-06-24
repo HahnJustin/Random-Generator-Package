@@ -22,7 +22,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // DeepClone readGrid twice: one as input, one as writeGrid
             TileGridData inputGrid = TileGrid.CloneGridData();
@@ -61,6 +61,7 @@ namespace Dalichrome.RandomGenerator.Generators
             outputGrid.Dispose();
 
             ClearDisposables();
+            return input;
         }
     }
 }

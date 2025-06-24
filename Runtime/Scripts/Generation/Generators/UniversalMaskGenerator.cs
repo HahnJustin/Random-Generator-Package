@@ -11,7 +11,7 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public UniversalMaskGenerator(UniversalMaskConfig config) : base(config) { }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             for (int x = 0; x < width; x++)
             {
@@ -29,7 +29,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return neighbors;
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int currentWidth = Mathf.Clamp(Mathf.FloorToInt(width * config.BaseNoiseRatio), 1, width);
             int currentHeight = Mathf.Clamp(Mathf.FloorToInt(height * config.BaseNoiseRatio), 1, height);
@@ -111,7 +111,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if(baseGrid[x,y] == 1) TileGrid.SetTileId(x, y, (int)config.FillTile);
                 }
             }
-            return;
+            return input;
         }
     }
 }

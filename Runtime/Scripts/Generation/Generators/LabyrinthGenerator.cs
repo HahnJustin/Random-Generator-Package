@@ -19,13 +19,13 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             foreach (Room room in util.RoomList)
             {
                 util.CreateMazeInRoom(room, random);
             }
-            return;
+            return input;
         }
     }
 }

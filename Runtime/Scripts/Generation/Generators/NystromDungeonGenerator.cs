@@ -141,7 +141,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int[,] occupanceGrid = util.GetOccupanceGrid();
 
@@ -355,7 +355,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
             }
 
-            return;
+            return input;
         }
     }
 }

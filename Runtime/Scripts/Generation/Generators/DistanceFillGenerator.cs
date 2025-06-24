@@ -18,14 +18,14 @@ namespace Dalichrome.RandomGenerator.Generators
             AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             foreach (Tile tile in TileGrid)
             {
                 if(tile.Value >= config.LowerDepth && tile.Value <= config.UpperDepth) TileGrid.SetTileId(tile, (int)config.FillTile);
                 CancelCheck();
             }
-            return;
+            return input;
         }
     }
 }

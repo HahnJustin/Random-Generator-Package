@@ -9,9 +9,10 @@ using System;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractGridOperation<C, T> : AbstractOperation<C,T> 
+    public abstract class AbstractGridOperation<C, D, R> : AbstractOperation<C, D, R> 
         where C : AbstractConfig
-        where T : AbstractOperationData
+        where D : AbstractOperationData
+        where R : AbstractOperationData
     {
         private TileGrid tileGrid;
         protected TileGrid TileGrid { get { return GetTileGrid(); } set { SetTileGrid(value); } }

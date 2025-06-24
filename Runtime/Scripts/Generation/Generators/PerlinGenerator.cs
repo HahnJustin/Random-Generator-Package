@@ -11,7 +11,7 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public PerlinGenerator(PerlinConfig config) : base(config) { }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int newNoise = random.NextInt(100000);
 
@@ -49,7 +49,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }
