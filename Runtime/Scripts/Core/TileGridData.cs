@@ -46,35 +46,87 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public TileGridData(int width, int height)
+        private TileGridData(int width, int height, bool allocateCollections)
         {
-            Allocator allocator = Allocator.Persistent;
-
             this.width = width;
             this.height = height;
 
-            tiles = new NativeArray<Tile>(width * height, allocator);
-            invalidTile = new() { IsValid = false };
+            Allocator allocator = Allocator.Persistent;
 
-            tileMask = new TileMask
-            {
-                includeSet = new NativeParallelHashSet<int>(1, allocator),
-                excludeSet = new NativeParallelHashSet<int>(1, allocator),
-                IsValid = true
-            };
+            tiles = allocateCollections
+                ? new NativeArray<Tile>(width * height, allocator)
+                : default;
+
+            invalidTile = new Tile { IsValid = false };
+
+            tileMask = allocateCollections
+                ? new TileMask
+                {
+                    includeSet = new NativeParallelHashSet<int>(1, Allocator.Persistent),
+                    excludeSet = new NativeParallelHashSet<int>(1, Allocator.Persistent),
+                    IsValid = true
+                }
+                : default;
             masked = false;
 
-            tileLayerLookup = TileTypeLayerLookup.CreateLookup(allocator);
+            tileLayerLookup = allocateCollections
+                ? TileTypeLayerLookup.CreateLookup(Allocator.Persistent)
+                : default;
 
-            excludePositions = new NativeParallelHashSet<int2>(64, Allocator.Persistent);
+            excludePositions = allocateCollections
+                ? new NativeParallelHashSet<int2>(64, allocator)
+                : default;
 
             IsValid = true;
+        }
 
+        public TileGridData(int width, int height)
+    : this(width, height, true)
+        {
             for (int i = 0; i < width * height; i++)
             {
                 int2 pos = IndexToInt2(i);
                 tiles[i] = new Tile(pos.x, pos.y);
             }
+        }
+
+        public static TileGridData DeepClone(TileGridData other)
+        {
+            TileGridData gridData = new(other.width, other.height, false);
+
+            Allocator allocator = Allocator.Persistent;
+
+            // Tiles
+            gridData.tiles = other.tiles.DeepClone(allocator);
+
+            // Tile Mask
+            gridData.masked = other.masked;
+            gridData.tileMask = other.tileMask.IsValid
+                ? other.tileMask.DeepClone()
+                : new TileMask
+                {
+                    includeSet = new NativeParallelHashSet<int>(1, allocator),
+                    excludeSet = new NativeParallelHashSet<int>(1, allocator),
+                    IsValid = true
+                };
+
+            // Tile Layer Lookup
+            gridData.tileLayerLookup = new NativeParallelHashMap<int, LayerType>(
+                math.ceilpow2(other.tileLayerLookup.Count()), allocator);
+
+            foreach (var kvp in other.tileLayerLookup)
+                gridData.tileLayerLookup.TryAdd(kvp.Key, kvp.Value);
+
+            // Exclude Positions
+            gridData.excludePositions = new NativeParallelHashSet<int2>(
+                math.ceilpow2(other.excludePositions.Count()), allocator);
+
+            foreach (var pos in other.excludePositions)
+                gridData.excludePositions.Add(pos);
+
+            gridData.IsValid = true;
+
+            return gridData;
         }
 
         private LayerType GetLayerFromId(int id)
@@ -106,39 +158,6 @@ namespace Dalichrome.RandomGenerator.Core
             if (!Masked) return true;
 
             return tileMask.CanModifyTile(tile);
-        }
-
-        public static TileGridData DeepClone(TileGridData other)
-        {
-            TileGridData gridData = new(other.width, other.height);
-
-            // Tiles
-            gridData.tiles.Dispose();
-            gridData.tiles = other.tiles.DeepClone(Allocator.Persistent);
-
-            // Tile Mask
-            gridData.tileMask.Dispose();
-            gridData.masked = other.masked;
-            if (other.tileMask.IsValid) gridData.tileMask = other.tileMask.DeepClone();
-
-            // Tile Layer Lookup
-            gridData.tileLayerLookup.Dispose();
-            gridData.tileLayerLookup = new (
-                    other.tileLayerLookup.Capacity,
-                    Allocator.Persistent);
-
-            foreach (var kvp in other.tileLayerLookup)
-                gridData.tileLayerLookup.TryAdd(kvp.Key, kvp.Value);
-
-            // Exclude Positions List
-            gridData.excludePositions.Dispose();
-            gridData.excludePositions = new NativeParallelHashSet<int2>(other.excludePositions.Count(), Allocator.Persistent);
-            foreach (var pos in other.excludePositions)
-                gridData.excludePositions.Add(pos);
-
-            gridData.IsValid = true;
-
-            return gridData;
         }
 
         public bool SetTileId(int x, int y, int id)

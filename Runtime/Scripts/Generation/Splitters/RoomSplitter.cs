@@ -19,7 +19,10 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void Initialize(Generation generation) { }
 
-        protected override RegionSplits Enact(Generation generation) { return default; }
+        protected override RegionSplits Enact(Generation generation)
+        {
+            return default; 
+        }
 
         protected override void PostEnact(RegionSplits regionSplits) { }
     }
