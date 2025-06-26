@@ -81,7 +81,7 @@ namespace Dalichrome.RandomGenerator.Generators
             AddDisposable(pairsNative);
 
             // Create Grid to Read From
-            TileGridData inputGrid = TileGridData.DeepClone(TileGrid.GetGridData());
+            NativeTileGrid inputGrid = NativeTileGrid.DeepClone(TileGrid.GetGridData());
             AddDisposable(inputGrid);
 
             var job = new GuaranteeSpawnJob

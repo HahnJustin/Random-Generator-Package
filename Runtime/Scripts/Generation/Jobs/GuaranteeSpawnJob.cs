@@ -9,12 +9,12 @@ public struct GuaranteeSpawnJob : IJob
 {
     /* inputs */
     [ReadOnly] public NativeArray<int2> candidateTiles;
-    [ReadOnly] public TileGridData inputGrid;
+    [ReadOnly] public NativeTileGrid inputGrid;
     [ReadOnly] public NativeArray<int2> tilePairs;   // (id, weight)
     public uint seed;
 
     /* outputs */
-    [NativeDisableParallelForRestriction] public TileGridData outputGrid;
+    [NativeDisableParallelForRestriction] public NativeTileGrid outputGrid;
     public NativeList<int2> outputExcludes;
 
     public int maxSpawns;

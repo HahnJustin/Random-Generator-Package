@@ -25,8 +25,8 @@ namespace Dalichrome.RandomGenerator.Generators
         protected override Generation Enact(Generation input)
         {
             // DeepClone readGrid twice: one as input, one as writeGrid
-            TileGridData inputGrid = TileGrid.CloneGridData();
-            TileGridData outputGrid = TileGrid.CloneGridData();
+            NativeTileGrid inputGrid = TileGrid.CloneGridData();
+            NativeTileGrid outputGrid = TileGrid.CloneGridData();
 
             AddDisposable(inputGrid);
             AddDisposable(outputGrid);

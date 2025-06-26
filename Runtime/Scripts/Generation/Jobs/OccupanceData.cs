@@ -23,7 +23,7 @@ namespace Dalichrome.RandomGenerator.Generators
             outOfBoundsValue = outOfBounds;
         }
 
-        public int IsOccupied(int2 pos, TileGridData grid)
+        public int IsOccupied(int2 pos, NativeTileGrid grid)
         {
             if (!grid.IsInBounds(pos))
                 return outOfBoundsValue;

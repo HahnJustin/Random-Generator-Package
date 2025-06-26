@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public struct TileGridData : IDisposable
+    public struct NativeTileGrid : IDisposable
     {
         public readonly int width;
         public readonly int height;
@@ -46,7 +46,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        private TileGridData(int width, int height, bool allocateCollections)
+        private NativeTileGrid(int width, int height, bool allocateCollections)
         {
             this.width = width;
             this.height = height;
@@ -80,7 +80,7 @@ namespace Dalichrome.RandomGenerator.Core
             IsValid = true;
         }
 
-        public TileGridData(int width, int height)
+        public NativeTileGrid(int width, int height)
     : this(width, height, true)
         {
             for (int i = 0; i < width * height; i++)
@@ -90,9 +90,9 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public static TileGridData DeepClone(TileGridData other)
+        public static NativeTileGrid DeepClone(NativeTileGrid other)
         {
-            TileGridData gridData = new(other.width, other.height, false);
+            NativeTileGrid gridData = new(other.width, other.height, false);
 
             Allocator allocator = Allocator.Persistent;
 

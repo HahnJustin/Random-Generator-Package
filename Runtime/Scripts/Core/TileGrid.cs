@@ -20,7 +20,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool Masked { get { return data.Masked; } }
 
-        private TileGridData data;
+        private NativeTileGrid data;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private string allocationStack;
@@ -69,7 +69,7 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Private Funcs
-        public void SetGridData(TileGridData newData) => data = newData;
+        public void SetGridData(NativeTileGrid newData) => data = newData;
 
         // Set Tile Type
         public bool SetTileId(int x, int y, int id)
@@ -289,14 +289,14 @@ namespace Dalichrome.RandomGenerator.Core
             return data.AsNativeArray().GetEnumerator();
         }
 
-        public ref TileGridData GetGridData() => ref data;
+        public ref NativeTileGrid GetGridData() => ref data;
 
-        public TileGridData CloneGridData()
+        public NativeTileGrid CloneGridData()
         {
-            return TileGridData.DeepClone(data);
+            return NativeTileGrid.DeepClone(data);
         }
 
-        public void OverrideGridData(TileGridData _data)
+        public void OverrideGridData(NativeTileGrid _data)
         {
             data.Dispose();
             data = _data;
