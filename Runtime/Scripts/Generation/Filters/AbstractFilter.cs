@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractFilter<C>: AbstractOperation<C, RegionSplits, Generation>
-        where C : AbstractRegionFilterConfig, IFilter
+    public abstract class AbstractFilter<C>: AbstractOperation<C, RegionSplits, Generation>, IFilter
+        where C : AbstractRegionFilterConfig
     {
-
+        protected AbstractFilter(C config) : base(config)
+        {
+        }
     }
 }

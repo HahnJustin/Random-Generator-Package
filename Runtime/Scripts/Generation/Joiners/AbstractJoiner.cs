@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractJoiner<C> : AbstractOperation<C, RegionSplits, Generation> 
-        where C : AbstractRegionJoinerConfig, IJoiner
+    public abstract class AbstractJoiner<C> : AbstractOperation<C, RegionSplits, Generation>, IJoiner
+        where C : AbstractRegionJoinerConfig
     {
-
+        protected AbstractJoiner(C config) : base(config)
+        {
+        }
     }
 }
