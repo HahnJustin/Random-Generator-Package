@@ -5,11 +5,10 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
-using static Unity.Collections.AllocatorManager;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public class TileGrid : IDisposable, IEnumerable
+    public class TileGrid : ITileGrid, IDisposable, IEnumerable
     {
         public readonly int width;
         public readonly int height;
@@ -18,34 +17,35 @@ namespace Dalichrome.RandomGenerator.Core
 
         public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } }
 
-        public bool Masked { get { return data.Masked; } }
+        public bool Masked { get { return subgrid.Masked; } }
 
-        private NativeTileGrid data;
+        private NativeTileGrid subgrid;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private string allocationStack;
         private bool isDisposed = false;
 #endif
 
-        public bool IsDataValid 
+        public bool IsValid 
         {
-            get { return data.IsValid; }
+            get { return subgrid.IsValid; }
+            internal set { subgrid.IsValid = value; }
         }
 
         public bool IsIncludingTiles
         {
             get
             {
-                if (!data.tileMask.IsValid) return false;
-                return data.tileMask.IsIncludingTiles;
+                if (!subgrid.tileMask.IsValid) return false;
+                return subgrid.tileMask.IsIncludingTiles;
             }
         }
         public bool IsExcludingTiles
         {
             get
             {
-                if (!data.tileMask.IsValid) return false;
-                return data.tileMask.IsExcludingTiles;
+                if (!subgrid.tileMask.IsValid) return false;
+                return subgrid.tileMask.IsExcludingTiles;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Dalichrome.RandomGenerator.Core
             this.width = width;
             this.height = height;
 
-            data = new (width, height);
+            subgrid = new (width, height);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             allocationStack = Environment.StackTrace;
@@ -64,20 +64,25 @@ namespace Dalichrome.RandomGenerator.Core
         public static TileGrid DeepClone(TileGrid other)
         {
             TileGrid grid = new(other.width, other.height);
-            if(other.IsDataValid) grid.data = other.data.DeepClone();
+            if(other.IsValid) grid.subgrid = other.subgrid.DeepClone();
             return grid;
         }
 
         // Private Funcs
-        public void SetGridData(NativeTileGrid newData) => data = newData;
+        public void SetGridData(NativeTileGrid newData) => subgrid = newData;
 
         // Set Tile Type
         public bool SetTileId(int x, int y, int id)
         {
-            return data.SetTileId(x, y, id);
+            return subgrid.SetTileId(x, y, id);
         }
 
         public bool SetTileId(Vector2Int position, int id)
+        {
+            return SetTileId(position.x, position.y, id);
+        }
+
+        public bool SetTileId(int2 position, int id)
         {
             return SetTileId(position.x, position.y, id);
         }
@@ -91,7 +96,12 @@ namespace Dalichrome.RandomGenerator.Core
         // Contains Type
         public bool ContainsId(int x, int y, int id)
         {
-            return data.ContainsId(x, y, id);
+            return subgrid.ContainsId(x, y, id);
+        }
+
+        public bool ContainsId(int2 position, int id)
+        {
+            return ContainsId(position.x, position.y, id);
         }
 
         public bool ContainsId(Vector2Int position, int id)
@@ -102,7 +112,7 @@ namespace Dalichrome.RandomGenerator.Core
         // Get Tile
         public Tile GetTile(int x, int y)
         {
-            return data.GetTile(x, y);
+            return subgrid.GetTile(x, y);
         }
 
         public Tile GetTile(Vector2Int position)
@@ -119,7 +129,7 @@ namespace Dalichrome.RandomGenerator.Core
         // Set Tile
         public bool SetTile(int x, int y, Tile toSet)
         {
-            data.SetTile(x, y, toSet);
+            subgrid.SetTile(x, y, toSet);
             return true;
         }
 
@@ -141,7 +151,7 @@ namespace Dalichrome.RandomGenerator.Core
         // Set Tile Value
         public bool SetTileValue(int x, int y, int value)
         {
-            return data.SetTileValue(x, y, value);
+            return subgrid.SetTileValue(x, y, value);
         }
 
         public bool SetTileValue(Vector2Int position, int value)
@@ -163,23 +173,23 @@ namespace Dalichrome.RandomGenerator.Core
         // Mask Funcs
         public void RemoveMask()
         {
-            data.RemoveMask();
+            subgrid.RemoveMask();
         }
 
         public void CreateMask(List<int> includeList, List<int> excludeList)
         {
-            data.CreateMask(includeList, excludeList);
-            SetGridData(data);
+            subgrid.CreateMask(includeList, excludeList);
+            SetGridData(subgrid);
         }
 
         public void ToggleMasked(bool on)
         {
-            data.ToggleMasked(on);
+            subgrid.ToggleMasked(on);
         }
 
         public void AddExcludedPosition(int2 position)
         {
-            data.AddExcludedPosition(position);
+            subgrid.AddExcludedPosition(position);
         }
 
         public void AddExcludedPosition(Vector2Int position)
@@ -199,7 +209,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool IsExcluding(int2 position)
         {
-            return data.IsExcluding(position);
+            return subgrid.IsExcluding(position);
         }
 
         public bool IsExcluding(Tile tile)
@@ -207,40 +217,51 @@ namespace Dalichrome.RandomGenerator.Core
             return IsExcluding(tile.Int2);
         }
 
-        public Vector2Int GetNearestPosition(int x, int y, int id)
+        public int2 GetNearestPosition(int x, int y, int id)
         {
-            int2 pos = data.GetNearestPosition(x, y, id);
-            return new(pos.x, pos.y);
+            return subgrid.GetNearestPosition(x, y, id);
         }
 
         public Vector2Int GetNearestPosition(Vector2Int position, int id)
         {
+            int2 nearest =  GetNearestPosition(position.x, position.y, id);
+            return new Vector2Int(nearest.x, nearest.y);
+        }
+
+        public int2 GetNearestPosition(int2 position, int id)
+        {
             return GetNearestPosition(position.x, position.y, id);
         }
 
-        public Vector2Int GetNearestPosition(int2 position, int id)
+        public int2 GetRandomEdgePoint(AbstractRandom random)
         {
-            return GetNearestPosition(position.x, position.y, id);
+            return subgrid.GetRandomEdgePoint(random);
+        }
+
+        public Vector2Int GetRandomEdgeVector2(AbstractRandom random)
+        {
+            int2 position = subgrid.GetRandomEdgePoint(random);
+            return new(position.x, position.y);
         }
 
         public void ClearNumbers()
         {
-            data.ClearNumbers();
+            subgrid.ClearNumbers();
         }
 
         public void ClearPositiveNumbers()
         {
-           data.ClearPositiveNumbers();
+           subgrid.ClearPositiveNumbers();
         }
 
         public bool CanHaveTiles()
         {
-            return data.CanHaveTiles();
+            return subgrid.CanHaveTiles();
         }
 
         public void Dispose()
         {
-            data.Dispose();
+            subgrid.Dispose();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             isDisposed = true;
@@ -260,51 +281,127 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<Tile> GetEightNeighborTiles(Tile tile)
         {
-            return data.GetEightNeighborTiles(tile);
+            return subgrid.GetEightNeighborTiles(tile);
         }
 
         public List<Tile> GetFourNeighborTiles(Tile tile)
         {
-            return data.GetFourNeighborTiles(tile);
+            return subgrid.GetFourNeighborTiles(tile);
         }
 
-        public Vector2Int GetRandomEdgePoint(AbstractRandom random)
-        {
-            int2 position = data.GetRandomEdgePoint(random);
-            return new(position.x, position.y);
-        }
-
-        public int2 GetRandomEdgeInt2(AbstractRandom random)
-        {
-            return data.GetRandomEdgePoint(random);
-        }
 
         public bool IsInBounds(int x, int y)
         {
-            return data.IsInBounds(x, y);
+            return subgrid.IsInBounds(x, y);
+        }
+
+        public bool IsInBounds(int2 position)
+        {
+            return subgrid.IsInBounds(position);
+        }
+
+        public void CreateRegion(int2 min, int2 max, List<int2> regionExcludedPositions) 
+        {
+            subgrid.CreateRegion(min, max, regionExcludedPositions);
+        }
+
+        public void CreateRegionBounds(Vector2Int min, Vector2Int max)
+        {
+            subgrid.CreateRegionBounds(new (min.x, min.y), new(max.x, max.y));
+        }
+
+        public void CreateRegionBounds(int2 min, int2 max) 
+        { 
+            subgrid.CreateRegionBounds(min, max);
+        }
+
+        public void RemoveRegion()
+        {
+            subgrid.RemoveRegion();
+        }
+
+        public void AddRegionExcludedPosition(int x, int y)
+        {
+            subgrid.AddRegionExcludedPosition(x, y);
+        }
+
+        public void AddRegionExcludedPosition(Vector2Int pos)
+        {
+            subgrid.AddRegionExcludedPosition(pos.x, pos.y);
+        }
+
+        public void AddRegionExcludedPosition(int2 pos)
+        {
+            subgrid.AddRegionExcludedPosition(pos);
+        }
+
+        public bool IsInRegion(Vector2Int pos)
+        {
+            return subgrid.IsInRegion(pos.x, pos.y);
+        }
+
+        public bool IsInRegion(int2 pos) 
+        {
+            return subgrid.IsInRegion(pos);
+        }
+
+        public bool IsInRegion(int x, int y)
+        {
+            return subgrid.IsInRegion(x, y);
         }
 
         public IEnumerator GetEnumerator()
         {
-            return data.AsNativeArray().GetEnumerator();
+            return subgrid.AsNativeArray().GetEnumerator();
         }
 
-        public ref NativeTileGrid GetGridData() => ref data;
-
-        public NativeTileGrid CloneGridData()
+        public bool IsRestricted(int x, int y)
         {
-            return NativeTileGrid.DeepClone(data);
+            return subgrid.IsRestricted(x, y);
         }
 
-        public void OverrideGridData(NativeTileGrid _data)
+        public bool IsRestricted(Vector2Int pos)
         {
-            data.Dispose();
-            data = _data;
+            return subgrid.IsRestricted(pos.x, pos.y);
+        }
+
+        public bool IsRestricted(int2 pos)
+        {
+            return subgrid.IsRestricted(pos);
+        }
+
+        // Ienumeration
+        public NativeArray<Tile> AsNativeArray()
+        {
+            return subgrid.AsNativeArray();
+        }
+
+        public IEnumerable<int2> GetRegionPositions()
+        {
+            return subgrid.GetRegionPositions();
+        }
+
+        public IEnumerable<int2> GetRegionGrid()
+        {
+            return subgrid.GetRegionGrid();
+        }
+
+        public ref NativeTileGrid GetNative() => ref subgrid;
+
+        public NativeTileGrid CloneNativeGrid()
+        {
+            return NativeTileGrid.DeepClone(subgrid);
+        }
+
+        public void OverrideSubGrid(NativeTileGrid _data)
+        {
+            subgrid.Dispose();
+            subgrid = _data;
         }
 
         public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
         {
-            data.AddLayersLookups(layerLookup);
+            subgrid.AddLayersLookups(layerLookup);
         }
     }
 }

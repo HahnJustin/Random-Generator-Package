@@ -81,14 +81,14 @@ namespace Dalichrome.RandomGenerator.Generators
             AddDisposable(pairsNative);
 
             // Create Grid to Read From
-            NativeTileGrid inputGrid = NativeTileGrid.DeepClone(TileGrid.GetGridData());
+            NativeTileGrid inputGrid = NativeTileGrid.DeepClone(TileGrid.GetNative());
             AddDisposable(inputGrid);
 
             var job = new GuaranteeSpawnJob
             {
                 candidateTiles = candidates.AsArray(),
                 inputGrid = inputGrid,
-                outputGrid = TileGrid.GetGridData(),
+                outputGrid = TileGrid.GetNative(),
                 outputExcludes = tempExcludes,
                 maxSpawns = maxSpawns,
                 minDistance = config.MinimumDistanceFromEntrance,

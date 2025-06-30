@@ -268,7 +268,7 @@ namespace Dalichrome.RandomGenerator
                 CreateDictionary();
             }
 
-            if (tileGrid == null || !tileGrid.IsDataValid)
+            if (tileGrid == null || !tileGrid.IsValid)
             {
                 Debug.LogError("TileGrid is not valid");
                 return;

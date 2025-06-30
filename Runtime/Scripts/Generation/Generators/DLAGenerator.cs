@@ -139,7 +139,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             for (int i = 0; i < config.MaxWalkers; i++)
             {
-                walkers.Add(new(TileGrid.GetRandomEdgePoint(random), radius));
+                walkers.Add(new(TileGrid.GetRandomEdgeVector2(random), radius));
                 radius *= config.Shrink;
             }
 
@@ -160,7 +160,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             while (walkers.Count < config.MaxWalkers && radius > 1)
             {
-                walkers.Add(new(TileGrid.GetRandomEdgePoint(random), radius));
+                walkers.Add(new(TileGrid.GetRandomEdgeVector2(random), radius));
                 radius *= config.Shrink;
             }
 

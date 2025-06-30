@@ -29,7 +29,7 @@ namespace Dalichrome.RandomGenerator
 
             set
             {
-                if (grid != null && grid != value && grid.IsDataValid)
+                if (grid != null && grid != value && grid.IsValid)
                 {
                     grid.Dispose();
                 }
@@ -62,7 +62,7 @@ namespace Dalichrome.RandomGenerator
             if (_disposed) return;
             _disposed = true;
 #endif
-            if (grid != null && grid.IsDataValid)
+            if (grid != null && grid.IsValid)
             {
                 Debug.Log($"[GI #{_id}] disposed");
                 grid.Dispose();
