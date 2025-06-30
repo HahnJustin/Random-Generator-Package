@@ -519,27 +519,26 @@ namespace Dalichrome.RandomGenerator.Core
             return tiles;
         }
 
-        public IEnumerable<int2> GetRegionPositions()
+        public IEnumerable<Tile> GetRegionPositions()
         {
             for (int y = regionMin.y; y <= regionMax.y; y++)
             {
                 for (int x = regionMin.x; x <= regionMax.x; x++)
                 {
-                    int2 pos = new int2(x, y);
+                    int2 pos = new (x, y);
                     if (!regionExcludedPositions.Contains(pos))
-                        yield return pos;
+                        yield return GetTileFromNativeArray(x, y);
                 }
             }
         }
 
-        public IEnumerable<int2> GetRegionGrid()
+        public IEnumerable<Tile> GetRegionGrid()
         {
             for (int y = regionMin.y; y <= regionMax.y; y++)
             {
                 for (int x = regionMin.x; x <= regionMax.x; x++)
                 {
-                    int2 pos = new int2(x, y);
-                    yield return pos;
+                    yield return GetTileFromNativeArray(x, y);
                 }
             }
         }

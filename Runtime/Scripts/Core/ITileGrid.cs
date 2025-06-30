@@ -84,8 +84,8 @@ namespace Dalichrome.RandomGenerator.Core
 
         // Ienumeration
         public abstract NativeArray<Tile> AsNativeArray();
-        public abstract IEnumerable<int2> GetRegionPositions();
-        public abstract IEnumerable<int2> GetRegionGrid();
+        public abstract IEnumerable<Tile> GetRegionPositions();
+        public abstract IEnumerable<Tile> GetRegionGrid();
 
         // Layer Table Funcs
         public abstract void AddLayersLookups(Dictionary<int, LayerType> layerLookup);

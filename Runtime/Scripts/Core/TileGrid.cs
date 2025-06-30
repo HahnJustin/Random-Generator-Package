@@ -352,7 +352,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public IEnumerator GetEnumerator()
         {
-            return subgrid.AsNativeArray().GetEnumerator();
+            return subgrid.GetRegionGrid().GetEnumerator();
         }
 
         public bool IsRestricted(int x, int y)
@@ -376,12 +376,12 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.AsNativeArray();
         }
 
-        public IEnumerable<int2> GetRegionPositions()
+        public IEnumerable<Tile> GetRegionPositions()
         {
             return subgrid.GetRegionPositions();
         }
 
-        public IEnumerable<int2> GetRegionGrid()
+        public IEnumerable<Tile> GetRegionGrid()
         {
             return subgrid.GetRegionGrid();
         }
