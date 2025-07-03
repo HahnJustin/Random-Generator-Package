@@ -37,11 +37,28 @@ namespace Dalichrome.RandomGenerator
             operationsMilliseconds.Add(config.GetHashCode(), ms);
         }
 
+        public void AddOperationTime(int hashCode, long ms)
+        {
+            operationsMilliseconds.Add(hashCode, ms);
+        }
+
         public long GetOperationTime(AbstractConfig config)
         {
             if (operationsMilliseconds.TryGetValue(config.GetHashCode(), out long ms))
                 return ms;
             return -1;
+        }
+
+        public long GetOperationTime(int configHash)
+        {
+            if (operationsMilliseconds.TryGetValue(configHash, out long ms))
+                return ms;
+            return -1;
+        }
+
+        public Dictionary<int, long> GetOperationMillisDictionary() 
+        {
+            return operationsMilliseconds;
         }
     }
 }

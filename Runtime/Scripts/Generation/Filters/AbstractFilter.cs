@@ -16,5 +16,23 @@ namespace Dalichrome.RandomGenerator.Generators
         protected AbstractFilter(C config) : base(config)
         {
         }
+
+        public abstract bool Filter(RegionBounds bounds);
+
+        protected override Generation Enact(RegionSplits regionSplits)
+        {
+            Generation generation = new(regionSplits);
+
+            regionSplits.Shuffle();
+            foreach (RegionBounds region in regionSplits)
+            {
+                if (Filter(region))
+                {
+                    generation.Grid.SetRegionBounds(region);
+                    return generation;
+                }
+            }
+            return null;
+        }
     }
 }

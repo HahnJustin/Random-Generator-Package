@@ -22,11 +22,10 @@ using Sirenix.Utilities.Editor;
 
 namespace Dalichrome.RandomGenerator.Editor
 {
-
     /// <summary>Reusable inspector for every <see cref="ConfigNodeBase{T}"/>.</summary>
     public class ConfigNodeEditor<TNode, TCfg> : NodeEditor
         where TNode : ConfigNodeBase<TCfg>
-        where TCfg : class
+        where TCfg : AbstractConfig
     {
 
         private static readonly HashSet<string> Mask = new()

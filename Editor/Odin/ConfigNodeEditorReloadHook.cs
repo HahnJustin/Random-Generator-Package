@@ -3,23 +3,27 @@
 using UnityEditor;
 using Sirenix.OdinInspector.Editor;
 using System.Collections.Generic;
+using Dalichrome.RandomGenerator.Nodes;
 
-[InitializeOnLoad]
-static class NodeEditorReloadHook
+namespace Dalichrome.RandomGenerator.Editor
 {
-    internal static readonly HashSet<AbstractNode> Nodes = new();
-    internal static readonly HashSet<PropertyTree> LiveTrees = new();
-
-    static NodeEditorReloadHook()
+    [InitializeOnLoad]
+    static class NodeEditorReloadHook
     {
-        AssemblyReloadEvents.beforeAssemblyReload += DisposeAll;
-        EditorApplication.quitting += DisposeAll;
-    }
+        internal static readonly HashSet<AbstractNode> Nodes = new();
+        internal static readonly HashSet<PropertyTree> LiveTrees = new();
 
-    static void DisposeAll()
-    {
-        foreach (PropertyTree t in LiveTrees) t?.Dispose();
-        LiveTrees.Clear();
+        static NodeEditorReloadHook()
+        {
+            AssemblyReloadEvents.beforeAssemblyReload += DisposeAll;
+            EditorApplication.quitting += DisposeAll;
+        }
+
+        static void DisposeAll()
+        {
+            foreach (PropertyTree t in LiveTrees) t?.Dispose();
+            LiveTrees.Clear();
+        }
     }
 }
 #endif

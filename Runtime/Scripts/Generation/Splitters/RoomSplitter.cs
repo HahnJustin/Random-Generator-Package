@@ -1,8 +1,10 @@
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 
 namespace Dalichrome.RandomGenerator.Generators
@@ -21,7 +23,27 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override RegionSplits Enact(Generation generation)
         {
-            return default; 
+            RegionSplits regionSplits = new(generation);
+
+            // Culling Rooms
+            List<Room> roomList = util.LargestFirstRoomList;
+            for (int i = roomList.Count - 1; i >= 0; i--)
+            {
+                Room room = roomList[i];
+                if ((room.Count < config.MinimumRoomSize) || (room.Count > config.MaximumRoomSize))
+                    
+                {
+                    roomList.Remove(room);
+                }
+            }
+
+            // Adding Rooms to RegionSplits
+            foreach (Room room in roomList) 
+            {
+                regionSplits.AddRegion(room.ToRegionBounds());
+            }
+
+            return regionSplits;
         }
 
         protected override void PostEnact(RegionSplits regionSplits) { }

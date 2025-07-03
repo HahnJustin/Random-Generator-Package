@@ -26,16 +26,14 @@ namespace Dalichrome.RandomGenerator.Utils
         {
             get
             {
-                BoundsInt bounds = GetBounds();
-                return bounds.xMax - bounds.x;
+                return Bounds.xMax - Bounds.x;
             }
         }
         public int Height
         {
             get
             {
-                BoundsInt bounds = GetBounds();
-                return bounds.yMax - bounds.y;
+                return Bounds.yMax - Bounds.y;
             }
         }
 
@@ -53,6 +51,12 @@ namespace Dalichrome.RandomGenerator.Utils
         public int Value { get; private set; }
 
         public int Count { get { return tiles.Count; } }
+
+        public int2 Minimum { get { return new int2(left.x, bottom.y); } }
+
+        public int2 Maximum { get { return new int2(right.x - left.x, top.y - bottom.y); } }
+
+        public BoundsInt Bounds { get { return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x - left.x, top.y - bottom.y, 1)); } } 
 
         public Room(int roomNumber)
         {
@@ -90,12 +94,6 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
             if (!right.IsValid || right.x < tile.x) right = tile;
             if (!left.IsValid || left.x > tile.x) left = tile;
-        }
-
-        //Could definitely have issue with using bounds related to rooms wrapping around a readGrid
-        public BoundsInt GetBounds()
-        {
-            return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x-left.x, top.y-bottom.y, 1));
         }
 
         public Tile GetFirstTile()
@@ -140,6 +138,13 @@ namespace Dalichrome.RandomGenerator.Utils
             if (tiles.Count < other.tiles.Count) return 1;
             else if (tiles.Count > other.tiles.Count) return -1;
             return 0;
+        }
+
+        public RegionBounds ToRegionBounds()
+        {
+            List<int2> regionPositions = tiles.Select(x => x.Int2).ToList();
+
+            return new(Minimum, Maximum, regionPositions);
         }
 
         public IEnumerator<Tile> GetEnumerator()

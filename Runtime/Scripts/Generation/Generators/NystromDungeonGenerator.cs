@@ -147,7 +147,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             foreach (Room room in util.RoomList)
             {
-                BoundsInt bounds = room.GetBounds();
+                BoundsInt bounds = room.Bounds;
                 if (room.Height <= Mathf.Max(ROOM_HEIGHT_MIN, config.RoomMinSize) &&
                     room.Width <= Mathf.Max(ROOM_WIDTH_MIN, config.RoomMinSize)) continue;
 

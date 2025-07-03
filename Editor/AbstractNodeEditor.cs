@@ -1,18 +1,20 @@
 // Editor/AbstractNodeEditor.cs
 #if UNITY_EDITOR && ODIN_INSPECTOR
-using UnityEditor;
 using XNodeEditor;
-using static XNodeEditor.NodeEditor;
+using Dalichrome.RandomGenerator.Nodes;
 
-[CustomNodeEditor(typeof(AbstractNode))]
-public abstract class AbstractNodeEditor : NodeEditor
+namespace Dalichrome.RandomGenerator.Editor
 {
-    void OnDisable()          // Unity message, no "override"
+    [CustomNodeEditor(typeof(AbstractNode))]
+    public abstract class AbstractNodeEditor : NodeEditor
     {
-        // NodeEditorBase stores its PropertyTree in 'objectTree'
-        if (objectTree != null)
-           objectTree.Dispose();
-    }
+        void OnDisable()          // Unity message, no "override"
+        {
+            // NodeEditorBase stores its PropertyTree in 'objectTree'
+            if (objectTree != null)
+                objectTree.Dispose();
+        }
 
+    }
 }
 #endif

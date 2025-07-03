@@ -65,12 +65,12 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract List<Tile> GetFourNeighborTiles(Tile tile);
 
         // Region Funcs
-        public abstract void CreateRegion(int2 min, int2 max, List<int2> regionExcludedPositions);
-        public abstract void CreateRegionBounds(int2 min, int2 max);
+        public abstract void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions);
+        public abstract void SetRegionBounds(RegionBounds regionBounds);
         public abstract void RemoveRegion();
 
-        public abstract void AddRegionExcludedPosition(int x, int y);
-        public abstract void AddRegionExcludedPosition(int2 pos);
+        public abstract void AddRegionPosition(int x, int y);
+        public abstract void AddRegionPosition(int2 pos);
         public abstract bool IsInRegion(int x, int y);
         public abstract bool IsInRegion(int2 pos);
 

@@ -204,7 +204,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public void CreateMazeInRoomGrid(int[,] grid, Room room, AbstractRandom random)
         {
             cells = new();
-            InitializeMazeCellsInRoomGrid(grid, room.GetBounds());
+            InitializeMazeCellsInRoomGrid(grid, room.Bounds);
 
             if (cells.Count <= 0) return;
 

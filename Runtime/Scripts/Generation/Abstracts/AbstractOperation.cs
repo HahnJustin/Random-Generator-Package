@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEngine;
+using System.Diagnostics;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
@@ -67,13 +67,17 @@ namespace Dalichrome.RandomGenerator.Generators
             ClearDisposables();
         }
 
-        protected abstract void Initialize(D input);
+        protected virtual bool RunCondition(D input) { return true; }
+
+        protected virtual void Initialize(D input) { }
         protected abstract R Enact(D input);
-        protected abstract void PostEnact(R output);
+        protected virtual void PostEnact(R output) { }
 
         public R Do(D input)
         {
-            var watch = new System.Diagnostics.Stopwatch();
+            if (!RunCondition(input)) return null;
+
+            var watch = new Stopwatch();
             watch.Start();
 
             random = input.Random;

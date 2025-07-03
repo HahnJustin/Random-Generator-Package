@@ -17,7 +17,7 @@ public class GeneratorConfigNode
 
     public override System.Type ConfigBaseType => typeof(AbstractGeneratorConfig);
 
-    public GeneratorType Type => Config?.Type ?? GeneratorType.NA;
+    public GeneratorType Type => ((AbstractGeneratorConfig)Config)?.Type ?? GeneratorType.NA;
     public override int PaletteSeed => (int)Type;
 
     public override void SyncNameWithType()

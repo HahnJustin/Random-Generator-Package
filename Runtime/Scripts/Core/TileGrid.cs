@@ -300,19 +300,19 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.IsInBounds(position);
         }
 
-        public void CreateRegion(int2 min, int2 max, List<int2> regionExcludedPositions) 
+        public void SetRegionBounds(RegionBounds regionBounds)
         {
-            subgrid.CreateRegion(min, max, regionExcludedPositions);
+            subgrid.SetRegionBounds(regionBounds);
         }
 
-        public void CreateRegionBounds(Vector2Int min, Vector2Int max)
+        public void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions) 
         {
-            subgrid.CreateRegionBounds(new (min.x, min.y), new(max.x, max.y));
+            subgrid.SetRegionBounds(min, max, regionExcludedPositions);
         }
 
-        public void CreateRegionBounds(int2 min, int2 max) 
-        { 
-            subgrid.CreateRegionBounds(min, max);
+        public void SetRegionBounds(Vector2Int min, Vector2Int max, List<int2> regionExcludedPositions)
+        {
+            subgrid.SetRegionBounds(new (min.x, min.y), new(max.x, max.y), regionExcludedPositions);
         }
 
         public void RemoveRegion()
@@ -320,19 +320,19 @@ namespace Dalichrome.RandomGenerator.Core
             subgrid.RemoveRegion();
         }
 
-        public void AddRegionExcludedPosition(int x, int y)
+        public void AddRegionPosition(int x, int y)
         {
-            subgrid.AddRegionExcludedPosition(x, y);
+            subgrid.AddRegionPosition(x, y);
         }
 
-        public void AddRegionExcludedPosition(Vector2Int pos)
+        public void AddRegionPosition(Vector2Int pos)
         {
-            subgrid.AddRegionExcludedPosition(pos.x, pos.y);
+            subgrid.AddRegionPosition(pos.x, pos.y);
         }
 
-        public void AddRegionExcludedPosition(int2 pos)
+        public void AddRegionPosition(int2 pos)
         {
-            subgrid.AddRegionExcludedPosition(pos);
+            subgrid.AddRegionPosition(pos);
         }
 
         public bool IsInRegion(Vector2Int pos)

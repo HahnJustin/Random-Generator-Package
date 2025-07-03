@@ -27,7 +27,7 @@ namespace Dalichrome.RandomGenerator.Core
         [ReadOnly] private NativeParallelHashSet<int2> excludePositions;
 
         // Region Variables
-        [ReadOnly] private NativeParallelHashSet<int2> regionExcludedPositions;
+        [ReadOnly] private NativeParallelHashSet<int2> regionPositions;
         private int2 regionMin;
         private int2 regionMax;
         private bool regionLimited;
@@ -83,7 +83,7 @@ namespace Dalichrome.RandomGenerator.Core
                 ? new NativeParallelHashSet<int2>(64, allocator)
                 : default;
 
-            regionExcludedPositions = allocateCollections
+            regionPositions = allocateCollections
                 ? new NativeParallelHashSet<int2>(64, allocator)
                 : default;
 
@@ -140,11 +140,11 @@ namespace Dalichrome.RandomGenerator.Core
                 grid.excludePositions.Add(pos);
 
             // Regional Exclude Positions
-            grid.regionExcludedPositions = new NativeParallelHashSet<int2>(
-                math.ceilpow2(other.regionExcludedPositions.Count()), allocator);
+            grid.regionPositions = new NativeParallelHashSet<int2>(
+                math.ceilpow2(other.regionPositions.Count()), allocator);
 
-            foreach (var pos in other.regionExcludedPositions)
-                grid.regionExcludedPositions.Add(pos);
+            foreach (var pos in other.regionPositions)
+                grid.regionPositions.Add(pos);
 
             // Set Region Bounds
             grid.regionMax = other.regionMax;
@@ -403,7 +403,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             tileLayerLookup.Dispose();
             excludePositions.Dispose();
-            regionExcludedPositions.Dispose();
+            regionPositions.Dispose();
 
             IsValid = false;
         }
@@ -450,18 +450,19 @@ namespace Dalichrome.RandomGenerator.Core
             else return new (random.NextInt(width), 0);
         }
 
-        public void CreateRegion(int2 min, int2 max, List<int2> regionExcludedPositions)
-        {
-            CreateRegionBounds(min, max);
-            foreach (var pos in regionExcludedPositions)
-                AddRegionExcludedPosition(pos);
-        }
-
-        public void CreateRegionBounds(int2 min, int2 max)
+        public void SetRegionBounds(int2 min, int2 max, List<int2> regionAddPositions)
         {
             regionMin = min;
             regionMax = max;
             regionLimited = true;
+
+            foreach (var pos in regionAddPositions)
+                AddRegionPosition(pos);
+        }
+
+        public void SetRegionBounds(RegionBounds regionBounds)
+        {
+            SetRegionBounds(regionBounds.min, regionBounds.max, regionBounds.includingPositions);
         }
 
         public void RemoveRegion()
@@ -471,14 +472,14 @@ namespace Dalichrome.RandomGenerator.Core
             regionLimited = false;
         }
 
-        public void AddRegionExcludedPosition(int x, int y)
+        public void AddRegionPosition(int x, int y)
         {
-            regionExcludedPositions.Add(new (x,y));
+            regionPositions.Add(new (x,y));
         }
 
-        public void AddRegionExcludedPosition(int2 pos)
+        public void AddRegionPosition(int2 pos)
         {
-            regionExcludedPositions.Add(pos);
+            regionPositions.Add(pos);
         }
 
         public bool IsInRegion(int2 pos)
@@ -486,7 +487,7 @@ namespace Dalichrome.RandomGenerator.Core
             if (!regionLimited) return true;
             return math.all(pos >= regionMin) &&
                    math.all(pos <= regionMax) &&
-                   !regionExcludedPositions.Contains(pos);
+                   regionPositions.Contains(pos);
         }
 
         public bool IsInRegion(int x, int y)
@@ -526,7 +527,7 @@ namespace Dalichrome.RandomGenerator.Core
                 for (int x = regionMin.x; x <= regionMax.x; x++)
                 {
                     int2 pos = new (x, y);
-                    if (!regionExcludedPositions.Contains(pos))
+                    if (regionPositions.Contains(pos))
                         yield return GetTileFromNativeArray(x, y);
                 }
             }

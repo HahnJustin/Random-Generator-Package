@@ -1,4 +1,5 @@
 ﻿// ConfigNodeBase.cs
+using Dalichrome.RandomGenerator.Configs;
 using UnityEngine;
 using XNode;
 
@@ -6,8 +7,8 @@ namespace Dalichrome.RandomGenerator.Nodes
 {
 
     /// <summary>Node with an embedded managed-reference config object.</summary>
-    public abstract class ConfigNodeBase<TCfg> : Node
-        where TCfg : class                        // ScriptableObject OR plain class
+    public abstract class ConfigNodeBase<TCfg> : Node, IConfigNode
+        where TCfg : AbstractConfig                        // ScriptableObject OR plain class
     {
         /* ───── UI state ───── */
         [SerializeField] private bool _enabled = true;
@@ -24,7 +25,7 @@ namespace Dalichrome.RandomGenerator.Nodes
 
         /* ───── Config (managed-reference!) ───── */
         [SerializeReference] private TCfg _config;
-        public TCfg Config => _config;     // for subclasses
+        public AbstractConfig Config { get { return _config; } }     // for subclasses
 
         /// <summary>The concrete base-class you want to appear in the drop-down
         /// (e.g. typeof(AbstractGeneratorConfig) or typeof(AbstractRegionSplitterConfig))</summary>
