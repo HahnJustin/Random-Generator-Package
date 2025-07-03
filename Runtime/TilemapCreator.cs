@@ -33,7 +33,7 @@ namespace Dalichrome.RandomGenerator
         [Header("Number Tiles")]
         [SerializeField] private bool makeNumberLayer = false;
 
-        private GenerationManager randomGenerator;
+        private RandomGenerator randomGenerator;
         private TileInfoGrabber tileInfoGrabber;
         private LayerInfoGrabber layerInfoGrabber;
 
@@ -296,7 +296,7 @@ namespace Dalichrome.RandomGenerator
             if (makeNumberLayer) SetNumberTiles();
         }
 
-        public void SetRandomGenerator(GenerationManager randomGenerator)
+        public void SetRandomGenerator(RandomGenerator randomGenerator)
         {
             if (randomGenerator == null)
             {

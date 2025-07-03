@@ -20,7 +20,7 @@ A Unity package for generating random maps. This tool is designed to create hund
 
 ## Getting Started
 
-1. Add the `GenerationManager` component to any GameObject in your scene.
+1. Add the `RandomGenerator` component to any GameObject in your scene.
 2. Set your map dimensions, stack of generator algorithms, tile database objects, and layer database objects in the Inspector (The databases come with a default tileset and layer info set)
 3. Make a tilemap creator object (that has grid component as well) this will instantiate the tilemaps as children if not predefined
 4. Call `Generate()` from a script or set it to auto-generate in the editor.
@@ -29,14 +29,14 @@ A Unity package for generating random maps. This tool is designed to create hund
 
 ```csharp
 using UnityEngine;
-using RandomMapGenerator;
+using Dalichrome.RandomGenerator;
 
 public class Example : MonoBehaviour
 {
-    public GenerationManager generationManager;
+    public RandomGenerator randomGenerator;
 
     void Start()
     {
-        generationManager.Generate();
+        randomGenerator.Generate();
     }
 }

@@ -1,15 +1,22 @@
-using Dalichrome.RandomGenerator.Random;
+﻿using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
 using System;
 using System.Threading;
 using UnityEngine;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace Dalichrome.RandomGenerator
 {
     public class AbstractGridOperationData : AbstractOperationData, IDisposable
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        protected static int _nextId;                    // thread-safe
+        protected readonly int _id;
+        protected bool _disposed;
+#endif
+
         public int Width { get { return Grid.width; } }
 
         public int Height { get { return Grid.height; } }
@@ -34,10 +41,18 @@ namespace Dalichrome.RandomGenerator
 
         public AbstractGridOperationData()
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _id = Interlocked.Increment(ref _nextId);
+            Debug.Log($"[GridOpData #{_id}] ctor (empty)");
+#endif
         }
 
         public AbstractGridOperationData(AbstractGridOperationData data)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _id = Interlocked.Increment(ref _nextId);
+            Debug.Log($"[GridOpData #{_id}] ctor data");
+#endif
             Grid = data.Grid;
             Seed = data.Seed;
         }
@@ -46,7 +61,11 @@ namespace Dalichrome.RandomGenerator
         {
             if (grid != null && grid.IsValid)
             {
+                Debug.Log($"[GridOpData #{_id}] disposing seed={Seed}");
                 grid.Dispose();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                _disposed = true;
+#endif
             }
         }
 
@@ -54,5 +73,15 @@ namespace Dalichrome.RandomGenerator
         {
             Grid.AddLayersLookups(layerLookup);
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        ~AbstractGridOperationData()
+        {
+            if (!_disposed && Grid != null)
+            {
+                Debug.LogError($"[GridOpData #{_id}] FINALIZER — leaked Generation! seed={Seed}");
+            }
+        }
+#endif
     }
 }

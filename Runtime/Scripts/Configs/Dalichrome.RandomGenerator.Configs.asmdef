@@ -1,10 +1,8 @@
 {
-    "name": "Dalichrome.Randomgenerator.Nodes",
+    "name": "Dalichrome.RandomGenerator.Configs",
     "rootNamespace": "",
     "references": [
-        "GUID:ac422043113dd38479a01a1904702f3b",
-        "GUID:b8e24fd1eb19b4226afebb2810e3c19b",
-        "GUID:ce1cda39096c9b148912cf008a3a78fe"
+        "GUID:ac422043113dd38479a01a1904702f3b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

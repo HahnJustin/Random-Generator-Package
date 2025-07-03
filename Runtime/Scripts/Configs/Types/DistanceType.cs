@@ -1,5 +1,4 @@
-
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Configs
 {
     public enum DistanceType
     {

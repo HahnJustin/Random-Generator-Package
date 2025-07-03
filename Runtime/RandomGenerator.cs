@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Threading;
+using System.Linq;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Generators;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Databases;
 using Dalichrome.RandomGenerator.Core;
-using System.Linq;
-using System.Collections.Concurrent;
-using UnityEngine.Tilemaps;
-using System.Threading.Tasks;
-using System.Reflection.Emit;
-using UnityEditor.PackageManager;
+using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.UserData;
 
 namespace Dalichrome.RandomGenerator
 {
-    public class GenerationManager : MonoBehaviour
+    public class RandomGenerator : MonoBehaviour
     {
         [SerializeField] private GenerationParams generationParameters;
+        [SerializeField] private GeneratorGraph graph;
 
         [SerializeField] private TilemapCreator tilemapCreator;
 
@@ -120,11 +119,11 @@ namespace Dalichrome.RandomGenerator
             get { return generationParameters.Configs; }
         }
 
-        public static GenerationManager Last
+        public static RandomGenerator Last
         {
             get { return last; }
         }
-        private static GenerationManager last = null;
+        private static RandomGenerator last = null;
 
         private static uint GetRandomSeed()
         {
