@@ -1,5 +1,5 @@
 using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator.Generators;
+using Dalichrome.RandomGenerator.Utils;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;

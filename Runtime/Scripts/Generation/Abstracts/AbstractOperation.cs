@@ -10,7 +10,7 @@ using Dalichrome.RandomGenerator.Random;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractOperation<C, D, R> : IDisposable 
+    public abstract class AbstractOperation<C, D, R> : IDisposable, IAbstractOperation
         where C : AbstractConfig 
         where D : AbstractOperationData
         where R : AbstractOperationData
@@ -21,6 +21,13 @@ namespace Dalichrome.RandomGenerator.Generators
         protected List<IDisposable> disposables = new();
 
         protected C config;
+
+        AbstractOperationData IAbstractOperation.Do(AbstractOperationData input)
+    => Do((D)input);
+
+        public Type InputType => typeof(D);
+        public Type OutputType => typeof(R);
+        public Type ConfigType => typeof(C);
 
         protected AbstractOperation()
         {

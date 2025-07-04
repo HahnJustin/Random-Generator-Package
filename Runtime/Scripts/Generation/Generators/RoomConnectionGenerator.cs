@@ -3,7 +3,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -12,7 +12,19 @@ namespace Dalichrome.RandomGenerator.Generators
         private RoomUtil util;
         private readonly int INITIAL_RING_VALUE = 1;
 
-        private record RoomInfo(Room Room, Tile Tile, int ringCount);
+        private class RoomInfo
+        {
+            public Room Room { get; }
+            public Tile Tile { get; }
+            public int RingCount { get; }
+
+            public RoomInfo(Room room, Tile tile, int ringCount)
+            {
+                Room = room;
+                Tile = tile;
+                RingCount = ringCount;
+            }
+        }
 
         private List<Room> currentRooms;
 
@@ -96,7 +108,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             Room room = info.Room;
             Tile tile = info.Tile;
-            int value = info.ringCount;
+            int value = info.RingCount;
 
             while(value >= INITIAL_RING_VALUE)
             {

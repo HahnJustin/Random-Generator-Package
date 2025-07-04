@@ -6,6 +6,7 @@ namespace Dalichrome.RandomGenerator.Nodes
 {
     public enum NodeRole
     {
+        NA,
         Generator,
         Filter,
         LogicFilter,

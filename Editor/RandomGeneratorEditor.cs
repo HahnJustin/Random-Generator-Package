@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator;
+using Dalichrome.RandomGenerator.Data;
 using UnityEngine;
 using UnityEditor;
 using System.IO;

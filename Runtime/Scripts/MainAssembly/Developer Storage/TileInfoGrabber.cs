@@ -1,13 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.ComponentModel;
 using UnityEngine.Tilemaps;
-using Dalichrome.RandomGenerator;
 using Dalichrome.RandomGenerator.Databases;
 using Dalichrome.RandomGenerator.Core;
-using System.Security.Cryptography;
 using Dalichrome.RandomGenerator.UserData;
 
 namespace Dalichrome.RandomGenerator
@@ -22,7 +17,22 @@ namespace Dalichrome.RandomGenerator
 
         private Dictionary<int, TileObject> tileObjects = new();
 
-        private record ExtractedValue(GameObject gameObject, Sprite SpriteValue, Color ColorValue, TileBase TileValue);
+        private class ExtractedValue
+        {
+            public GameObject GameObject { get; }
+            public Sprite SpriteValue { get; }
+            public Color ColorValue { get; }
+            public TileBase TileValue { get; }
+
+            public ExtractedValue(GameObject gameObject, Sprite spriteValue, Color colorValue, TileBase tileValue)
+            {
+                GameObject = gameObject;
+                SpriteValue = spriteValue;
+                ColorValue = colorValue;
+                TileValue = tileValue;
+            }
+        }
+
 
         private enum TileInfoType
         {
@@ -48,7 +58,7 @@ namespace Dalichrome.RandomGenerator
         {
             if (id.TryToEnum(out TileType type))
             {
-                return GetInfoHelperByType(type, TileInfoType.gameObject).gameObject;
+                return GetInfoHelperByType(type, TileInfoType.gameObject).GameObject;
             }
             else if (tileObjects.ContainsKey(id) && tileObjects[id].tileSpawn.spawnType == TileSpawnType.GameObject)
             {

@@ -77,7 +77,8 @@ namespace Dalichrome.RandomGenerator.Nodes
             else if (node is RegionJoinerNode) return NodeRole.Joiner;
             else if (node is RegionSplitterNode) return NodeRole.Splitter;
             else if (node is GeneratorConfigNode) return NodeRole.Generator;
-            else return NodeRole.LogicFilter;
+            else if (node is AbstractLogicNode) return NodeRole.LogicFilter;
+            else return NodeRole.NA;
         }
     }
 }

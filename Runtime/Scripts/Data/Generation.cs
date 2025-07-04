@@ -3,10 +3,8 @@ using Dalichrome.RandomGenerator.Core;
 using System;
 using System.Threading;
 using UnityEngine;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using System.Collections.Generic;
 
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Data
 {
     public class Generation : AbstractGridOperationData, IDisposable
     {

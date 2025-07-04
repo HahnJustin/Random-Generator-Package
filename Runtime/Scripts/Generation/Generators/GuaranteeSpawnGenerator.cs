@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator.Generators;
+using Dalichrome.RandomGenerator.Data;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Jobs;
 using UnityEngine;
-using System.Threading.Tasks;
 using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Generators

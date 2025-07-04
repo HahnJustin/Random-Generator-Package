@@ -1,4 +1,5 @@
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator
 {

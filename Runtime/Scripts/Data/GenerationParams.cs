@@ -5,7 +5,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Data
 {
     [Serializable]
     public class GenerationParams: ICloneable

@@ -1,8 +1,6 @@
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public interface ISplitter
+    public interface ISplitter : IAbstractOperation
     {
-        public RegionSplits Do(Generation generation);
-
     }
 }

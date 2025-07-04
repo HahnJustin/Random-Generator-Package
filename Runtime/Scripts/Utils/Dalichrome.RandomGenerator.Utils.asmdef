@@ -1,17 +1,13 @@
 {
-    "name": "Dalichrome.RandomGenerator",
+    "name": "Dalichrome.RandomGenerator.Utils",
     "rootNamespace": "",
     "references": [
-        "GUID:908115082798b5a4bb5f52a13d0ca332",
-        "GUID:c967b8ba713466f409b733123b16bbc8",
         "GUID:ce1cda39096c9b148912cf008a3a78fe",
-        "GUID:8f91eeaf1ca54fa46a2cc328cec310a4",
+        "GUID:c967b8ba713466f409b733123b16bbc8",
         "GUID:ac422043113dd38479a01a1904702f3b",
-        "GUID:a92263f597e59404a85c0b47f42b99a9",
         "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:e0cd26848372d4e5c891c569017e11f1",
-        "GUID:2665a8d13d1b3f18800f46e256720795",
-        "GUID:b8e24fd1eb19b4226afebb2810e3c19b"
+        "GUID:2665a8d13d1b3f18800f46e256720795"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Data;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators

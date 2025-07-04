@@ -2,9 +2,8 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator;
 
-namespace Dalichrome.RandomGenerator.Generators
+namespace Dalichrome.RandomGenerator.Utils
 {
     public struct OccupanceData
     {

@@ -6,7 +6,7 @@ using XNode;
 namespace Dalichrome.RandomGenerator.Nodes
 {
     [CreateNodeMenu("Logic/AND")]
-    public class AndNode : AbstractNode
+    public class AndNode : AbstractLogicNode
     {
         [Input(typeConstraint = TypeConstraint.Strict)]
         public TileRegion Input;

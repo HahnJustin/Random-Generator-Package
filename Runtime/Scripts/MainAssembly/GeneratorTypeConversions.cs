@@ -1,8 +1,9 @@
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Generators;
 using System;
 using UnityEngine;
 
-namespace Dalichrome.RandomGenerator.Generators
+namespace Dalichrome.RandomGenerator
 {
     public static class GeneratorTypeConversions
     {

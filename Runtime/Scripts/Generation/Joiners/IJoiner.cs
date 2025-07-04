@@ -1,8 +1,6 @@
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public interface IJoiner
+    public interface IJoiner : IAbstractOperation
     {
-        public Generation Do(Generation generation);
-
     }
 }

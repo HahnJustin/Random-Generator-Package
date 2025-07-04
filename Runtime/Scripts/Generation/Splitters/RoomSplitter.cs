@@ -1,11 +1,7 @@
 using Dalichrome.RandomGenerator.Configs;
-using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Utils;
-using System.Collections;
+using Dalichrome.RandomGenerator.Data;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Windows;
-
 
 namespace Dalichrome.RandomGenerator.Generators
 {

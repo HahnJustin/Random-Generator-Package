@@ -1,7 +1,7 @@
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public interface IGenerator
+    public interface IGenerator : IAbstractOperation
     {
-        Generation Do(Generation generation);
+
     }
 }
