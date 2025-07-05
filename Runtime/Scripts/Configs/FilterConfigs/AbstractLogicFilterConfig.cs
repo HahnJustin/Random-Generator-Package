@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public abstract class AbstractLogicFilterConfig : AbstractRegionFilterConfig, IJoinConfig
+    public abstract class AbstractLogicFilterConfig : AbstractRegionFilterConfig
     {
         [Hidden] public new virtual FilterType Type { get; }
 
@@ -20,8 +20,5 @@ namespace Dalichrome.RandomGenerator.Configs
                 _name = value;
             }
         }
-
-        protected int _inputCount = 1;
-        [SerializeField, Hidden] public int InputCount { get { return _inputCount; } set { _inputCount = value; } }
     }
 }

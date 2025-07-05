@@ -7,7 +7,7 @@ namespace Dalichrome.RandomGenerator.Generators
 {
     public class MapJoiner : AbstractJoiner<MapJoinerConfig>
     {
-        protected MapJoiner(MapJoinerConfig config) : base(config) { }
+        public MapJoiner(MapJoinerConfig config, int inputs) : base(config, inputs) { }
 
         protected override Generation Join(List<Generation> generations)
         {

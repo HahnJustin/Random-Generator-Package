@@ -5,7 +5,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
 
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Data
 {
     public abstract class AbstractOperationData
     {

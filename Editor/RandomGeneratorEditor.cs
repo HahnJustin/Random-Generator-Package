@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator;
 using Dalichrome.RandomGenerator.Data;
+using Dalichrome.RandomGenerator.Nodes;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -77,6 +78,12 @@ public class RandomGeneratorEditor : Editor
             genMan.SetParams((GenerationParams)asset.GenerationParams.Clone());
             textAsset = null;
 
+        }
+
+        // TODO: Remove this later
+        if (GUILayout.Button("Generate Graph"))
+        {
+            genMan.GenerateGraphAsync();
         }
     }
 }

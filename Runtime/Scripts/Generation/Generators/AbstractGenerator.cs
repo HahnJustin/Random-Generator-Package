@@ -6,9 +6,7 @@ namespace Dalichrome.RandomGenerator.Generators
 {
     public abstract class AbstractGenerator<C> : AbstractGridOperation<C, Generation, Generation>, IGenerator where C : AbstractGeneratorConfig
     {
-        protected AbstractGenerator(C config) : base(config)
-        {
-        }
+        protected AbstractGenerator(C config) : base(config) {}
 
         private void ApplyAfterMask(TileGrid finalGrid)
         {

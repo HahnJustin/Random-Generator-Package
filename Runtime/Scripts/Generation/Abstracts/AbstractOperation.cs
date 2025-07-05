@@ -4,7 +4,7 @@ using System.Threading;
 using System.Diagnostics;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
-using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Data;
 using System;
 using Dalichrome.RandomGenerator.Random;
 

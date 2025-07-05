@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public abstract class AbstractRegionJoinerConfig : AbstractJoinConfig, IJoinConfig
+    public abstract class AbstractRegionJoinerConfig : AbstractConfig
     {
         [Hidden] public new virtual JoinerType Type { get; }
 

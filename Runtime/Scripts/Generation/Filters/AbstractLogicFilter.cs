@@ -10,9 +10,14 @@ using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractLogicFilter<C> : AbstractFilter<C>
+    public abstract class AbstractLogicFilter<C> : AbstractFilter<C>, ILogicFilter
         where C : AbstractLogicFilterConfig
     {
-        protected AbstractLogicFilter(C config) : base(config) {}
+        protected List<IFilter> filters = new List<IFilter>();
+
+        protected AbstractLogicFilter(C config, List<IFilter> filters) : base(config) 
+        {
+            filters = this.filters;
+        }
     }
 }

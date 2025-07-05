@@ -4,7 +4,7 @@ using Dalichrome.RandomGenerator.Data;
 namespace Dalichrome.RandomGenerator
 {
     public delegate void GenerationStartHandler(GenerationParams genParams);
-    public delegate void ConfigGeneratedHandler(AbstractGeneratorConfig config, float amount);
+    public delegate void ConfigGeneratedHandler(AbstractConfig config, float amount);
     public delegate void GenerationEndHandler(Generation output);
     public delegate void GenerationCancelHandler();
     public delegate void GenerationErrorHandler(string errorMessage);
@@ -20,7 +20,7 @@ namespace Dalichrome.RandomGenerator
         public event UngeneratedChangeCheckHandler OnUngeneratedCheck;
 
         public void RaiseGenerationEnd(Generation output) => OnGenerationEnd?.Invoke(output);
-        public void RaiseConfigGenerated(AbstractGeneratorConfig config, float amount) => OnConfigGenerated?.Invoke(config, amount);
+        public void RaiseConfigGenerated(AbstractConfig config, float amount) => OnConfigGenerated?.Invoke(config, amount);
         public void RaiseGenerationStart(GenerationParams genParams) => OnGenerationStart?.Invoke(genParams);
         public void RaiseGenerationCancel() => OnGenerationCancel?.Invoke();
         public void RaiseGenerationError(string errorMessage) => OnGenerationError?.Invoke(errorMessage);

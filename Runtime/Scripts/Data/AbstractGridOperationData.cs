@@ -7,7 +7,7 @@ using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace Dalichrome.RandomGenerator
+namespace Dalichrome.RandomGenerator.Data
 {
     public class AbstractGridOperationData : AbstractOperationData, IDisposable
     {
@@ -52,7 +52,8 @@ namespace Dalichrome.RandomGenerator
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             _id = Interlocked.Increment(ref _nextId);
             Debug.Log($"[GridOpData #{_id}] ctor data");
-#endif
+#endif  
+            data._disposed = true;
             Grid = data.Grid;
             Seed = data.Seed;
         }

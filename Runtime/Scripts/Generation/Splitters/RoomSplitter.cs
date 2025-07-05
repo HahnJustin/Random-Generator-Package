@@ -8,16 +8,14 @@ namespace Dalichrome.RandomGenerator.Generators
     public class RoomSplitter : AbstractSplitter<RoomSplitterConfig>
     {
         private RoomUtil util;
-        public RoomSplitter(RoomSplitterConfig config) : base(config)
+        public RoomSplitter(RoomSplitterConfig config, int outputs) : base(config, outputs)
         {
             this.config = config;
             util = new(config);
             AddUtil(util);
         }
 
-        protected override void Initialize(Generation generation) { }
-
-        protected override RegionSplits Enact(Generation generation)
+        protected override RegionSplits Split(Generation generation)
         {
             RegionSplits regionSplits = new(generation);
 
@@ -41,7 +39,5 @@ namespace Dalichrome.RandomGenerator.Generators
 
             return regionSplits;
         }
-
-        protected override void PostEnact(RegionSplits regionSplits) { }
     }
 }

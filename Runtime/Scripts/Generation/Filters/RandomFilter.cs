@@ -6,9 +6,7 @@ namespace Dalichrome.RandomGenerator.Generators
 {
     public class RandomFilter : AbstractFilter<RandomFilterConfig>
     {
-        protected RandomFilter(RandomFilterConfig config) : base(config)
-        {
-        }
+        public RandomFilter(RandomFilterConfig config) : base(config) { }
 
         protected override void Initialize(RegionSplits regionSplits) { }
 

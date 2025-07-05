@@ -14,6 +14,7 @@ using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.UserData;
+using Sirenix.OdinInspector;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -200,7 +201,7 @@ namespace Dalichrome.RandomGenerator
                 events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
 
                 Debug.Log("Generating Config of " + config.Type);
-                IGenerator generator = GeneratorTypeConversions.GetGeneratorFromConfig(config);
+                IGenerator generator = OperationFactory.CreateGenerator(config);
                 try
                 {
                     await Task.Run(() => generator.Do(generation));
@@ -237,57 +238,79 @@ namespace Dalichrome.RandomGenerator
 
         private async void Generate(CancellationToken token, GeneratorGraph generatorGraph)
         {
-            Generation generation = CreateGeneration(token);
+            AbstractGridOperationData data = CreateGeneration(token);
             events.RaiseGenerationStart(generationParameters);
 
-            //Background Thread Generating the TileGrid and Calculating Time
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            ConfigGraphNode start = generatorGraph.ToConfigGraphRoot();
+            ConfigGraphNode current = generatorGraph.ToConfigGraphRoot();
+            bool forwards = true;
 
-            //Await thread syncing on each strategy config, this is done to allow UI like the loader to function
             int count = 0;
-            foreach (AbstractGeneratorConfig config in generatingConfigs)
+
+            while (current.Role != NodeRole.End)
             {
-                if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
+                if (!current.Visited && forwards && 
+                    current.Role != NodeRole.Start && 
+                    current.Role != NodeRole.End )
+                {
+                    try
+                    {
+                        events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Configs.Count);
+                        await Task.Run(() => data = current.Operate(data));
 
-                count += 1;
-                events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
+                        if (current.Visited)
+                            count += 1;
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        events.RaiseGenerationCancel();
+                        Debug.Log($"Generation Got Cancelled! {ex}");
+                        data.Dispose();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        events.RaiseGenerationError(ex.ToString());
+                        data.Dispose();
+                        return;
+                    }
+                }
 
-                Debug.Log("Generating Config of " + config.Type);
-                IGenerator generator = GeneratorTypeConversions.GetGeneratorFromConfig(config);
-                try
+                bool moved = false;
+                var connectedNodes = forwards ? current.Children : current.Parents;
+
+                foreach (var node in connectedNodes)
                 {
-                    await Task.Run(() => generator.Do(generation));
+                    if (node.Visited && forwards) continue;
+
+                    if (!forwards && !node.Visited)
+                        forwards = true;
+
+                    current = node;
+                    moved = true;
+                    break;
                 }
-                catch (OperationCanceledException exception)
+
+                if (!moved)
                 {
-                    events.RaiseGenerationCancel();
-                    Debug.Log("Generation Got Cancelled!" + exception.ToString());
-                    generation.Dispose();
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    events.RaiseGenerationError(exception.ToString());
-                    generation.Dispose();
+                    events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
+                    data.Dispose();
                     return;
                 }
             }
 
             watch.Stop();
+            data.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
 
-            Dispose();
-            generation.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-            lastGeneration = generation;
+            Dispose(); // Clears previous generation
+
+            lastGeneration = (Generation)data;
             lastGeneratedConfigs = generatingConfigs.DeepClone();
             CheckUngeneratedChanges();
 
-            if (tilemapCreator != null)
-            {
-                tilemapCreator.CreateTilemaps(lastGeneration.Grid);
-            }
+            tilemapCreator?.CreateTilemaps(lastGeneration.Grid);
             events.RaiseGenerationEnd(lastGeneration);
         }
 
@@ -365,7 +388,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
 
-                    IGenerator generator = GeneratorTypeConversions.GetGeneratorFromConfig(config);
+                    IGenerator generator = OperationFactory.CreateGenerator(config);
                     generator.Do(generationOutput);
                 }
 
@@ -396,17 +419,17 @@ namespace Dalichrome.RandomGenerator
             Generate(combinationSource.Token);
         }
 
-        public void GenerateAsync(GeneratorGraph graph)
+        [Button]
+        public void GenerateGraphAsync()
         {
             last = this;
 
-            this.graph = graph;
             if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
 
             CancelAsyncGeneration();
             CancellationTokenSource combinationSource = CancellationTokenSource.CreateLinkedTokenSource(manualCancellationSource.Token, Application.exitCancellationToken);
 
-            Generate(combinationSource.Token);
+            Generate(combinationSource.Token, graph);
         }
 
         public void CancelAsyncGeneration()

@@ -33,35 +33,8 @@ namespace Dalichrome.RandomGenerator
 
         private static AbstractGeneratorConfig LogAndReturnNull(GeneratorType type)
         {
-            Debug.LogError($"[GeneratorDataManager] No config found for generator type: {type}");
+            Debug.LogError($"[GeneratorTypeConversions] No config found for generator type: {type}");
             return null;
-        }
-
-        public static IGenerator GetGeneratorFromConfig(AbstractGeneratorConfig config)
-        {
-            return config switch
-            {
-                InitialConfig iConfig => new InitializeGenerator(iConfig),
-                NoiseConfig nConfig => new NoiseGenerator(nConfig),
-                OvalConfig oConfig => new OvalGenerator(oConfig),
-                PerlinConfig pConfig => new PerlinGenerator(pConfig),
-                RandomWalkConfig rConfig => new RandomWalkGenerator(rConfig),
-                CellularAutomataConfig cConfig => new CellularAutomataGenerator(cConfig),
-                CopyConfig coConfig => new CopyGenerator(coConfig),
-                RoomConnectionConfig rcConfig => new RoomConnectionGenerator(rcConfig),
-                EntranceExitConfig eConfig => new EntranceExitGenerator(eConfig),
-                DLAConfig dConfig => new DLAGenerator(dConfig),
-                LabyrinthConfig lConfig => new LabyrinthGenerator(lConfig),
-                RoomFillConfig rfConfig => new RoomFillGenerator(rfConfig),
-                UniversalMaskConfig umConfig => new UniversalMaskGenerator(umConfig),
-                DevelopmentConfig devConfig => new DevelopmentGenerator(devConfig),
-                UpscaledNoiseConfig upnConfig => new UpscaledNoiseGenerator(upnConfig),
-                DistanceFillConfig distConfig => new DistanceFillGenerator(distConfig),
-                NystromDungeonConfig nyDunConfig => new NystromDungeonGenerator(nyDunConfig),
-                GuaranteeSpawnConfig guSpConfig => new GuaranteeSpawnGenerator(guSpConfig),
-                BorderConfig boConfig => new BorderGenerator(boConfig),
-                _ => throw new ArgumentException($"No generator found for config type {config.GetType().Name}")
-            };
         }
     }
 }

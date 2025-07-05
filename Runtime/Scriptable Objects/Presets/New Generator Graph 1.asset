@@ -21,8 +21,8 @@ MonoBehaviour:
     values:
     - _fieldName: Result
       _node: {fileID: -8797633544368839608}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 1
       _connectionType: 1
@@ -30,8 +30,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: Input
       _node: {fileID: -8797633544368839608}
-      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: SubRegions 1
         node: {fileID: -320565390338251375}
@@ -44,12 +44,14 @@ MonoBehaviour:
   _displayName: 
   _customName: 0
   _config:
-    rid: -2
+    rid: 4553556069843468363
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 4553556069843468363
+      type: {class: AndFilterConfig, ns: Dalichrome.RandomGenerator.Generators, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
 --- !u!114 &-320565390338251375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,8 +75,8 @@ MonoBehaviour:
     values:
     - _fieldName: Region
       _node: {fileID: -320565390338251375}
-      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 1
       _connectionType: 0
@@ -82,8 +84,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: Source
       _node: {fileID: -320565390338251375}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 1
@@ -117,12 +119,20 @@ MonoBehaviour:
   _displayName: 
   _customName: 0
   _config:
-    rid: -2
+    rid: 4553556069843468361
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 4553556069843468361
+      type: {class: RoomSplitterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
+        _minimumRoomSize: 1
+        _maximumRoomSize: 2147483647
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,8 +172,8 @@ MonoBehaviour:
     values:
     - _fieldName: Result
       _node: {fileID: 770551095515249537}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 1
       _connectionType: 1
@@ -171,8 +181,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: Input
       _node: {fileID: 770551095515249537}
-      _typeQualifiedName: ConditionalRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: SubRegions 0
         node: {fileID: -320565390338251375}
@@ -185,12 +195,14 @@ MonoBehaviour:
   _displayName: 
   _customName: 0
   _config:
-    rid: -2
+    rid: 4553556069843468362
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 4553556069843468362
+      type: {class: AndFilterConfig, ns: Dalichrome.RandomGenerator.Generators, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
 --- !u!114 &1566446650716710768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -212,8 +224,8 @@ MonoBehaviour:
     values:
     - _fieldName: Output
       _node: {fileID: 1566446650716710768}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 1
       _connectionType: 1
@@ -221,8 +233,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: Input
       _node: {fileID: 1566446650716710768}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 1
@@ -232,12 +244,12 @@ MonoBehaviour:
   _displayName: 
   _customName: 0
   _config:
-    rid: 1480368358889881776
+    rid: 4553556069843468360
   references:
     version: 2
     RefIds:
-    - rid: 1480368358889881776
-      type: {class: BorderConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+    - rid: 4553556069843468360
+      type: {class: BorderConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _masked: 0
@@ -267,8 +279,8 @@ MonoBehaviour:
     values:
     - _fieldName: Output
       _node: {fileID: 7885427493459358468}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 1
       _connectionType: 1
@@ -276,8 +288,8 @@ MonoBehaviour:
       _dynamic: 0
     - _fieldName: Input
       _node: {fileID: 7885427493459358468}
-      _typeQualifiedName: TileRegion, dalichrome.randomgenerator.nodes, Version=0.0.0.0,
-        Culture=neutral, PublicKeyToken=null
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections: []
       _direction: 0
       _connectionType: 1
@@ -287,12 +299,12 @@ MonoBehaviour:
   _displayName: 
   _customName: 0
   _config:
-    rid: 1480368358889881771
+    rid: 4553556069843468359
   references:
     version: 2
     RefIds:
-    - rid: 1480368358889881771
-      type: {class: BorderConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator}
+    - rid: 4553556069843468359
+      type: {class: BorderConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _masked: 0
