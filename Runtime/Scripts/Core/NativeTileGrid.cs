@@ -52,6 +52,16 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
+        public int2 Minimum
+        {
+            get { return regionMin; }
+        }
+
+        public int2 Maximum
+        {
+            get { return regionMax; }
+        }
+
         private NativeTileGrid(int width, int height, bool allocateCollections)
         {
             this.width = width;
@@ -452,6 +462,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void SetRegionBounds(int2 min, int2 max, List<int2> regionAddPositions)
         {
+            regionPositions.Clear();
             regionMin = min;
             regionMax = max;
             regionLimited = true;

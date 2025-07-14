@@ -26,8 +26,11 @@ namespace Dalichrome.RandomGenerator.Generators
         protected void SetTileGrid(TileGrid tileGrid)
         {
             this.tileGrid = tileGrid;
-            width = tileGrid.width;
-            height = tileGrid.height;
+            if (tileGrid != null)
+            {
+                width = tileGrid.width;
+                height = tileGrid.height;
+            }
         }
 
         protected TileGrid GetTileGrid()

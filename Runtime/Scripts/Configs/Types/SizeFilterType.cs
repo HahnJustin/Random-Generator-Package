@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public enum RegionSizeFilterType
+    public enum SizeFilterType
     {
+        FirstFound,
+        Random,
         Largest,
-        Smallest,
-        Random
+        Smallest
     }
 }

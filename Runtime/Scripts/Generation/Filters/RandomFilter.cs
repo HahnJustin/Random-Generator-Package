@@ -8,14 +8,14 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public RandomFilter(RandomFilterConfig config) : base(config) { }
 
-        protected override void Initialize(RegionSplits regionSplits) { }
-
-        //TODO add more configurable options
         public override bool Filter(RegionBounds region)
         {
-            return true;
+            if(config.RandomType == RandomFilterType.Guarantee || 
+                (config.RandomType == RandomFilterType.Probability && random.NextFloat() <= config.Probability))
+            {
+                return true;
+            }
+            return false;
         }
-
-        protected override void PostEnact(Generation generation) { }
     }
 }

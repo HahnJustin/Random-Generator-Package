@@ -54,7 +54,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public int2 Minimum { get { return new int2(left.x, bottom.y); } }
 
-        public int2 Maximum { get { return new int2(right.x - left.x, top.y - bottom.y); } }
+        public int2 Maximum { get { return new int2(right.x, top.y); } }
 
         public BoundsInt Bounds { get { return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x - left.x, top.y - bottom.y, 1)); } } 
 

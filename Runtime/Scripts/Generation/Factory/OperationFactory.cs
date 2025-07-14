@@ -38,6 +38,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return config switch
             {
                 RandomFilterConfig c => new RandomFilter(c),
+                RegionSizeFilterConfig c => new RegionSizeFilter(c),
                 _ => throw new ArgumentException($"Unknown filter config: {config.GetType().Name}")
             };
         }
@@ -56,6 +57,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return config switch
             {
                 RoomSplitterConfig c => new RoomSplitter(c, inputs),
+                VoronoiSplitterConfig c => new VoronoiSplitter(c, inputs),
                 _ => throw new ArgumentException($"Unknown splitter: {config.GetType().Name}")
             };
         }

@@ -3,17 +3,19 @@ using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Generators;
 using System.Collections.Generic;
+using System;
+using System.Collections;
 
-public class ConfigGraphNode
+public class ConfigGraphNode: IComparable<ConfigGraphNode>
 {
     public AbstractConfig Config;
     public NodeRole Role;
     public IAbstractOperation Operation;
     public List<ConfigGraphNode> Parents = new();
     public List<ConfigGraphNode> Children = new();
-
-    public bool Visited => _visited;
-    private bool _visited = false;
+    public int Priority = 10;
+    public bool Done => _done || (Config != null && !Config.Enabled);
+    private bool _done = false;
 
     public ConfigGraphNode(AbstractConfig config, NodeRole role)
     {
@@ -23,24 +25,29 @@ public class ConfigGraphNode
 
     public AbstractGridOperationData Operate(AbstractGridOperationData data)
     {
-        if (_visited) return data;
+        if (Done) return data;
 
         AbstractOperationData result = Operation.Do(data);
 
         switch (Role)
         {
             case NodeRole.Joiner when Operation is IJoiner joiner:
-                _visited = joiner.IsReady;
+                _done = joiner.IsReady;
                 break;
             case NodeRole.Splitter when Operation is ISplitter splitter:
-                _visited = splitter.IsComplete;
+                _done = splitter.Done;
                 break;
             default:
-                _visited = true;
+                _done = true;
                 break;
         }
 
         return (AbstractGridOperationData)result;
+    }
+
+    public int CompareTo(ConfigGraphNode node)
+    {
+        return Priority.CompareTo(node.Priority);
     }
 }
 

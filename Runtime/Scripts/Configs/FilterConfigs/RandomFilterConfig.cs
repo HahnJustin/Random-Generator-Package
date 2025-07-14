@@ -12,5 +12,12 @@ namespace Dalichrome.RandomGenerator.Configs
         }
 
         public override FilterType Type { get { return FilterType.Random; } }
+
+        public RandomFilterType RandomType { get { return _randomType; } set { _randomType = value; } }
+        [SerializeField] private RandomFilterType _randomType;
+
+        [Condition("RandomType", RandomFilterType.Probability)] public float Probability { get { return _probability; } set { _probability = value; } }
+        [Condition("RandomType", RandomFilterType.Probability), SerializeField] private float _probability = 0.5f;
+
     }
 }

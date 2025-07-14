@@ -115,13 +115,19 @@ namespace Dalichrome.RandomGenerator.Editor
             if (open)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("_enabled"),
-                                              new GUIContent("Enabled"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("_enabled"), new GUIContent("Enabled"));
+
                 EditorGUI.BeginChangeCheck();
                 string newName = EditorGUILayout.TextField("Name",
                                    serializedObject.FindProperty("_displayName").stringValue);
                 if (EditorGUI.EndChangeCheck())
+                {
                     serializedObject.FindProperty("_displayName").stringValue = newName;
+                    serializedObject.ApplyModifiedProperties();
+                }
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("_priority"), new GUIContent("Priority"));
+
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Space(4);

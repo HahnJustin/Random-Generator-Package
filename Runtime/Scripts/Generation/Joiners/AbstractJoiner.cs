@@ -13,8 +13,9 @@ namespace Dalichrome.RandomGenerator.Generators
         protected List<Generation> components = new();
 
         private readonly int _inputCount = 1;
+        private int invalidInputs = 0;
         public int InputCount { get { return _inputCount; } }
-        public bool IsReady => components.Count >= InputCount;
+        public bool IsReady => components.Count + invalidInputs >= InputCount;
 
         protected AbstractJoiner(C config, int inputCount) : base(config) 
         {
@@ -23,13 +24,29 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override bool RunCondition(Generation input)
         {
-            components.Add(input);
+            if (!input.Valid)
+            {
+                invalidInputs++;
+                input.ParallelDispose();
+            }
+            else components.Add(input);
             return IsReady;
         }
 
         protected override Generation Enact(Generation input) {
+            // If all generations were invalid
+            if (components.Count <= 0) return input;
+
+            // Else join the generations
             Generation main = Join(components);
             JoinGenerationOperationMiliseconds(main, components);
+            components.Remove(main);
+
+            foreach (var component in components)
+            {
+                component.ParallelDispose();
+            }
+
             return main;
         }
 

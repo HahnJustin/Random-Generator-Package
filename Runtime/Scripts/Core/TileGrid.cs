@@ -49,6 +49,16 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
+        public int2 Minimum
+        {
+            get { return subgrid.Minimum; }
+        }
+
+        public int2 Maximum
+        {
+            get { return subgrid.Maximum; }
+        }
+
         public TileGrid(int width, int height)
         {
             this.width = width;
@@ -350,11 +360,6 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.IsInRegion(x, y);
         }
 
-        public IEnumerator GetEnumerator()
-        {
-            return subgrid.GetRegionGrid().GetEnumerator();
-        }
-
         public bool IsRestricted(int x, int y)
         {
             return subgrid.IsRestricted(x, y);
@@ -371,6 +376,11 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Ienumeration
+        public IEnumerator GetEnumerator()
+        {
+            return subgrid.GetRegionPositions().GetEnumerator();
+        }
+
         public NativeArray<Tile> AsNativeArray()
         {
             return subgrid.AsNativeArray();

@@ -10,8 +10,19 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         [Hidden] public virtual Enum Type { get; }
 
-        public virtual string Name { get; set; }
 
+        [Hidden]
+        public virtual string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = value;
+            }
+        }
         protected string _name = "";
 
         [Hidden] public StringType DescriptionStringType { get { return _description; } }
@@ -39,6 +50,14 @@ namespace Dalichrome.RandomGenerator.Configs
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            if (Type == null)
+                return GetType().ToString();
+
+            return Type.ToString();
         }
     }
 }

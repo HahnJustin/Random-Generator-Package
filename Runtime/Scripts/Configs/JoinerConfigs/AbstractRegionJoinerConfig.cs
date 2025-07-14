@@ -8,17 +8,9 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         [Hidden] public new virtual JoinerType Type { get; }
 
-        [Hidden]
-        public override string Name
+        public override string ToString()
         {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
+            return Type.ToString() + " Joiner";
         }
     }
 }

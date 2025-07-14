@@ -52,20 +52,21 @@ namespace Dalichrome.RandomGenerator.Nodes
                 }
             }
 
-            // 👇 Step 2: Assign operations + collapse logic filters
-            ApplyOperationsAndCollapseFilters(nodeMap[startNode]);
+            FinalizeGraph(nodeMap[startNode]);
 
             return nodeMap[startNode];
         }
 
         private ConfigGraphNode GetOrCreate(Node node, Dictionary<Node, ConfigGraphNode> map, NodeRole role, AbstractConfig config)
         {
-            if (!map.TryGetValue(node, out var result))
+            if (!map.TryGetValue(node, out var configGraphNode))
             {
-                result = new ConfigGraphNode(config, role);
-                map[node] = result;
+                configGraphNode = new ConfigGraphNode(config, role);
+                map[node] = configGraphNode;
+                if(node is IConfigNode iconfigNode) 
+                    configGraphNode.Priority = iconfigNode.Priority;
             }
-            return result;
+            return configGraphNode;
         }
 
         private Node FindStartNode()
@@ -85,7 +86,8 @@ namespace Dalichrome.RandomGenerator.Nodes
             return NodeRole.NA;
         }
 
-        private void ApplyOperationsAndCollapseFilters(ConfigGraphNode root)
+        // Adds Operations to Nodes, Collapses Logic Filters, Orders Node Relatives by Priority
+        private void FinalizeGraph(ConfigGraphNode root)
         {
             var queue = new Queue<ConfigGraphNode>();
             var visited = new HashSet<ConfigGraphNode>();
@@ -96,6 +98,10 @@ namespace Dalichrome.RandomGenerator.Nodes
             while (queue.Count > 0)
             {
                 var node = queue.Dequeue();
+
+                //Order by Priority
+                node.Parents.Sort();
+                node.Children.Sort();
 
                 if (node.Operation != null)
                     continue;

@@ -18,8 +18,5 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public int MaximumRoomSize { get { return _maximumRoomSize; } set { _maximumRoomSize = value; } }
         [SerializeField] private int _maximumRoomSize = int.MaxValue;
-
-        public RegionSizeFilterType RegionSizeFilter { get { return _regionSizeFilter; } set { _regionSizeFilter = value; } }
-        [SerializeField] private RegionSizeFilterType _regionSizeFilter;
     }
 }

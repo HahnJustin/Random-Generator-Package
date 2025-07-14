@@ -37,6 +37,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 regionSplits.AddRegion(room.ToRegionBounds());
             }
 
+            UnityEngine.Debug.Log("[RoomSplitter] SPLIT " + regionSplits.Count);
+
             return regionSplits;
         }
     }

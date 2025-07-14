@@ -17,7 +17,7 @@ namespace Dalichrome.RandomGenerator.Generators
         }
 
         public void AddOutputComplete() => filledOutputs++;
-        public bool IsComplete => filledOutputs >= expectedOutputs;
+        public bool Done => filledOutputs >= expectedOutputs;
 
         protected override void Initialize(Generation generation)
         {
@@ -29,7 +29,8 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override RegionSplits Enact(Generation input)
         {
-            if(resultSplits != null) 
+            filledOutputs += 1;
+            if (resultSplits != null) 
                 return resultSplits;
 
             resultSplits = Split(input);
@@ -37,5 +38,10 @@ namespace Dalichrome.RandomGenerator.Generators
         }
 
         public RegionSplits GetSplits() => resultSplits;
+
+        public void ParallelDispose()
+        {
+            resultSplits.ParallelDispose();
+        }
     }
 }

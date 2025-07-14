@@ -15,6 +15,7 @@ using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.UserData;
 using Sirenix.OdinInspector;
+using System.Security.Cryptography;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -238,6 +239,7 @@ namespace Dalichrome.RandomGenerator
 
         private async void Generate(CancellationToken token, GeneratorGraph generatorGraph)
         {
+            Debug.Log("==== Starting Generation via Graph " + generatorGraph.name);
             AbstractGridOperationData data = CreateGeneration(token);
             events.RaiseGenerationStart(generationParameters);
 
@@ -246,34 +248,46 @@ namespace Dalichrome.RandomGenerator
 
             ConfigGraphNode current = generatorGraph.ToConfigGraphRoot();
             bool forwards = true;
+            var usedSplitters = new HashSet<ISplitter>();
 
             int count = 0;
 
             while (current.Role != NodeRole.End)
             {
-                if (!current.Visited && forwards && 
-                    current.Role != NodeRole.Start && 
-                    current.Role != NodeRole.End )
+
+                // If going forward and node can still operate
+                if (!current.Done && forwards && current.Operation != null)
                 {
                     try
                     {
+                        // Run the node operation
+                        if (current.Config != null) Debug.Log("Generating Config of " + current.Config.ToString());
                         events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Configs.Count);
-                        await Task.Run(() => data = current.Operate(data));
+                        AbstractGridOperationData temp = null;
+                        await Task.Run(() => temp = current.Operate(data));
 
-                        if (current.Visited)
+                        // Reverse Traversal Condition - Only happens for undone joiners
+                        if (temp == null) forwards = false;
+                        else data = temp;
+
+                        if (current.Done)
                             count += 1;
+
+                        // Track used splitters
+                        if (current.Operation is ISplitter splitter)
+                            usedSplitters.Add(splitter);
                     }
                     catch (OperationCanceledException ex)
                     {
                         events.RaiseGenerationCancel();
                         Debug.Log($"Generation Got Cancelled! {ex}");
-                        data.Dispose();
+                        data?.Dispose();
                         return;
                     }
                     catch (Exception ex)
                     {
                         events.RaiseGenerationError(ex.ToString());
-                        data.Dispose();
+                        data?.Dispose();
                         return;
                     }
                 }
@@ -281,11 +295,12 @@ namespace Dalichrome.RandomGenerator
                 bool moved = false;
                 var connectedNodes = forwards ? current.Children : current.Parents;
 
+                // Move inside the graph
                 foreach (var node in connectedNodes)
                 {
-                    if (node.Visited && forwards) continue;
+                    if (node.Done && connectedNodes.Count > 1) continue;
 
-                    if (!forwards && !node.Visited)
+                    if (!node.Done && !forwards && node.Role == NodeRole.Splitter)
                         forwards = true;
 
                     current = node;
@@ -293,13 +308,21 @@ namespace Dalichrome.RandomGenerator
                     break;
                 }
 
+                // Error at graph deadends, as end node should be the only dead end
                 if (!moved)
                 {
                     events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
-                    data.Dispose();
+                    data?.Dispose();
                     return;
                 }
             }
+
+            // Dispose used splitters since they store native data structs
+            foreach (ISplitter splitter in usedSplitters) splitter.ParallelDispose();
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"[GridOpData #{data._id}] final data");
+#endif
 
             watch.Stop();
             data.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
@@ -312,6 +335,8 @@ namespace Dalichrome.RandomGenerator
 
             tilemapCreator?.CreateTilemaps(lastGeneration.Grid);
             events.RaiseGenerationEnd(lastGeneration);
+
+            Debug.Log("Ended Generation of Graph " + generatorGraph.name);
         }
 
         private Generation CreateGeneration(CancellationToken token)

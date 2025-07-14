@@ -20,5 +20,10 @@ namespace Dalichrome.RandomGenerator.Configs
                 _name = value;
             }
         }
+
+        public override string ToString()
+        {
+            return Type.ToString() + " Logic Filter";
+        }
     }
 }

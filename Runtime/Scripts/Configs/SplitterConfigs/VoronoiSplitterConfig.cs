@@ -12,5 +12,11 @@ namespace Dalichrome.RandomGenerator.Configs
         }
 
         public override SplitterType Type { get { return SplitterType.Voronoi; } }
+
+        public int RegionMin { get { return _regionMin; } set { _regionMin = value; } }
+        [SerializeField] private int _regionMin = 10;
+
+        public int RegionMax { get { return _regionMax; } set { _regionMax = value; } }
+        [SerializeField] private int _regionMax = 10;
     }
 }

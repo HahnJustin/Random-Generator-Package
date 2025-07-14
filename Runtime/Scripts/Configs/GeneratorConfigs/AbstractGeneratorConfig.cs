@@ -11,18 +11,6 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         [Hidden] public new virtual GeneratorType Type { get; }
 
-        [Hidden]
-        public override string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
 
         //Mask Variables
         [Hidden]
@@ -71,14 +59,14 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField, Condition("TryingMask", true)] private MaskTimeType _maskTime = MaskTimeType.During;
 
         [Condition("Masked", true), Color("#4d728f"), TileDisplay] public List<int> IncludeList { get { return _includeList; } set { _includeList = value; } }
-        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _includeList = new() {};
+        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _includeList = new() { };
 
         [Condition("Masked", true), Color("#4d728f"), TileDisplay] public List<int> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
-        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _excludeList = new() { (int)TileType.Wall_Object_NA};
+        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _excludeList = new() { (int)TileType.Wall_Object_NA };
 
         public override string ToString()
         {
-            return Type.ToString();
+            return Type.ToString() + " Generator";
         }
     }
 }

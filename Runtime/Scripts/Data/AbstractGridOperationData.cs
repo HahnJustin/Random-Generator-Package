@@ -3,17 +3,19 @@ using Dalichrome.RandomGenerator.Core;
 using System;
 using System.Threading;
 using UnityEngine;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using Unity.Mathematics;
+
 
 namespace Dalichrome.RandomGenerator.Data
 {
     public class AbstractGridOperationData : AbstractOperationData, IDisposable
     {
+        private static readonly bool ParallelProcessing = false;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         protected static int _nextId;                    // thread-safe
-        protected readonly int _id;
+        public readonly int _id;
         protected bool _disposed;
 #endif
 
@@ -39,6 +41,18 @@ namespace Dalichrome.RandomGenerator.Data
             }
         }
 
+        public bool Valid =>  grid != null && grid.IsValid;
+
+        public int2 Minimum
+        {
+            get { return Grid.Minimum; }
+        }
+
+        public int2 Maximum
+        {
+            get { return Grid.Maximum; }
+        }
+
         public AbstractGridOperationData()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -52,10 +66,20 @@ namespace Dalichrome.RandomGenerator.Data
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             _id = Interlocked.Increment(ref _nextId);
             Debug.Log($"[GridOpData #{_id}] ctor data");
-#endif  
-            data._disposed = true;
+#endif
+            data.ParallelDispose();
+
             Grid = data.Grid;
             Seed = data.Seed;
+        }
+
+        public void ParallelDispose()
+        {
+            if (ParallelProcessing) { Dispose(); }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            else _disposed = true;
+            Debug.Log($"[GridOpData #{_id}] paralllel disposed");
+#endif
         }
 
         public void Dispose()
@@ -80,7 +104,7 @@ namespace Dalichrome.RandomGenerator.Data
         {
             if (!_disposed && Grid != null)
             {
-                Debug.LogError($"[GridOpData #{_id}] FINALIZER — leaked Generation! seed={Seed}");
+                Debug.LogError($"[GridOpData #{_id}] FINALIZER — leaked {GetType()}! seed={Seed}");
             }
         }
 #endif

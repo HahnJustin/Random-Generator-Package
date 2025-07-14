@@ -23,9 +23,28 @@ namespace Dalichrome.RandomGenerator.Nodes
         }
         public bool HasCustomName => _customName;
 
+        [SerializeField] private int _priority = 0;
+
+        public int Priority
+        {
+            get => _priority;
+            set => _priority = value;
+        }
+
         /* ───── Config (managed-reference!) ───── */
         [SerializeReference] private TCfg _config;
-        public AbstractConfig Config { get { return _config; } }     // for subclasses
+        public AbstractConfig Config 
+        { 
+            get 
+            {
+                if (_config != null)
+                {
+                    _config.Enabled = _enabled;
+                    _config.Name = DisplayName;
+                }
+                return _config; 
+            } 
+        }     // for subclasses
 
         /// <summary>The concrete base-class you want to appear in the drop-down
         /// (e.g. typeof(AbstractGeneratorConfig) or typeof(AbstractRegionSplitterConfig))</summary>

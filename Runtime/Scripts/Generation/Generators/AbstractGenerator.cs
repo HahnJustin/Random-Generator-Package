@@ -21,6 +21,7 @@ namespace Dalichrome.RandomGenerator.Generators
             TileGrid.Dispose();
         }
 
+        //TODO: Definitely a trickle down issue of after masking is that this logic doesn't consider disposing yet - with the deep clone
         private void InitializingTileGrid(Generation generation)
         {
             if (!config.Masked) TileGrid = generation.Grid;
@@ -42,6 +43,16 @@ namespace Dalichrome.RandomGenerator.Generators
 
             //Removing Mask Variables from TileGrid
             generation.Grid.RemoveMask();
+        }
+
+        protected override bool RunCondition(Generation input)
+        {
+            return input.Grid != null && input.Valid;
+        }
+
+        protected override Generation FailConditionDefault(Generation input)
+        {
+            return input;
         }
 
         protected override void Initialize(Generation generation)

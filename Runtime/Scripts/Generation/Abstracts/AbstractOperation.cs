@@ -75,20 +75,20 @@ namespace Dalichrome.RandomGenerator.Generators
         }
 
         protected virtual bool RunCondition(D input) { return true; }
-
+        protected virtual R FailConditionDefault(D input) { return null; }
         protected virtual void Initialize(D input) { }
         protected abstract R Enact(D input);
         protected virtual void PostEnact(R output) { }
 
         public R Do(D input)
         {
-            if (!RunCondition(input)) return null;
-
-            var watch = new Stopwatch();
-            watch.Start();
+            if (!RunCondition(input)) return FailConditionDefault(input);
 
             random = input.Random;
             token = input.Token;
+
+            var watch = new Stopwatch();
+            watch.Start();
 
             Initialize(input);
             InitializeUtils();
