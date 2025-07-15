@@ -310,6 +310,11 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.IsInBounds(position);
         }
 
+        public RegionBounds GetRegionBounds()
+        {
+            return subgrid.GetRegionBounds();
+        }
+
         public void SetRegionBounds(RegionBounds regionBounds)
         {
             subgrid.SetRegionBounds(regionBounds);

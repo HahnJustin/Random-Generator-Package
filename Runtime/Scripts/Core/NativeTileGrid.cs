@@ -460,6 +460,16 @@ namespace Dalichrome.RandomGenerator.Core
             else return new (random.NextInt(width), 0);
         }
 
+        public RegionBounds GetRegionBounds()
+        {
+            var list = new List<int2>(regionPositions.Count());
+
+            foreach (var pos in regionPositions)
+                list.Add(pos);
+
+            return new RegionBounds(regionMin, regionMax, list);
+        }
+
         public void SetRegionBounds(int2 min, int2 max, List<int2> regionAddPositions)
         {
             regionPositions.Clear();

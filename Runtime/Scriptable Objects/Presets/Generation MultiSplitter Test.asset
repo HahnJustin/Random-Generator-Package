@@ -1,5 +1,67 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8607807667881494858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40f9c64fa717a84a8b6b4eb263d3215, type: 3}
+  m_Name: Region Filter
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 360, y: -168}
+  ports:
+    keys:
+    - Input
+    - Result
+    values:
+    - _fieldName: Input
+      _node: {fileID: -8607807667881494858}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Region
+        node: {fileID: 7760345747399855414}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+    - _fieldName: Result
+      _node: {fileID: -8607807667881494858}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Input
+        node: {fileID: 5342345377250574726}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _priority: 0
+  _config:
+    rid: 4553556254314201218
+  references:
+    version: 2
+    RefIds:
+    - rid: 4553556254314201218
+      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
+        _sizeFilterType: 2
+        _regionAmountFilterType: 0
+        _regionAmount: 4
+        _regionProportion: 0.4
+        _randomType: 0
+        _probability: 0.5
 --- !u!114 &-7375063041419141049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,7 +138,7 @@ MonoBehaviour:
   m_Name: End
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 2664, y: -168}
+  position: {x: 2472, y: 152}
   ports:
     keys:
     - Input
@@ -106,7 +168,7 @@ MonoBehaviour:
   m_Name: Region Filter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 584, y: 152}
+  position: {x: 1208, y: 72}
   ports:
     keys:
     - Input
@@ -139,23 +201,23 @@ MonoBehaviour:
   _enabled: 1
   _displayName: Named Filter2
   _customName: 0
-  _priority: 15
+  _priority: 13
   _config:
-    rid: 4553556089345409128
+    rid: 4553556272577249390
   references:
     version: 2
     RefIds:
-    - rid: 4553556089345409128
+    - rid: 4553556272577249390
       type: {class: RegionSizeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
         asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _sizeFilterType: 1
-        _regionAmountFilterType: 1
-        _regionAmount: 13
-        _regionProportion: 0.5
-        _minimumRoomSize: 244
-        _maximumRoomSize: 99999999
+        _sizeFilterType: 0
+        _regionAmountFilterType: 0
+        _regionAmount: 0
+        _regionProportion: 0
+        _minimumRoomSize: 1
+        _maximumRoomSize: 2147483647
 --- !u!114 &-3936364024740490169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +231,7 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 552, y: -520}
+  position: {x: 360, y: -504}
   ports:
     keys:
     - Input
@@ -232,7 +294,7 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 936, y: -520}
+  position: {x: 728, y: -504}
   ports:
     keys:
     - Input
@@ -303,7 +365,7 @@ MonoBehaviour:
   m_Name: Region Splitter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 936, y: -168}
+  position: {x: 968, y: -56}
   ports:
     keys:
     - Source
@@ -315,7 +377,7 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Output
-        node: {fileID: 3470442837570602064}
+        node: {fileID: 5342345377250574726}
         reroutePoints: []
       _direction: 0
       _connectionType: 1
@@ -327,10 +389,10 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Input
-        node: {fileID: -5784308040530958626}
+        node: {fileID: 5305461975377240851}
         reroutePoints: []
       - fieldName: Input
-        node: {fileID: 5305461975377240851}
+        node: {fileID: -5784308040530958626}
         reroutePoints: []
       _direction: 1
       _connectionType: 0
@@ -362,7 +424,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7744813fa4d254e48895159f32607bb7, type: 3}
-  m_Name: Generation Flow Test 3
+  m_Name: Generation MultiSplitter Test
   m_EditorClassIdentifier: 
   nodes:
   - {fileID: 4194706540378351992}
@@ -375,11 +437,75 @@ MonoBehaviour:
   - {fileID: 7146697687814360198}
   - {fileID: -7375063041419141049}
   - {fileID: -5784308040530958626}
-  - {fileID: 8297635456952478894}
-  - {fileID: 4619963457274538569}
-  - {fileID: 5622111572569486271}
   - {fileID: 6323390042909989280}
   - {fileID: 5383419808542546107}
+  - {fileID: 7760345747399855414}
+  - {fileID: 2649642626318676420}
+  - {fileID: -8607807667881494858}
+  - {fileID: 5342345377250574726}
+  - {fileID: 4390573794954160354}
+--- !u!114 &2649642626318676420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40f9c64fa717a84a8b6b4eb263d3215, type: 3}
+  m_Name: Region Filter
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 360, y: 88}
+  ports:
+    keys:
+    - Input
+    - Result
+    values:
+    - _fieldName: Input
+      _node: {fileID: 2649642626318676420}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Region
+        node: {fileID: 7760345747399855414}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+    - _fieldName: Result
+      _node: {fileID: 2649642626318676420}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Input
+        node: {fileID: 4390573794954160354}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _priority: 15
+  _config:
+    rid: 4553556254314201216
+  references:
+    version: 2
+    RefIds:
+    - rid: 4553556254314201216
+      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
+        _sizeFilterType: 0
+        _regionAmountFilterType: 3
+        _regionAmount: 0
+        _regionProportion: 0
+        _randomType: 0
+        _probability: 0.5
 --- !u!114 &3470442837570602064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,7 +519,7 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 552, y: -168}
+  position: {x: 1096, y: -408}
   ports:
     keys:
     - Input
@@ -417,7 +543,7 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Source
-        node: {fileID: -835619539594842424}
+        node: {fileID: 7760345747399855414}
         reroutePoints: []
       _direction: 1
       _connectionType: 1
@@ -455,7 +581,7 @@ MonoBehaviour:
   m_Name: Start
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 312, y: -520}
+  position: {x: 136, y: -504}
   ports:
     keys:
     - Output
@@ -472,7 +598,7 @@ MonoBehaviour:
       _connectionType: 1
       _typeConstraint: 2
       _dynamic: 0
---- !u!114 &4619963457274538569
+--- !u!114 &4390573794954160354
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -485,26 +611,26 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 1992, y: 152}
+  position: {x: 1448, y: 440}
   ports:
     keys:
     - Input
     - Output
     values:
     - _fieldName: Input
-      _node: {fileID: 4619963457274538569}
+      _node: {fileID: 4390573794954160354}
       _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
-      - fieldName: Output
-        node: {fileID: 5622111572569486271}
+      - fieldName: Result
+        node: {fileID: 2649642626318676420}
         reroutePoints: []
       _direction: 0
       _connectionType: 1
       _typeConstraint: 2
       _dynamic: 0
     - _fieldName: Output
-      _node: {fileID: 4619963457274538569}
+      _node: {fileID: 4390573794954160354}
       _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
@@ -520,21 +646,21 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556112521822299
+    rid: 4553556254314201224
   references:
     version: 2
     RefIds:
-    - rid: 4553556112521822299
+    - rid: 4553556254314201224
       type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _masked: 1
+        _masked: 0
         _maskTime: 0
-        _includeList: 10270000
-        _excludeList: 
-        _density: 0.15
+        _includeList: 
+        _excludeList: 10270000
+        _density: 1
         _repetitions: 1
-        _tiles: fa0f0000
+        _tiles: fa230000
 --- !u!114 &5305461975377240851
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -548,7 +674,7 @@ MonoBehaviour:
   m_Name: Region Filter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 1192, y: -168}
+  position: {x: 1208, y: -168}
   ports:
     keys:
     - Input
@@ -597,6 +723,69 @@ MonoBehaviour:
         _regionProportion: 0
         _randomType: 0
         _probability: 0
+--- !u!114 &5342345377250574726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 600, y: -168}
+  ports:
+    keys:
+    - Input
+    - Output
+    values:
+    - _fieldName: Input
+      _node: {fileID: 5342345377250574726}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Result
+        node: {fileID: -8607807667881494858}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+    - _fieldName: Output
+      _node: {fileID: 5342345377250574726}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Source
+        node: {fileID: -835619539594842424}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _priority: 0
+  _config:
+    rid: 4553556254314201220
+  references:
+    version: 2
+    RefIds:
+    - rid: 4553556254314201220
+      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
+        _density: 1
+        _repetitions: 1
+        _tiles: 40060000
 --- !u!114 &5383419808542546107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,7 +799,7 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 840, y: 152}
+  position: {x: 1448, y: 136}
   ports:
     keys:
     - Input
@@ -634,7 +823,7 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Input
-        node: {fileID: 8297635456952478894}
+        node: {fileID: 7146697687814360198}
         reroutePoints: []
       _direction: 1
       _connectionType: 1
@@ -660,77 +849,6 @@ MonoBehaviour:
         _density: 1
         _repetitions: 1
         _tiles: 78050000
---- !u!114 &5622111572569486271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
-  m_Name: Generator Config
-  m_EditorClassIdentifier: 
-  graph: {fileID: 11400000}
-  position: {x: 1608, y: 152}
-  ports:
-    keys:
-    - Input
-    - Output
-    values:
-    - _fieldName: Input
-      _node: {fileID: 5622111572569486271}
-      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      connections:
-      - fieldName: Output
-        node: {fileID: 8297635456952478894}
-        reroutePoints: []
-      _direction: 0
-      _connectionType: 1
-      _typeConstraint: 2
-      _dynamic: 0
-    - _fieldName: Output
-      _node: {fileID: 5622111572569486271}
-      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
-        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      connections:
-      - fieldName: Input
-        node: {fileID: 4619963457274538569}
-        reroutePoints: []
-      _direction: 1
-      _connectionType: 1
-      _typeConstraint: 2
-      _dynamic: 0
-  _enabled: 1
-  _displayName: 
-  _customName: 0
-  _priority: 0
-  _config:
-    rid: 4553556121772097618
-  references:
-    version: 2
-    RefIds:
-    - rid: 4553556121772097618
-      type: {class: CellularAutomataConfig, ns: Dalichrome.RandomGenerator.Configs,
-        asm: Dalichrome.RandomGenerator.Configs}
-      data:
-        _enabled: 1
-        _masked: 0
-        _maskTime: 0
-        _includeList: 
-        _excludeList: 10270000
-        _liveNeighboursRequired: 7
-        _repetitions: 2
-        _fill: 100
-        _empty: 9996
-        _placeProbability: 1
-        _borderOccupied: 1
-        _occupance: 2
-        _occupyLayer: 2
-        _tileA: 100
-        _invertOccupance: 0
 --- !u!114 &6323390042909989280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -744,7 +862,7 @@ MonoBehaviour:
   m_Name: Generator Config
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 2280, y: -168}
+  position: {x: 2104, y: 152}
   ports:
     keys:
     - Input
@@ -779,29 +897,21 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556121772097620
+    rid: 4553556272577249389
   references:
     version: 2
     RefIds:
-    - rid: 4553556121772097620
-      type: {class: CellularAutomataConfig, ns: Dalichrome.RandomGenerator.Configs,
-        asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556272577249389
+      type: {class: CopyConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 0
-        _masked: 1
+        _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 14050000
-        _liveNeighboursRequired: 6
-        _repetitions: 2
-        _fill: 1500
-        _empty: 1400
-        _placeProbability: 1
-        _borderOccupied: 1
-        _occupance: 1
-        _occupyLayer: 2
-        _tileA: 1500
-        _invertOccupance: 0
+        _excludeList: 10270000
+        _fromTo:
+        - Key: 100
+          Value: 9996
 --- !u!114 &7146697687814360198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -815,7 +925,7 @@ MonoBehaviour:
   m_Name: Region Joiner
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 2024, y: -168}
+  position: {x: 1864, y: 152}
   ports:
     keys:
     - Input
@@ -830,7 +940,10 @@ MonoBehaviour:
         node: {fileID: -7375063041419141049}
         reroutePoints: []
       - fieldName: Output
-        node: {fileID: 4619963457274538569}
+        node: {fileID: 5383419808542546107}
+        reroutePoints: []
+      - fieldName: Output
+        node: {fileID: 4390573794954160354}
         reroutePoints: []
       _direction: 0
       _connectionType: 0
@@ -861,7 +974,7 @@ MonoBehaviour:
       type: {class: MapJoinerConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
---- !u!114 &8297635456952478894
+--- !u!114 &7760345747399855414
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -870,38 +983,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
-  m_Name: Generator Config
+  m_Script: {fileID: 11500000, guid: f4fff61b58f5e144b9776b754d7c8450, type: 3}
+  m_Name: Region Splitter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 1224, y: 152}
+  position: {x: 120, y: -72}
   ports:
     keys:
-    - Input
-    - Output
+    - Source
+    - Region
     values:
-    - _fieldName: Input
-      _node: {fileID: 8297635456952478894}
+    - _fieldName: Source
+      _node: {fileID: 7760345747399855414}
       _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Output
-        node: {fileID: 5383419808542546107}
+        node: {fileID: 3470442837570602064}
         reroutePoints: []
       _direction: 0
       _connectionType: 1
       _typeConstraint: 2
       _dynamic: 0
-    - _fieldName: Output
-      _node: {fileID: 8297635456952478894}
-      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+    - _fieldName: Region
+      _node: {fileID: 7760345747399855414}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.ConditionalRegion, Dalichrome.Randomgenerator.Nodes,
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Input
-        node: {fileID: 5622111572569486271}
+        node: {fileID: -8607807667881494858}
+        reroutePoints: []
+      - fieldName: Input
+        node: {fileID: 2649642626318676420}
         reroutePoints: []
       _direction: 1
-      _connectionType: 1
+      _connectionType: 0
       _typeConstraint: 2
       _dynamic: 0
   _enabled: 1
@@ -909,18 +1025,17 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556089345409130
+    rid: 4553556254314201214
   references:
     version: 2
     RefIds:
-    - rid: 4553556089345409130
-      type: {class: NoiseConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556254314201214
+      type: {class: RoomSplitterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _masked: 0
-        _maskTime: 0
-        _includeList: 
-        _excludeList: 10270000
-        _density: 0.8
-        _repetitions: 1
-        _tiles: dc050000
+        _minimumRoomSize: 0
+        _maximumRoomSize: 2147483647
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0

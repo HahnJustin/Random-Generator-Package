@@ -25,6 +25,12 @@ namespace Dalichrome.RandomGenerator.Generators
             SetUtilsTileGrid();
         }
 
+        protected override void InitializeUtils()
+        {
+            if (resultSplits == null)
+                base.InitializeUtils();
+        }
+
         protected abstract RegionSplits Split(Generation input);
 
         protected override RegionSplits Enact(Generation input)

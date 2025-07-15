@@ -7,6 +7,7 @@ using Dalichrome.RandomGenerator.Core;
 using Unity.Mathematics;
 using Dalichrome.RandomGenerator.Random;
 using System.Linq;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -14,12 +15,31 @@ namespace Dalichrome.RandomGenerator.Generators
     {
         public VoronoiSplitter(VoronoiSplitterConfig config, int outputs) : base(config, outputs) { }
 
-        private static List<int2> GenerateRandomSeeds(int2 min, int2 max, int count, AbstractRandom rng)
+        private static List<int2> GenerateRandomSeeds(
+            Generation generation,
+            int count,
+            AbstractRandom rng)
         {
             var seeds = new HashSet<int2>();
+            RegionBounds bounds = generation.Grid.GetRegionBounds();
+            List<int2> sourcePositions = bounds.includingPositions;
 
-            int width = max.x - min.x + 1;
-            int height = max.y - min.y + 1;
+            if (sourcePositions != null && sourcePositions.Count > 0)
+            {
+                int total = sourcePositions.Count;
+                while (seeds.Count < count && seeds.Count < total)
+                {
+                    var pos = sourcePositions[rng.NextInt(total)];
+                    seeds.Add(pos);
+                }
+
+                return seeds.ToList();
+            }
+
+            // Fallback: generate from full bounds
+            int width = generation.Width;
+            int height = generation.Height;
+            int2 min = generation.Minimum;
 
             while (seeds.Count < count)
             {
@@ -31,47 +51,64 @@ namespace Dalichrome.RandomGenerator.Generators
             return seeds.ToList();
         }
 
-        protected override RegionSplits Split(Generation generation)
+        private int FindNearestSeedStep(List<int2> seeds, int2 pos)
         {
-            RegionSplits regionSplits = new(generation);
-
-            int2 min = generation.Minimum;
-            int2 max = generation.Maximum;
-            int width = max.x - min.x + 1;
-            int height = max.y - min.y + 1;
-
-            List<int2> seeds = GenerateRandomSeeds(min, max, random.NextInt(config.RegionMin, config.RegionMax), random);
-
-            Dictionary<int, List<int2>> regionBuckets = new();
+            int closestSeed = -1;
+            float closestDistSq = float.MaxValue;
 
             for (int i = 0; i < seeds.Count; i++)
-                regionBuckets[i] = new List<int2>();
-
-            for (int y = min.y; y <= max.y; y++)
             {
-                for (int x = min.x; x <= max.x; x++)
+                float distSq = math.distancesq(pos, seeds[i]);
+                if (distSq < closestDistSq)
                 {
-                    int2 pos = new(x, y);
-                    int closestSeed = -1;
-                    float closestDistSq = float.MaxValue;
-
-                    for (int i = 0; i < seeds.Count; i++)
-                    {
-                        float distSq = math.distancesq(pos, seeds[i]);
-                        if (distSq < closestDistSq)
-                        {
-                            closestDistSq = distSq;
-                            closestSeed = i;
-                        }
-                    }
-
-                    regionBuckets[closestSeed].Add(pos);
+                    closestDistSq = distSq;
+                    closestSeed = i;
                 }
             }
 
+            return closestSeed;
+        }
+
+        protected override RegionSplits Split(Generation generation)
+        {
+            RegionBounds bounds = generation.Grid.GetRegionBounds();
+            RegionSplits regionSplits = new(generation);
+
+            List<int2> regionPositions = bounds.includingPositions;
+            bool useFallback = regionPositions == null || regionPositions.Count == 0;
+
+            // Fallback: use every tile in the rectangle
+            if (useFallback)
+            {
+                regionPositions = new List<int2>();
+                for (int y = bounds.min.y; y <= bounds.max.y; y++)
+                {
+                    for (int x = bounds.min.x; x <= bounds.max.x; x++)
+                    {
+                        regionPositions.Add(new int2(x, y));
+                    }
+                }
+            }
+
+            // Generate Voronoi seeds from within the region
+            List<int2> seeds = GenerateRandomSeeds(generation, random.NextInt(config.RegionMin, config.RegionMax), random);
+
+            // Initialize seed buckets
+            Dictionary<int, List<int2>> regionBuckets = new();
+            for (int i = 0; i < seeds.Count; i++)
+                regionBuckets[i] = new List<int2>();
+
+            // Assign each tile in the region to the nearest seed
+            foreach (Tile tile in generation.Grid)
+            {
+                int closestSeed = FindNearestSeedStep(seeds, tile.Int2);
+                regionBuckets[closestSeed].Add(tile.Int2);
+            }
+            
+            // Create RegionBounds from each cluster
             foreach (var kvp in regionBuckets)
             {
-                List<int2> positions = kvp.Value;
+                var positions = kvp.Value;
                 if (positions.Count == 0) continue;
 
                 int2 regionMin = positions[0];

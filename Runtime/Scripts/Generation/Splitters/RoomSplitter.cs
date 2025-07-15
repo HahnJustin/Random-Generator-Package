@@ -2,6 +2,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Data;
 using System.Collections.Generic;
+using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -17,6 +18,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override RegionSplits Split(Generation generation)
         {
+            RegionBounds bounds = generation.Grid.GetRegionBounds();
             RegionSplits regionSplits = new(generation);
 
             // Culling Rooms
@@ -36,8 +38,6 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 regionSplits.AddRegion(room.ToRegionBounds());
             }
-
-            UnityEngine.Debug.Log("[RoomSplitter] SPLIT " + regionSplits.Count);
 
             return regionSplits;
         }

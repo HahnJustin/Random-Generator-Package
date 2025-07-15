@@ -28,6 +28,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 regionSplits.Shuffle();
             }
         }
+
         protected override Generation Enact(RegionSplits regionSplits)
         {
             Sort(regionSplits);
