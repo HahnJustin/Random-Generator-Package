@@ -1,6 +1,7 @@
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -34,19 +35,25 @@ namespace Dalichrome.RandomGenerator.Utils
             return IsOccupied(position.x, position.y);
         }
 
+        public int IsOccupied(int2 position)
+        {
+            return IsOccupied(position.x, position.y);
+        }
+
         public int IsOccupied(int x, int y)
         {
-            if (width <= x || x < 0 || height <= y || y < 0)
-            {
+            if (!tileGrid.IsInBounds(x,y))
                 return OutOfBoundsOccupancy;
-            }
-
+            
             Tile tile = tileGrid.GetTile(x, y);
             return IsOccupied(tile);
         }
 
         public int IsOccupied(Tile tile)
         {
+            if (!tileGrid.IsInRegion(tile.Int2))
+                return OutOfBoundsOccupancy; 
+
             int value = 0;
             if (config.Occupance == OccupanceType.Layer_Not_NA)
             {

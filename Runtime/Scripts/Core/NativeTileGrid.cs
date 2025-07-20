@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public struct NativeTileGrid : ITileGrid, IDisposable
+    public struct NativeTileGrid : ITileGrid, IDisposable, IEnumerable
     {
         public readonly int width;
         public readonly int height;
@@ -503,6 +503,11 @@ namespace Dalichrome.RandomGenerator.Core
             regionPositions.Add(pos);
         }
 
+        public bool IsInRegion(Tile tile)
+        {
+            return IsInRegion(tile.Int2);
+        }
+
         public bool IsInRegion(int2 pos)
         {
             if (!regionLimited) return true;
@@ -541,7 +546,19 @@ namespace Dalichrome.RandomGenerator.Core
             return tiles;
         }
 
-        public IEnumerable<Tile> GetRegionPositions()
+        public IEnumerable<Tile> GetTiles()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int2 pos = new(x, y);
+                    yield return GetTileFromNativeArray(x, y);
+                }
+            }
+        }
+
+        public IEnumerable<Tile> GetRegionTiles()
         {
             for (int y = regionMin.y; y <= regionMax.y; y++)
             {
@@ -563,6 +580,15 @@ namespace Dalichrome.RandomGenerator.Core
                     yield return GetTileFromNativeArray(x, y);
                 }
             }
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            if (regionLimited)
+            {
+                return GetRegionTiles().GetEnumerator();
+            }
+            else return GetTiles().GetEnumerator();
         }
 
         public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)

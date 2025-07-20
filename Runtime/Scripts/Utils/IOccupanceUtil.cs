@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -10,6 +11,8 @@ namespace Dalichrome.RandomGenerator.Utils
         public abstract int IsOccupied(Vector2Int position);
 
         public abstract int IsOccupied(int x, int y);
+
+        public abstract int IsOccupied(int2 position);
 
         public abstract int IsOccupied(Tile tile);
 

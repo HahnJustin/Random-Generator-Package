@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Region Filter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 360, y: -168}
+  position: {x: 360, y: -184}
   ports:
     keys:
     - Input
@@ -48,20 +48,21 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556254314201218
+    rid: 4553556405280309320
   references:
     version: 2
     RefIds:
-    - rid: 4553556254314201218
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309320
+      type: {class: RegionSizeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _sizeFilterType: 2
+        _sizeFilterType: 0
         _regionAmountFilterType: 0
-        _regionAmount: 4
-        _regionProportion: 0.4
-        _randomType: 0
-        _probability: 0.5
+        _regionAmount: 0
+        _regionProportion: 0
+        _minimumRoomSize: 999999
+        _maximumRoomSize: 2147483647
 --- !u!114 &-7375063041419141049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,7 +125,7 @@ MonoBehaviour:
         _excludeList: 10270000
         _density: 1
         _repetitions: 1
-        _tiles: 0e060000
+        _tiles: f00a0000
 --- !u!114 &-6517725862149913408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,7 +366,7 @@ MonoBehaviour:
   m_Name: Region Splitter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 968, y: -56}
+  position: {x: 968, y: -168}
   ports:
     keys:
     - Source
@@ -403,17 +404,23 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556121772097536
+    rid: 4553556390812581974
   references:
     version: 2
     RefIds:
-    - rid: 4553556121772097536
-      type: {class: VoronoiSplitterConfig, ns: Dalichrome.RandomGenerator.Configs,
+    - rid: 4553556390812581974
+      type: {class: ProximitySplitterConfig, ns: Dalichrome.RandomGenerator.Configs,
         asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _regionMin: 35
-        _regionMax: 40
+        _tiles: 64000000
+        _minimumRadiusSize: 1
+        _maximumRadiusSize: 4
+        _useOccupance: 1
+        _occupance: 2
+        _occupyLayer: 2
+        _tileA: 100
+        _invertOccupance: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,7 +431,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7744813fa4d254e48895159f32607bb7, type: 3}
-  m_Name: Generation MultiSplitter Test
+  m_Name: Generation MultiSplitter Failed Filter
   m_EditorClassIdentifier: 
   nodes:
   - {fileID: 4194706540378351992}
@@ -457,7 +464,7 @@ MonoBehaviour:
   m_Name: Region Filter
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 360, y: 88}
+  position: {x: 360, y: 104}
   ports:
     keys:
     - Input
@@ -717,10 +724,10 @@ MonoBehaviour:
       type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _sizeFilterType: 2
-        _regionAmountFilterType: 0
+        _sizeFilterType: 1
+        _regionAmountFilterType: 2
         _regionAmount: 0
-        _regionProportion: 0
+        _regionProportion: 0.03
         _randomType: 0
         _probability: 0
 --- !u!114 &5342345377250574726
@@ -1025,17 +1032,14 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556254314201214
+    rid: 4553556388554735688
   references:
     version: 2
     RefIds:
-    - rid: 4553556254314201214
-      type: {class: RoomSplitterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556388554735688
+      type: {class: VoronoiSplitterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _minimumRoomSize: 0
-        _maximumRoomSize: 2147483647
-        _occupance: 2
-        _occupyLayer: 2
-        _tileA: 100
-        _invertOccupance: 0
+        _regionMin: 10
+        _regionMax: 10

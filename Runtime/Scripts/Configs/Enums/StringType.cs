@@ -58,5 +58,6 @@ public enum StringType
     Description_Filter_RegionSize,
     Description_Filter_Random,
     Description_Joiner_RegionJoin,
-    Description_Joiner_MapJoin
+    Description_Joiner_MapJoin,
+    Description_Splitter_Proximity
 }

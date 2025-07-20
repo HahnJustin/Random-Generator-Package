@@ -75,20 +75,6 @@ namespace Dalichrome.RandomGenerator.Generators
             RegionSplits regionSplits = new(generation);
 
             List<int2> regionPositions = bounds.includingPositions;
-            bool useFallback = regionPositions == null || regionPositions.Count == 0;
-
-            // Fallback: use every tile in the rectangle
-            if (useFallback)
-            {
-                regionPositions = new List<int2>();
-                for (int y = bounds.min.y; y <= bounds.max.y; y++)
-                {
-                    for (int x = bounds.min.x; x <= bounds.max.x; x++)
-                    {
-                        regionPositions.Add(new int2(x, y));
-                    }
-                }
-            }
 
             // Generate Voronoi seeds from within the region
             List<int2> seeds = GenerateRandomSeeds(generation, random.NextInt(config.RegionMin, config.RegionMax), random);

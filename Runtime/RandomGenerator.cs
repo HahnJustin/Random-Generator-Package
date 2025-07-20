@@ -261,7 +261,12 @@ namespace Dalichrome.RandomGenerator
                     try
                     {
                         // Run the node operation
-                        if (current.Config != null) Debug.Log("Generating Config of " + current.Config.ToString());
+                        if (current.Config != null)
+                        {
+                            Debug.Log("Generating Config of " + current.Config.ToString());
+                            Debug.Log("Inputting Data " + data.ToString());
+                            if( data.Grid == null) Debug.Log("Data Grid is null");
+                        }
                         events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Configs.Count);
                         AbstractGridOperationData temp = null;
                         await Task.Run(() => temp = current.Operate(data));

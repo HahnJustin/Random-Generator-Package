@@ -123,7 +123,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 Tile tile = grid.GetTile(point);
 
                 // Is Occupied
-                if (IsOccupied(tile) >= 1 || (tile.Value < 0 && useNumbers))
+                if (!grid.IsInRegion(tile) || IsOccupied(tile) >= 1 || (tile.Value < 0 && useNumbers))
                     continue;
                 if (room != null)
                 {

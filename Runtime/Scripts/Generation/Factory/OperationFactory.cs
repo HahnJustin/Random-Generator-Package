@@ -58,6 +58,7 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 RoomSplitterConfig c => new RoomSplitter(c, inputs),
                 VoronoiSplitterConfig c => new VoronoiSplitter(c, inputs),
+                ProximitySplitterConfig c => new ProxiomitySplitter(c, inputs),
                 _ => throw new ArgumentException($"Unknown splitter: {config.GetType().Name}")
             };
         }

@@ -8,6 +8,7 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         NA,
         Room,
-        Voronoi
+        Voronoi,
+        Proximity
     }
 }

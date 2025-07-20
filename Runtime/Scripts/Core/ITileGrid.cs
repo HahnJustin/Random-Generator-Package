@@ -72,6 +72,8 @@ namespace Dalichrome.RandomGenerator.Core
 
         public abstract void AddRegionPosition(int x, int y);
         public abstract void AddRegionPosition(int2 pos);
+
+        public abstract bool IsInRegion(Tile tile);
         public abstract bool IsInRegion(int x, int y);
         public abstract bool IsInRegion(int2 pos);
 
@@ -85,7 +87,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         // Ienumeration
         public abstract NativeArray<Tile> AsNativeArray();
-        public abstract IEnumerable<Tile> GetRegionPositions();
+        public abstract IEnumerable<Tile> GetRegionTiles();
         public abstract IEnumerable<Tile> GetRegionGrid();
 
         // Layer Table Funcs

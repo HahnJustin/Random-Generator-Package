@@ -350,6 +350,11 @@ namespace Dalichrome.RandomGenerator.Core
             subgrid.AddRegionPosition(pos);
         }
 
+        public bool IsInRegion(Tile tile)
+        {
+            return subgrid.IsInRegion(tile);
+        }
+
         public bool IsInRegion(Vector2Int pos)
         {
             return subgrid.IsInRegion(pos.x, pos.y);
@@ -383,7 +388,7 @@ namespace Dalichrome.RandomGenerator.Core
         // Ienumeration
         public IEnumerator GetEnumerator()
         {
-            return subgrid.GetRegionPositions().GetEnumerator();
+            return subgrid.GetEnumerator();
         }
 
         public NativeArray<Tile> AsNativeArray()
@@ -391,9 +396,9 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.AsNativeArray();
         }
 
-        public IEnumerable<Tile> GetRegionPositions()
+        public IEnumerable<Tile> GetRegionTiles()
         {
-            return subgrid.GetRegionPositions();
+            return subgrid.GetRegionTiles();
         }
 
         public IEnumerable<Tile> GetRegionGrid()

@@ -27,7 +27,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override void InitializeUtils()
         {
-            if (resultSplits == null)
+            if (TileGrid != null && resultSplits == null)
                 base.InitializeUtils();
         }
 
@@ -39,7 +39,11 @@ namespace Dalichrome.RandomGenerator.Generators
             if (resultSplits != null) 
                 return resultSplits;
 
-            resultSplits = Split(input);
+            // Grid is Valid case
+            if (input.Grid != null)
+                resultSplits = Split(input);
+            // No Grid - Probably failed filter upstream
+            else resultSplits = new(input);
             return resultSplits;
         }
 

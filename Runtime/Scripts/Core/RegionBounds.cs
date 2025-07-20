@@ -14,6 +14,35 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int Size => includingPositions?.Count ?? 0;
 
+        public RegionBounds(List<int2> regionIncludedPositons)
+        {
+            includingPositions = regionIncludedPositons;
+
+            if(includingPositions.Count == 0)
+            {
+                min = new(0, 0);
+                max = new(0, 0);
+                return;
+            }
+
+            int left = int.MaxValue;
+            int bottom = int.MaxValue;
+
+            int top = int.MinValue;
+            int right = int.MinValue;
+
+            foreach (int2 positon in includingPositions)
+            {
+                if (left > positon.x) left = positon.x;
+                if (bottom > positon.y) bottom = positon.y;
+                if (top < positon.y) top = positon.y;
+                if (right < positon.x) right = positon.x;
+            }
+
+            min = new int2(left,bottom);
+            max = new int2(right,top);
+        }
+
         public RegionBounds(int2 minimum, int2 maximum, List<int2> regionIncludedPositons)
         {
             includingPositions = regionIncludedPositons;
