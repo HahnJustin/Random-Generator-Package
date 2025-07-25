@@ -6,6 +6,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public abstract class AbstractLogicFilterConfig : AbstractRegionFilterConfig
     {
+        public override string IconName => "filter-icon";
+
         [Hidden] public new virtual FilterType Type { get; }
 
         [Hidden]

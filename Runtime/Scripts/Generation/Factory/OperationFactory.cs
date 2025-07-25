@@ -37,8 +37,10 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             return config switch
             {
-                RandomFilterConfig c => new RandomFilter(c),
+                ChanceFilterConfig c => new ChanceFilter(c),
                 RegionSizeFilterConfig c => new RegionSizeFilter(c),
+                GuaranteeFilterConfig c => new GuaranteeFilter(c),
+                ContainsFilterConfig c => new ContainsFilter(c),
                 _ => throw new ArgumentException($"Unknown filter config: {config.GetType().Name}")
             };
         }
@@ -48,6 +50,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return config switch
             {
                 AndFilterConfig c => new AndFilter(c, inputs),
+                OrFilterConfig c => new OrFilter(c, inputs),
                 _ => throw new ArgumentException($"Unknown logic filter config: {config.GetType().Name}")
             };
         }
@@ -59,6 +62,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 RoomSplitterConfig c => new RoomSplitter(c, inputs),
                 VoronoiSplitterConfig c => new VoronoiSplitter(c, inputs),
                 ProximitySplitterConfig c => new ProxiomitySplitter(c, inputs),
+                PerlinSplitterConfig c => new PerlinSplitter(c, inputs),
+                MultiPerlinSplitterConfig c => new MultiPerlinSplitter(c, inputs),
                 _ => throw new ArgumentException($"Unknown splitter: {config.GetType().Name}")
             };
         }
@@ -68,6 +73,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return config switch
             {
                 MapJoinerConfig c => new MapJoiner(c, outputs),
+                RegionJoinerConfig c => new RegionJoiner(c, outputs),
                 _ => throw new ArgumentException($"Unknown joiner: {config.GetType().Name}")
             };
         }

@@ -46,6 +46,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468432
   references:
@@ -138,6 +139,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556089345409128
   references:
@@ -200,6 +202,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468386
   references:
@@ -262,6 +265,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468397
   references:
@@ -335,6 +339,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556121772097536
   references:
@@ -421,6 +426,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468398
   references:
@@ -512,6 +518,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556112521822299
   references:
@@ -574,21 +581,21 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
-    rid: 4553556069843468402
+    rid: 4553556405280309336
   references:
     version: 2
     RefIds:
-    - rid: 4553556069843468402
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309336
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 2
         _regionAmountFilterType: 0
         _regionAmount: 0
         _regionProportion: 0
-        _randomType: 0
-        _probability: 0
 --- !u!114 &5383419808542546107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -635,6 +642,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556121772097624
   references:
@@ -697,6 +705,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556121772097618
   references:
@@ -767,6 +776,7 @@ MonoBehaviour:
   _enabled: 0
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556121772097620
   references:
@@ -840,6 +850,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468404
   references:
@@ -895,6 +906,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556089345409130
   references:

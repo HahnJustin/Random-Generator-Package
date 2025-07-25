@@ -11,8 +11,6 @@ namespace Dalichrome.RandomGenerator.Nodes
         : ConfigNodeEditor<RegionJoinerNode, AbstractRegionJoinerConfig>
     {
         public override int GetWidth() => 220;
-
-        protected override string IconFilename => "joiner-icon.png";
     }
 }
 #endif

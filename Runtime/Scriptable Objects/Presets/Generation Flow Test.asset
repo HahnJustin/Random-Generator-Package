@@ -46,6 +46,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468432
   references:
@@ -138,6 +139,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556089345409128
   references:
@@ -200,6 +202,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468386
   references:
@@ -262,6 +265,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556112521822293
   references:
@@ -332,6 +336,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468397
   references:
@@ -405,6 +410,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468403
   references:
@@ -492,6 +498,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468398
   references:
@@ -583,6 +590,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556112521822299
   references:
@@ -643,23 +651,23 @@ MonoBehaviour:
       _typeConstraint: 2
       _dynamic: 0
   _enabled: 1
-  _displayName: 
-  _customName: 0
+  _displayName: GuaranteeFilter
+  _customName: 1
+  _priority: 0
   _config:
-    rid: 4553556069843468402
+    rid: 4553556405280309335
   references:
     version: 2
     RefIds:
-    - rid: 4553556069843468402
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309335
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 1
         _regionAmountFilterType: 2
         _regionAmount: 0
         _regionProportion: 0.5
-        _randomType: 0
-        _probability: 0
 --- !u!114 &7146697687814360198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -709,6 +717,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556069843468404
   references:
@@ -764,6 +773,7 @@ MonoBehaviour:
   _enabled: 1
   _displayName: 
   _customName: 0
+  _priority: 0
   _config:
     rid: 4553556089345409130
   references:

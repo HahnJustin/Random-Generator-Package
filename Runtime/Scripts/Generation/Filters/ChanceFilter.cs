@@ -4,14 +4,13 @@ using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class RandomFilter : AbstractFilter<RandomFilterConfig>
+    public class ChanceFilter : AbstractFilter<ChanceFilterConfig>
     {
-        public RandomFilter(RandomFilterConfig config) : base(config) { }
+        public ChanceFilter(ChanceFilterConfig config) : base(config) { }
 
         public override bool Filter(RegionBounds region)
         {
-            if(config.RandomType == RandomFilterType.Guarantee || 
-                (config.RandomType == RandomFilterType.Probability && random.NextFloat() <= config.Probability))
+            if(random.NextFloat() <= config.Probability)
             {
                 return true;
             }

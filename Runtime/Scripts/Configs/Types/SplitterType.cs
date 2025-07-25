@@ -9,6 +9,8 @@ namespace Dalichrome.RandomGenerator.Configs
         NA,
         Room,
         Voronoi,
-        Proximity
+        Proximity,
+        Perlin,
+        MultiPerlin
     }
 }

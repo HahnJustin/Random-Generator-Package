@@ -56,8 +56,12 @@ public enum StringType
     Description_Splitter_Room,
     Description_Splitter_Voronoi,
     Description_Filter_RegionSize,
-    Description_Filter_Random,
+    Description_Filter_Chance,
     Description_Joiner_RegionJoin,
     Description_Joiner_MapJoin,
-    Description_Splitter_Proximity
+    Description_Splitter_Proximity,
+    Description_Filter_Guarantee,
+    Description_Filter_Contains,
+    Description_Splitter_Perlin,
+    Description_Splitter_PerlinMulti
 }

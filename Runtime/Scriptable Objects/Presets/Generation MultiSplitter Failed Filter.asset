@@ -499,20 +499,19 @@ MonoBehaviour:
   _customName: 0
   _priority: 15
   _config:
-    rid: 4553556254314201216
+    rid: 4553556405280309325
   references:
     version: 2
     RefIds:
-    - rid: 4553556254314201216
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309325
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 0
         _regionAmountFilterType: 3
         _regionAmount: 0
         _regionProportion: 0
-        _randomType: 0
-        _probability: 0.5
 --- !u!114 &3470442837570602064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -716,20 +715,19 @@ MonoBehaviour:
   _customName: 0
   _priority: 2
   _config:
-    rid: 4553556069843468402
+    rid: 4553556405280309328
   references:
     version: 2
     RefIds:
-    - rid: 4553556069843468402
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309328
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
-        _sizeFilterType: 1
+        _sizeFilterType: 0
         _regionAmountFilterType: 2
         _regionAmount: 0
-        _regionProportion: 0.03
-        _randomType: 0
-        _probability: 0
+        _regionProportion: 0.3
 --- !u!114 &5342345377250574726
 MonoBehaviour:
   m_ObjectHideFlags: 0

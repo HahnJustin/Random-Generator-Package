@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public class RegionBounds
+    public class RegionBounds: IEnumerable
     {
         public List<int2> includingPositions;
         public int2 min;
@@ -92,5 +92,9 @@ namespace Dalichrome.RandomGenerator.Core
             max = math.max(max, bounds.max);
         }
 
+        public IEnumerator GetEnumerator()
+        {
+            return includingPositions.GetEnumerator();
+        }
     }
 }

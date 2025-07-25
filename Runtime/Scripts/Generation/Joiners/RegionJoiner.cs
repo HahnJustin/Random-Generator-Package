@@ -1,18 +1,35 @@
-using System.Collections;
+using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Data;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class RegionJoiner : MonoBehaviour
+namespace Dalichrome.RandomGenerator.Generators
 {
-    // Start is called before the first frame update
-    void Start()
+    public class RegionJoiner : AbstractJoiner<RegionJoinerConfig>
     {
-        
-    }
+        public RegionJoiner(RegionJoinerConfig config, int inputs) : base(config, inputs) { }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        protected override Generation Join(List<Generation> generations)
+        {
+            Generation main = generations[0];
+            generations.RemoveAt(0);
+
+            TileGrid grid = main.Grid;
+            RegionBounds bounds = grid.GetRegionBounds();
+            grid.RemoveRegion();
+
+            foreach (Generation generation in generations)
+            {
+                TileGrid otherGrid = generation.Grid;
+                foreach (Tile tile in otherGrid)
+                {
+                    grid.SetTile(tile.Int2, tile);
+                }
+                bounds.AddRegion(otherGrid.GetRegionBounds());
+            }
+             grid.SetRegionBounds(bounds);
+
+            return main;
+        }
     }
 }

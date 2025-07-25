@@ -2,7 +2,7 @@
 #if UNITY_EDITOR
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Editor;
-using UnityEngine;
+using System;
 
 namespace Dalichrome.RandomGenerator.Nodes
 {
@@ -10,9 +10,13 @@ namespace Dalichrome.RandomGenerator.Nodes
     public class FilterConfigNodeEditor
     : ConfigNodeEditor<RegionFilterNode, AbstractRegionFilterConfig>
     {
-        public override int GetWidth() => 220;
+        public override int GetWidth() => 250;
 
-        protected override string IconFilename => "filter-icon";
+        protected override bool IsAllowedType(Type type)
+        {
+            // DonÅft allow AbstractLogicFilterConfig types here
+            return !typeof(AbstractLogicFilterConfig).IsAssignableFrom(type);
+        }
     }
 }
 #endif

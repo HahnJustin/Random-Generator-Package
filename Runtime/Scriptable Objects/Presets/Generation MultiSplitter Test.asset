@@ -48,20 +48,19 @@ MonoBehaviour:
   _customName: 0
   _priority: 0
   _config:
-    rid: 4553556254314201218
+    rid: 4553556405280309337
   references:
     version: 2
     RefIds:
-    - rid: 4553556254314201218
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309337
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 2
         _regionAmountFilterType: 0
-        _regionAmount: 4
-        _regionProportion: 0.4
-        _randomType: 0
-        _probability: 0.5
+        _regionAmount: 0
+        _regionProportion: 0
 --- !u!114 &-7375063041419141049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,20 +491,19 @@ MonoBehaviour:
   _customName: 0
   _priority: 15
   _config:
-    rid: 4553556254314201216
+    rid: 4553556405280309338
   references:
     version: 2
     RefIds:
-    - rid: 4553556254314201216
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309338
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 0
         _regionAmountFilterType: 3
         _regionAmount: 0
         _regionProportion: 0
-        _randomType: 0
-        _probability: 0.5
 --- !u!114 &3470442837570602064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -709,20 +707,19 @@ MonoBehaviour:
   _customName: 0
   _priority: 2
   _config:
-    rid: 4553556069843468402
+    rid: 4553556405280309339
   references:
     version: 2
     RefIds:
-    - rid: 4553556069843468402
-      type: {class: RandomFilterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+    - rid: 4553556405280309339
+      type: {class: GuaranteeFilterConfig, ns: Dalichrome.RandomGenerator.Configs,
+        asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
         _sizeFilterType: 2
         _regionAmountFilterType: 0
         _regionAmount: 0
         _regionProportion: 0
-        _randomType: 0
-        _probability: 0
 --- !u!114 &5342345377250574726
 MonoBehaviour:
   m_ObjectHideFlags: 0

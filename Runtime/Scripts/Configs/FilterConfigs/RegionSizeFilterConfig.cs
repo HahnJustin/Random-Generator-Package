@@ -6,6 +6,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public class RegionSizeFilterConfig : AbstractRegionFilterConfig
     {
+        public override string IconName => "regionsizefilter-icon";
+
         public RegionSizeFilterConfig()
         {
             _description = StringType.Description_Splitter_Room;

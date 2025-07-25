@@ -329,6 +329,11 @@ namespace Dalichrome.RandomGenerator
             Debug.Log($"[GridOpData #{data._id}] final data");
 #endif
 
+            if (!data.Valid || data.Grid == null)
+            {
+                events.RaiseGenerationError("Generator returned a null generation - Check if some chokepoint filter may be failing");
+            }
+
             watch.Stop();
             data.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
 

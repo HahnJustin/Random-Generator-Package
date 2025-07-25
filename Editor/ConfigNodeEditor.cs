@@ -11,7 +11,6 @@ using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.UserData;
-using UnityEditor.UIElements;
 using XNode;
 using Dalichrome.RandomGenerator.EditorHelpers;
 
@@ -42,19 +41,26 @@ namespace Dalichrome.RandomGenerator.Editor
         private readonly Dictionary<int, bool> maskFold = new(), occFold = new();
         private readonly Dictionary<int, bool> basicFold = new();
 
-        private static readonly Type[] _cfgTypes;
+        private Type[] _cfgTypes;
 
         static string[] _tileNames;
         static int[] _tileIds;
         static double _nextRefresh;
 
-        static ConfigNodeEditor()
+        private bool _skipRegionFields;
+        protected virtual bool IsAllowedType(Type type) => true;
+
+        private void EnsureConfigTypesInitialized()
         {
+            if (_cfgTypes != null) return;
+
             _cfgTypes = AppDomain.CurrentDomain.GetAssemblies()
-                        .SelectMany(a => a.GetTypes())
-                        .Where(t => !t.IsAbstract && typeof(TCfg).IsAssignableFrom(t))
-                        .OrderBy(t => t.Name)
-                        .ToArray();
+                .SelectMany(a => a.GetTypes())
+                .Where(t => !t.IsAbstract &&
+                            typeof(TCfg).IsAssignableFrom(t) &&
+                            IsAllowedType(t))
+                .OrderBy(t => t.Name)
+                .ToArray();
         }
 
         /* ─── per-editor caches ─── */
@@ -63,6 +69,11 @@ namespace Dalichrome.RandomGenerator.Editor
         private readonly Dictionary<TNode, PropertyTree> _treeCache = new();
 #endif
         private readonly Dictionary<int, bool> _maskFold = new(), _occFold = new(), _basicFold = new();
+
+        private static readonly HashSet<string> RegionFilterFieldNames = typeof(AbstractRegionFilterConfig)
+            .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            .Select(f => f.Name)
+            .ToHashSet();
 
         /* ───────── HEADER ───────── */
         public override void OnHeaderGUI()
@@ -100,8 +111,41 @@ namespace Dalichrome.RandomGenerator.Editor
         /* ───────── BODY ───────── */
         public override void OnBodyGUI()
         {
+            EnsureConfigTypesInitialized();
+
             var n = (TNode)target;
             serializedObject.Update();
+            var nodeType = n.GetType().Name;
+            var configType = n.Config?.GetType().Name ?? "<null>";
+
+            _skipRegionFields = false;
+
+            var thisNode = (TNode)target;
+
+            foreach (var port in thisNode.Outputs)
+            {
+                if (!port.IsConnected) continue;
+
+                foreach (var conn in port.GetConnections())
+                {
+                    var otherNode = conn.node;
+
+                    // Safe-guard: only consider config nodes
+                    if (otherNode is IConfigNode configNode && configNode.Config != null)
+                    {
+                        var cfg = configNode.Config;
+                        bool match = cfg is AbstractRegionFilterConfig;
+
+                        if (match)
+                        {
+                            _skipRegionFields = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (_skipRegionFields) break;
+            }
 
             /* 0  Ports */
             DrawPorts(n);
@@ -205,11 +249,10 @@ namespace Dalichrome.RandomGenerator.Editor
 #if ODIN_INSPECTOR
         private void DrawWithOdin(TNode node, SerializedProperty cfgProp)
         {
-            // <1> Grab the strongly-typed config instance
             var cfgObj = (TCfg)cfgProp.managedReferenceValue;
             if (cfgObj == null) return;
 
-            /* Dispose any tree that belongs to *another* config object */
+            // Dispose any tree that belongs to *another* config object
             if (_treeCache.TryGetValue(node, out var cached) &&
                 !ReferenceEquals(cached.WeakTargets[0], cfgObj))
             {
@@ -217,12 +260,11 @@ namespace Dalichrome.RandomGenerator.Editor
                 _treeCache.Remove(node);
             }
 
-            /* Create (and track) the fresh tree if we don't already have it */
+            // Create (and track) the fresh tree if we don't already have it
             if (!_treeCache.TryGetValue(node, out var tree))
             {
                 tree = PropertyTree.Create(cfgObj);
                 _treeCache[node] = tree;
-
                 NodeEditorReloadHook.LiveTrees.Add(tree);
             }
 
@@ -230,25 +272,27 @@ namespace Dalichrome.RandomGenerator.Editor
             {
                 tree.BeginDraw(false);
 
-                // <3> Bucket properties by name
+                // ─── Bucket fields ─────────────────────────────────────
                 var maskingProps = new List<InspectorProperty>();
                 var occupanceProps = new List<InspectorProperty>();
                 var otherProps = new List<InspectorProperty>();
 
                 foreach (var p in tree.RootProperty.Children)
                 {
-                    if (Skip.Contains(p.Name)) continue;              // hide
+                    if (Skip.Contains(p.Name)) continue;
+
+                    if (_skipRegionFields && IsRegionFilterField(p)) continue;
+
                     if (Mask.Contains(p.Name)) maskingProps.Add(p);
                     else if (Occ.Contains(p.Name)) occupanceProps.Add(p);
                     else otherProps.Add(p);
                 }
 
-                // <4> MAIN group  ────────────────────────────────────────────
+                // ─── Draw groups ───────────────────────────────────────
                 foreach (var p in otherProps) p.Draw();
 
                 int id = node.GetInstanceID();
 
-                // <5> Masking fold-out
                 if (maskingProps.Count > 0)
                 {
                     bool open = _maskFold.TryGetValue(id, out var v) && v;
@@ -263,9 +307,7 @@ namespace Dalichrome.RandomGenerator.Editor
                     }
                 }
 
-                // <6> Occupance fold-out (only if cfg implements IOccupanceConfig)
-                if (cfgObj is Dalichrome.RandomGenerator.Configs.IOccupanceConfig &&
-                    occupanceProps.Count > 0)
+                if (cfgObj is IOccupanceConfig && occupanceProps.Count > 0)
                 {
                     bool open = _occFold.TryGetValue(id, out var v) && v;
                     open = SirenixEditorGUI.Foldout(open, "Occupance");
@@ -313,8 +355,9 @@ namespace Dalichrome.RandomGenerator.Editor
             while (child.NextVisible(enter))
             {
                 enter = false;
-                if (child.depth != cfgProp.depth + 1) continue;       // only direct kids
-                if (Skip.Contains(child.name)) continue;     // hide config-level _enabled
+                if (child.depth != cfgProp.depth + 1) continue; 
+                if (Skip.Contains(child.name)) continue;
+                if (_skipRegionFields && RegionFilterFieldNames.Contains(child.name)) continue;
 
                 SerializedProperty snapshot = child.Copy();           // keep stable
 
@@ -514,7 +557,14 @@ namespace Dalichrome.RandomGenerator.Editor
         }
 
         // one-liner hook; default → null  (= no icon)
-        protected virtual string IconFilename => null;
+        protected string IconFilename
+        {
+            get
+            {
+                var cfg = ((TNode)target).Config;
+                return cfg?.IconName ?? null;
+            }
+        }
 
         // helper reused by the header drawer
         private GUIContent LoadIcon(string fileName) =>
@@ -533,6 +583,14 @@ namespace Dalichrome.RandomGenerator.Editor
         }
 
 #endif
+        private static bool IsRegionFilterField(InspectorProperty property)
+        {
+            var member = property.Info.GetMemberInfo();
+
+            if (member == null) return false;
+
+            return member.DeclaringType == typeof(AbstractRegionFilterConfig);
+        }
     }
 }
 #endif

@@ -8,8 +8,7 @@ using UnityEngine;
 public class SplitterConfigNodeEditor
     : ConfigNodeEditor<RegionSplitterNode, AbstractRegionSplitterConfig>
 {
-    public override int GetWidth() => 220;
+    public override int GetWidth() => 250;
 
-    protected override string IconFilename => "splitter-icon";
 }
 #endif

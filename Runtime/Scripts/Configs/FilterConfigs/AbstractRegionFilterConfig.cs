@@ -8,6 +8,8 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         [Hidden] public new virtual FilterType Type { get; }
 
+        public override string IconName => "filter-icon";
+
         public SizeFilterType SizeFilterType { get { return _sizeFilterType; } set { _sizeFilterType = value; } }
         [SerializeField] private SizeFilterType _sizeFilterType;
 

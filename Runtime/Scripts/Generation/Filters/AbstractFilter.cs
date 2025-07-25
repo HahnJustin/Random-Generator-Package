@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractFilter<C>: AbstractOperation<C, RegionSplits, Generation>, IFilter
+    public abstract class AbstractFilter<C>: AbstractGridOperation<C, RegionSplits, Generation>, IFilter
         where C : AbstractRegionFilterConfig
     {
         protected AbstractFilter(C config) : base(config) {}
@@ -27,6 +27,18 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 regionSplits.Shuffle();
             }
+        }
+
+        protected override void Initialize(RegionSplits splits)
+        {
+            TileGrid = splits.Grid;
+            SetUtilsTileGrid();
+        }
+
+        protected override void InitializeUtils()
+        {
+            if (TileGrid != null)
+                base.InitializeUtils();
         }
 
         protected override Generation Enact(RegionSplits regionSplits)

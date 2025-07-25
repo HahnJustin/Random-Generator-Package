@@ -17,7 +17,7 @@ namespace Dalichrome.RandomGenerator.Nodes
         [Output(connectionType = ConnectionType.Override, typeConstraint = TypeConstraint.Strict)]
         public TileRegion Result;
 
-        public override System.Type ConfigBaseType => typeof(AbstractRegionSplitterConfig);
+        public override System.Type ConfigBaseType => typeof(AbstractRegionFilterConfig);
 
         public override int PaletteSeed =>
         Config != null

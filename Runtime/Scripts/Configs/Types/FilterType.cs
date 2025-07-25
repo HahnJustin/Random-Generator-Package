@@ -8,7 +8,8 @@ namespace Dalichrome.RandomGenerator.Configs
     {
         NA,
         RegionSize,
-        Random,
-        Probability
+        Chance,
+        Guarantee,
+        Contains
     }
 }

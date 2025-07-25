@@ -9,6 +9,8 @@ namespace Dalichrome.RandomGenerator.Configs
     [Serializable]
     public abstract class AbstractGeneratorConfig : AbstractConfig
     {
+        public override string IconName => "generator-icon";
+
         [Hidden] public new virtual GeneratorType Type { get; }
 
 

@@ -9,7 +9,7 @@ namespace Dalichrome.RandomGenerator.Configs
     public abstract class AbstractConfig
     {
         [Hidden] public virtual Enum Type { get; }
-
+        [Hidden] public virtual string IconName => null;
 
         [Hidden]
         public virtual string Name

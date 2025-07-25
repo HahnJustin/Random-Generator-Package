@@ -7,6 +7,5 @@ using UnityEngine;
 public class GeneratorConfigNodeEditor
     : ConfigNodeEditor<GeneratorConfigNode, AbstractGeneratorConfig>
 {
-    protected override string IconFilename => "generator-icon";
 }
 #endif
