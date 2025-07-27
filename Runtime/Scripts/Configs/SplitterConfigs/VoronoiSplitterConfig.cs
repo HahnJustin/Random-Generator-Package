@@ -6,6 +6,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public class VoronoiSplitterConfig : AbstractRegionSplitterConfig
     {
+        public override string IconName => "voronoisplitter-icon";
+
         public VoronoiSplitterConfig()
         {
             _description = StringType.Description_Splitter_Voronoi;

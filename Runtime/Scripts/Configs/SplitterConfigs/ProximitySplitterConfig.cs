@@ -7,6 +7,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public class ProximitySplitterConfig : AbstractRegionSplitterConfig, IOccupanceConfig
     {
+        public override string IconName => "proximitysplitter-icon";
+
         public ProximitySplitterConfig()
         {
             _description = StringType.Description_Splitter_Proximity;

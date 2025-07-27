@@ -63,5 +63,6 @@ public enum StringType
     Description_Filter_Guarantee,
     Description_Filter_Contains,
     Description_Splitter_Perlin,
-    Description_Splitter_PerlinMulti
+    Description_Splitter_PerlinMulti,
+    Description_Splitter_UpscaleNoise
 }

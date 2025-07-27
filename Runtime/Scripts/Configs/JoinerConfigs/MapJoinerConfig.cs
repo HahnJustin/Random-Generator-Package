@@ -6,6 +6,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public class MapJoinerConfig : AbstractRegionJoinerConfig
     {
+        public override string IconName => "mapjoiner-icon";
+
         public MapJoinerConfig()
         {
             _description = StringType.Description_Joiner_MapJoin;

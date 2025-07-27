@@ -38,7 +38,6 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             this.config = config;
         }
-
         protected virtual void InitializeUtils()
         {
             foreach (AbstractUtil util in utils)
@@ -84,8 +83,7 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             if (!RunCondition(input)) return FailConditionDefault(input);
 
-            random = input.Random;
-            token = input.Token;
+            InitializeByInput(input);
 
             var watch = new Stopwatch();
             watch.Start();
@@ -103,5 +101,12 @@ namespace Dalichrome.RandomGenerator.Generators
             CancelCheck();
             return output;
         }
+
+        protected virtual void InitializeByInput(D input)
+        {
+            random = input.Random;
+            token = input.Token;
+        }
+
     }
 }

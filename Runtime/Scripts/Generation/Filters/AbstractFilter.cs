@@ -29,6 +29,13 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
+        public virtual void SubInitialize(RegionSplits splits)
+        {
+            InitializeByInput(splits);
+            Initialize(splits);
+            InitializeUtils();
+        }
+
         protected override void Initialize(RegionSplits splits)
         {
             TileGrid = splits.Grid;

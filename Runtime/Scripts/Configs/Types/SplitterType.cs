@@ -11,6 +11,7 @@ namespace Dalichrome.RandomGenerator.Configs
         Voronoi,
         Proximity,
         Perlin,
-        MultiPerlin
+        MultiPerlin,
+        UpscaleNoise
     }
 }

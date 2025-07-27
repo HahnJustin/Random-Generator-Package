@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XNode;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace Dalichrome.RandomGenerator.Nodes
 {
@@ -82,7 +83,7 @@ namespace Dalichrome.RandomGenerator.Nodes
             if (node is RegionJoinerNode) return NodeRole.Joiner;
             if (node is RegionSplitterNode) return NodeRole.Splitter;
             if (node is GeneratorConfigNode) return NodeRole.Generator;
-            if (node is AbstractLogicNode) return NodeRole.LogicFilter;
+            if (node is LogicFilterNode) return NodeRole.LogicFilter;
             return NodeRole.NA;
         }
 
@@ -127,18 +128,36 @@ namespace Dalichrome.RandomGenerator.Nodes
                     case NodeRole.LogicFilter:
                         var parentFilters = node.Parents
                             .Where(p => p.Operation is IFilter)
-                            .Select(p => (IFilter)p.Operation)
+                            .Select(p => (IFilter) p.Operation)
                             .ToList();
 
                         node.Operation = OperationFactory.CreateLogicFilter((AbstractLogicFilterConfig) node.Config, parentFilters);
 
-                        // Optionally null out collapsed filter ops
-                        foreach (var parent in node.Parents)
+                        HashSet<ConfigGraphNode> newParents = new();
+                        HashSet<ConfigGraphNode> oldParents = new();
+                        if (node.Parents == null) break;
+                        for (int i = node.Parents.Count -1; i >= 0; i--)
                         {
+                            var parent = node.Parents[i];
                             if (parent.Role == NodeRole.Filter || parent.Role == NodeRole.LogicFilter)
-                                parent.Operation = null;
+                            {
+                                oldParents.Add(parent);
+                                node.Parents.Remove(parent);
+                                if (parent.Parents == null) continue;
+                                foreach (var grandParent in parent.Parents)
+                                {
+                                    grandParent.Children.Remove(parent);
+                                    newParents.Add(grandParent);
+                                }
+                            }
                         }
 
+                        foreach (var newParent in newParents)
+                        {
+                            newParent.Children.Add(node);
+                        }
+
+                        node.Parents.AddRange(newParents);
                         break;
                 }
 

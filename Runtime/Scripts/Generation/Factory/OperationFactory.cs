@@ -29,7 +29,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 NystromDungeonConfig nyDunConfig => new NystromDungeonGenerator(nyDunConfig),
                 GuaranteeSpawnConfig guSpConfig => new GuaranteeSpawnGenerator(guSpConfig),
                 BorderConfig boConfig => new BorderGenerator(boConfig),
-                _ => throw new ArgumentException($"No generator found for config type {config.GetType().Name}")
+                _ => throw new ArgumentException($"Unknown generator config: {config.GetType().Name}")
             };
         }
 
@@ -51,6 +51,7 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 AndFilterConfig c => new AndFilter(c, inputs),
                 OrFilterConfig c => new OrFilter(c, inputs),
+                NotFilterConfig c => new NotFilter(c, inputs),
                 _ => throw new ArgumentException($"Unknown logic filter config: {config.GetType().Name}")
             };
         }
@@ -64,6 +65,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 ProximitySplitterConfig c => new ProxiomitySplitter(c, inputs),
                 PerlinSplitterConfig c => new PerlinSplitter(c, inputs),
                 MultiPerlinSplitterConfig c => new MultiPerlinSplitter(c, inputs),
+                UpscaleNoiseSplitterConfig c => new UpscaleNoiseSplitter(c, inputs),
                 _ => throw new ArgumentException($"Unknown splitter: {config.GetType().Name}")
             };
         }

@@ -7,7 +7,6 @@ namespace Dalichrome.RandomGenerator.Generators
     public class UpscaledNoiseGenerator : AbstractGenerator<UpscaledNoiseConfig>
     {
         private int SCALE_AMOUNT = 2;
-
         public UpscaledNoiseGenerator(UpscaledNoiseConfig config) : base(config) { }
         
         private int Mod(int x, int m)
@@ -30,7 +29,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return grid[x, y];
         }
 
-        private int GetIfOccupiedTileNextToPosition(int[,] grid, int x, int y)
+        private int GetOccupiedNeighborCount(int[,] grid, int x, int y)
         {
             int movement = 1;
             int neighbors = 0;
@@ -87,7 +86,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         int baseY = Mathf.FloorToInt(y / (float)SCALE_AMOUNT);
                         int parentValue = baseGrid[baseX, baseY];
                         if (random.NextFloat() < 
-                           (0.5f + (parentValue + GetIfOccupiedTileNextToPosition(baseGrid, baseX, baseY) - 4.5f) * config.LastGridImpact))
+                           (0.5f + (parentValue + GetOccupiedNeighborCount(baseGrid, baseX, baseY) - 4.5f) * config.LastGridImpact))
                         {
                             nextGrid[x, y] = 1;
                         }

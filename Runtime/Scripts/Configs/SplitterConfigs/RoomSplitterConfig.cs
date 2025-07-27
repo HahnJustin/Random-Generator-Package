@@ -7,6 +7,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public class RoomSplitterConfig : AbstractRegionSplitterConfig, IRoomConfig
     {
+        public override string IconName => "roomsplitter-icon";
+
         public RoomSplitterConfig()
         {
             _description = StringType.Description_Splitter_Room;
