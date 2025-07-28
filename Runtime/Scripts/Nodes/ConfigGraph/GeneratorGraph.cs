@@ -1,10 +1,10 @@
 ﻿using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Generators;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XNode;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace Dalichrome.RandomGenerator.Nodes
 {
@@ -64,7 +64,7 @@ namespace Dalichrome.RandomGenerator.Nodes
             {
                 configGraphNode = new ConfigGraphNode(config, role);
                 map[node] = configGraphNode;
-                if(node is IConfigNode iconfigNode) 
+                if (node is IConfigNode iconfigNode)
                     configGraphNode.Priority = iconfigNode.Priority;
             }
             return configGraphNode;
@@ -110,11 +110,11 @@ namespace Dalichrome.RandomGenerator.Nodes
                 switch (node.Role)
                 {
                     case NodeRole.Generator:
-                        node.Operation = OperationFactory.CreateGenerator((AbstractGeneratorConfig) node.Config);
+                        node.Operation = OperationFactory.CreateGenerator((AbstractGeneratorConfig)node.Config);
                         break;
 
                     case NodeRole.Filter:
-                        node.Operation = OperationFactory.CreateFilter((AbstractRegionFilterConfig) node.Config);
+                        node.Operation = OperationFactory.CreateFilter((AbstractRegionFilterConfig)node.Config);
                         break;
 
                     case NodeRole.Splitter:
@@ -128,15 +128,15 @@ namespace Dalichrome.RandomGenerator.Nodes
                     case NodeRole.LogicFilter:
                         var parentFilters = node.Parents
                             .Where(p => p.Operation is IFilter)
-                            .Select(p => (IFilter) p.Operation)
+                            .Select(p => (IFilter)p.Operation)
                             .ToList();
 
-                        node.Operation = OperationFactory.CreateLogicFilter((AbstractLogicFilterConfig) node.Config, parentFilters);
+                        node.Operation = OperationFactory.CreateLogicFilter((AbstractLogicFilterConfig)node.Config, parentFilters);
 
                         HashSet<ConfigGraphNode> newParents = new();
                         HashSet<ConfigGraphNode> oldParents = new();
                         if (node.Parents == null) break;
-                        for (int i = node.Parents.Count -1; i >= 0; i--)
+                        for (int i = node.Parents.Count - 1; i >= 0; i--)
                         {
                             var parent = node.Parents[i];
                             if (parent.Role == NodeRole.Filter || parent.Role == NodeRole.LogicFilter)
@@ -167,6 +167,44 @@ namespace Dalichrome.RandomGenerator.Nodes
                         queue.Enqueue(child);
                 }
             }
+        }
+
+        public int GetNodeCount()
+        {
+            var root = ToConfigGraphRoot();
+            if (root == null) return 0;
+
+            int count = 0;
+            var visited = new HashSet<ConfigGraphNode>();
+            var queue = new Queue<ConfigGraphNode>();
+            queue.Enqueue(root);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                if (!visited.Add(current)) continue;
+
+                if (current.Config != null)
+                    count++;
+
+                foreach (var child in current.Children)
+                    queue.Enqueue(child);
+            }
+
+            return count;
+        }
+
+        public List<AbstractConfig> GetConfigList()
+        {
+            return nodes
+                .OfType<IConfigNode>()
+                .Select(configNode => configNode.Config)
+                .ToList();
+        }
+
+        public GeneratorGraph Clone()
+        {
+            return Instantiate(this);
         }
     }
 }

@@ -22,7 +22,6 @@ namespace Dalichrome.RandomGenerator
     public class RandomGenerator : MonoBehaviour
     {
         [SerializeField] private GenerationParams generationParameters;
-        [SerializeField] private GeneratorGraph graph;
 
         [SerializeField] private TilemapCreator tilemapCreator;
 
@@ -38,9 +37,7 @@ namespace Dalichrome.RandomGenerator
         private Dictionary<int, LayerType> tileObjectLayerLookup = new();
         private List<int> ids = new();
 
-        private List<AbstractGeneratorConfig> lastGeneratedConfigs;
-        private List<AbstractGeneratorConfig> generatingConfigs;
-        private BlockingCollection<AbstractGeneratorConfig> blockingConfigs;
+        private GeneratorGraph lastGeneratedGraph;
 
         private GenerationEvents events = new();
 
@@ -56,6 +53,11 @@ namespace Dalichrome.RandomGenerator
             get { return Last.events; }
         }
 
+        public static GeneratorGraph LastGraph
+        {
+            get { return Last.Graph; }
+        }
+
         public static TileGrid LastGrid
         {
             get { return Last.lastGeneration.Grid; }
@@ -69,11 +71,6 @@ namespace Dalichrome.RandomGenerator
         public static int LastHeight
         {
             get { return Last.generationParameters.Height; }
-        }
-
-        public static List<AbstractGeneratorConfig> LastConfigs
-        {
-            get { return Last.generationParameters.Configs; }
         }
 
         public static Generation LastGeneration
@@ -117,9 +114,9 @@ namespace Dalichrome.RandomGenerator
             get { return generationParameters.Height; }
         }
 
-        public List<AbstractGeneratorConfig> Configs
+        public GeneratorGraph Graph
         {
-            get { return generationParameters.Configs; }
+            get { return generationParameters.Graph; }
         }
 
         public static RandomGenerator Last
@@ -165,7 +162,7 @@ namespace Dalichrome.RandomGenerator
 
         private void Start()
         {
-            if (generateOnStart) GenerateAsync();
+            if (generateOnStart) Generate();
         }
 
         private void OnApplicationQuit()
@@ -181,72 +178,52 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private async void Generate(CancellationToken token)
+        public void Generate()
         {
-            SetGeneratingConfigs();
+            if (CannotGenerate()) return;
+            last = this;
 
-            Generation generation = CreateGeneration(token);
+            CancelAsyncGeneration();
+            if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
+
+            Debug.Log("==== Starting Generation via Graph " + Graph.name);
+            Generation data = CreateGeneration();
             events.RaiseGenerationStart(generationParameters);
 
-            //Background Thread Generating the TileGrid and Calculating Time
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            //Await thread syncing on each strategy config, this is done to allow UI like the loader to function
-            int count = 0;
-            foreach (AbstractGeneratorConfig config in generatingConfigs)
-            {
-                if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
-
-                count += 1;
-                events.RaiseConfigGenerated(config, count / (float)generationParameters.Configs.Count);
-
-                Debug.Log("Generating Config of " + config.Type);
-                IGenerator generator = OperationFactory.CreateGenerator(config);
-                try
-                {
-                    await Task.Run(() => generator.Do(generation));
-                }
-                catch (OperationCanceledException exception)
-                {
-                    events.RaiseGenerationCancel();
-                    Debug.Log("Generation Got Cancelled!" + exception.ToString());
-                    generation.Dispose();
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    events.RaiseGenerationError(exception.ToString());
-                    generation.Dispose();
-                    return;
-                }
-            }
+            bool success = RunGraphTraversalLoop(
+                Graph,
+                data,
+                (node, input) => Task.FromResult(node.Operate(input))
+            );
 
             watch.Stop();
-
-            Dispose();
-            generation.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-            lastGeneration = generation;
-            lastGeneratedConfigs = generatingConfigs.DeepClone();
-            CheckUngeneratedChanges();
-
-            if (tilemapCreator != null)
-            {
-                tilemapCreator.CreateTilemaps(lastGeneration.Grid);
-            }
-            events.RaiseGenerationEnd(lastGeneration);
+            FinalizeGeneration(success, data, watch.ElapsedMilliseconds);
         }
 
-        private async void Generate(CancellationToken token, GeneratorGraph generatorGraph)
+        public void GenerateAsync()
         {
-            Debug.Log("==== Starting Generation via Graph " + generatorGraph.name);
+            CancelAsyncGeneration();
+            CancellationTokenSource combinationSource = CancellationTokenSource.CreateLinkedTokenSource(manualCancellationSource.Token, Application.exitCancellationToken);
+
+            GenerateAsync(combinationSource.Token);
+        }
+
+        private async void GenerateAsync(CancellationToken token)
+        {
+            if (CannotGenerate()) return;
+            last = this;
+
+            Debug.Log("==== Starting Generation via Graph " + Graph.name);
             AbstractGridOperationData data = CreateGeneration(token);
             events.RaiseGenerationStart(generationParameters);
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            ConfigGraphNode current = generatorGraph.ToConfigGraphRoot();
+            ConfigGraphNode current = Graph.ToConfigGraphRoot();
             bool forwards = true;
             var usedSplitters = new HashSet<ISplitter>();
 
@@ -265,9 +242,9 @@ namespace Dalichrome.RandomGenerator
                         {
                             Debug.Log("Generating Config of " + current.Config.ToString());
                             Debug.Log("Inputting Data " + data.ToString());
-                            if( data.Grid == null) Debug.Log("Data Grid is null");
+                            if (data.Grid == null) Debug.Log("Data Grid is null");
                         }
-                        events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Configs.Count);
+                        events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Graph.GetNodeCount());
                         AbstractGridOperationData temp = null;
                         await Task.Run(() => temp = current.Operate(data));
 
@@ -335,23 +312,211 @@ namespace Dalichrome.RandomGenerator
             }
 
             watch.Stop();
-            data.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
+            FinalizeGeneration(true, (Generation)data, watch.ElapsedMilliseconds);
+        }
 
-            Dispose(); // Clears previous generation
+        public void GenerateCoroutine()
+        {
+            StartCoroutine(DoGenerationCoroutine());
+        }
 
-            lastGeneration = (Generation)data;
-            lastGeneratedConfigs = generatingConfigs.DeepClone();
+        private IEnumerator DoGenerationCoroutine()
+        {
+            if (CannotGenerate()) yield break;
+            last = this;
+
+            CancelAsyncGeneration();
+
+            if (!generationParameters.IsSeeded || generationParameters.Seed == 0)
+                generationParameters.Seed = GetRandomSeed();
+
+            Debug.Log("==== Starting Coroutine Generation via Graph " + Graph.name);
+            AbstractGridOperationData data = CreateGeneration();
+            events.RaiseGenerationStart(generationParameters);
+
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
+            GeneratorGraph graph = Graph;
+            ConfigGraphNode current = graph.ToConfigGraphRoot();
+            bool forwards = true;
+            int count = 0;
+            var usedSplitters = new HashSet<ISplitter>();
+            int total = graph.GetNodeCount();
+
+            while (current.Role != NodeRole.End)
+            {
+                if (!current.Done && forwards && current.Operation != null)
+                {
+                    try
+                    {
+                        if (current.Config != null)
+                        {
+                            Debug.Log($"[Coroutine] Generating Config of {current.Config}");
+                        }
+
+                        events.RaiseConfigGenerated(current.Config, total == 0 ? 0 : count / (float)total);
+                        var result = current.Operate(data);
+
+                        if (result == null)
+                        {
+                            forwards = false;
+                        }
+                        else
+                        {
+                            data = result;
+                        }
+
+                        if (current.Done) count++;
+                        if (current.Operation is ISplitter splitter) usedSplitters.Add(splitter);
+                    }
+                    catch (Exception ex)
+                    {
+                        events.RaiseGenerationError($"Coroutine Generation Error: {ex}");
+                        data?.Dispose();
+                        yield break;
+                    }
+                }
+
+                bool moved = false;
+                var connected = forwards ? current.Children : current.Parents;
+                foreach (var node in connected)
+                {
+                    if (node.Done && connected.Count > 1) continue;
+                    if (!node.Done && !forwards && node.Role == NodeRole.Splitter)
+                        forwards = true;
+
+                    current = node;
+                    moved = true;
+                    break;
+                }
+
+                if (!moved)
+                {
+                    events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
+                    data?.Dispose();
+                    yield break;
+                }
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            foreach (var splitter in usedSplitters) splitter.ParallelDispose();
+
+            if (!data.Valid || data.Grid == null)
+            {
+                events.RaiseGenerationError("Generator returned a null generation");
+                yield break;
+            }
+
+            watch.Stop();
+            FinalizeGeneration(true, (Generation) data, watch.ElapsedMilliseconds);
+        }
+
+
+        private bool RunGraphTraversalLoop(
+            GeneratorGraph graph,
+            AbstractGridOperationData data,
+            Func<ConfigGraphNode, AbstractGridOperationData, Task<AbstractGridOperationData>> runOperation)
+        {
+            var current = graph.ToConfigGraphRoot();
+            bool forwards = true;
+            var usedSplitters = new HashSet<ISplitter>();
+            int count = 0;
+
+            while (current.Role != NodeRole.End)
+            {
+                if (!current.Done && forwards && current.Operation != null)
+                {
+                    try
+                    {
+                        if (current.Config != null)
+                        {
+                            Debug.Log($"Generating Config of {current.Config}");
+                            if (data.Grid == null) Debug.Log("Data Grid is null");
+                        }
+
+                        int totalConfigNodes = graph.GetNodeCount();
+                        events.RaiseConfigGenerated(current.Config, totalConfigNodes == 0 ? 0 : count / (float)totalConfigNodes);
+                        var result = runOperation(current, data).Result;
+
+                        if (result == null) forwards = false;
+                        else data = result;
+
+                        if (current.Done) count++;
+
+                        if (current.Operation is ISplitter splitter)
+                            usedSplitters.Add(splitter);
+                    }
+                    catch (Exception ex)
+                    {
+                        events.RaiseGenerationError(ex.ToString());
+                        data?.Dispose();
+                        return false;
+                    }
+                }
+
+                bool moved = false;
+                var connected = forwards ? current.Children : current.Parents;
+                foreach (var node in connected)
+                {
+                    if (node.Done && connected.Count > 1) continue;
+                    if (!node.Done && !forwards && node.Role == NodeRole.Splitter)
+                        forwards = true;
+
+                    current = node;
+                    moved = true;
+                    break;
+                }
+
+                if (!moved)
+                {
+                    events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
+                    data?.Dispose();
+                    return false;
+                }
+            }
+
+            foreach (ISplitter splitter in usedSplitters)
+                splitter.ParallelDispose();
+
+            if (!data.Valid || data.Grid == null)
+            {
+                events.RaiseGenerationError("Generator returned a null generation");
+            }
+
+            return true;
+        }
+
+        private void FinalizeGeneration(bool success, Generation data, long elapsedMs)
+        {
+            if (!success || data == null)
+            {
+                data?.Dispose();
+                return;
+            }
+
+            data.OverallOperationMilliseconds = elapsedMs;
+            Dispose(); // dispose previous generation
+            lastGeneration = data;
             CheckUngeneratedChanges();
 
-            tilemapCreator?.CreateTilemaps(lastGeneration.Grid);
-            events.RaiseGenerationEnd(lastGeneration);
+            tilemapCreator?.CreateTilemaps(data.Grid);
+            events.RaiseGenerationEnd(data);
 
-            Debug.Log("Ended Generation of Graph " + generatorGraph.name);
+            Debug.Log("Ended Generation of Graph " + Graph.name);
+        }
+
+        private Generation CreateGeneration()
+        {
+            Generation generationInput = generationParameters.ToGeneration();
+            generationInput.AddLayersLookups(tileObjectLayerLookup);
+            return generationInput;
         }
 
         private Generation CreateGeneration(CancellationToken token)
         {
-            Generation generationInput = new (generationParameters);
+            Generation generationInput = generationParameters.ToGeneration();
             generationInput.Token = token;
             generationInput.AddLayersLookups(tileObjectLayerLookup);
             return generationInput;
@@ -376,8 +541,8 @@ namespace Dalichrome.RandomGenerator
 
         public void SetParams(GenerationParams genParams)
         {
-            this.generationParameters = genParams;
-            lastGeneratedConfigs = Configs.DeepClone();
+            if( Graph != null) lastGeneratedGraph = Graph.Clone();
+            generationParameters = (GenerationParams) genParams.Clone();
 
             CheckUngeneratedChanges();
         }
@@ -387,84 +552,71 @@ namespace Dalichrome.RandomGenerator
             return generationParameters;
         }
 
-        public void SetGeneratingConfigs()
-        {
-            generatingConfigs = generationParameters.Configs.DeepClone();
-            blockingConfigs = new(new ConcurrentQueue<AbstractGeneratorConfig>(generatingConfigs));
-        }
-
         public bool CannotGenerate()
         {
-            return generationParameters.Configs == null || generationParameters.Configs.Count == 0 || LastWidth == 0 || LastHeight == 0;
+            string cannotGenerate = "Cannot Generate -";
+            if (generationParameters.Graph == null)
+            {
+                Debug.LogWarning($"{cannotGenerate} The Generator Graph is Null");
+                return true;
+            }
+            else if (generationParameters.Graph.GetNodeCount() == 0)
+            {
+                Debug.LogWarning($"{cannotGenerate} The Generator Graph contains no nodes");
+                return true;
+            }
+            else if (LastWidth <= 0 || LastHeight <= 0)
+            {
+                Debug.LogWarning($"{cannotGenerate} Either width or height is set to zero or below");
+                return true;
+            }
+
+            return false;
         }
 
         //Make clear this version lacks callbacks
         public Generation GenerateThreadSafe(CancellationToken token = default, uint seed = 0)
         {
-            if (CannotGenerate()) return null;
-            last = this;
+            if (Width == 0 || Height == 0) return null;
 
-            if ( seed == 0) seed = generationParameters.Seed;
             if (!generationParameters.IsSeeded || seed == 0)
             {
                 seed = GetRandomSeed();
             }
 
-            Generation generationOutput = CreateGeneration(token, seed);
-
-            if (generatingConfigs == null || Height == 0 || Width == 0) return generationOutput;
+            Generation generationOutput = generationParameters.ToGeneration();
+            generationOutput.Seed = seed;
+            generationOutput.Token = token;
+            generationOutput.AddLayersLookups(tileObjectLayerLookup);
 
             try
             {
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
 
-                foreach (AbstractGeneratorConfig config in blockingConfigs)
-                {
-                    if (config == null || config.Type == GeneratorType.NA || !config.Enabled) continue;
-
-                    IGenerator generator = OperationFactory.CreateGenerator(config);
-                    generator.Do(generationOutput);
-                }
+                bool success = RunGraphTraversalLoop(
+                    Graph,
+                    generationOutput,
+                    (node, input) => Task.FromResult(node.Operate(input)) // force sync
+                );
 
                 watch.Stop();
 
+                if (!success)
+                {
+                    generationOutput.Dispose();
+                    return null;
+                }
+
                 generationOutput.OverallOperationMilliseconds = watch.ElapsedMilliseconds;
-
+                return generationOutput;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                generationOutput?.Dispose();
+                Debug.LogError($"[ThreadSafeGeneration] Error: {ex}");
+                generationOutput.Dispose();
+                return null;
             }
-            return generationOutput;
-        }
-
-        //TODO have callback and return generationInfo also maybe turn into generationResult
-        public void GenerateAsync(GenerationParams overrideParams = null)
-        {
-            if (CannotGenerate()) return;
-            last = this;
-
-            if (overrideParams != null) generationParameters = overrideParams;
-            if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
-
-            CancelAsyncGeneration();
-            CancellationTokenSource combinationSource = CancellationTokenSource.CreateLinkedTokenSource(manualCancellationSource.Token, Application.exitCancellationToken);
-
-            Generate(combinationSource.Token);
-        }
-
-        [Button]
-        public void GenerateGraphAsync()
-        {
-            last = this;
-
-            if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
-
-            CancelAsyncGeneration();
-            CancellationTokenSource combinationSource = CancellationTokenSource.CreateLinkedTokenSource(manualCancellationSource.Token, Application.exitCancellationToken);
-
-            Generate(combinationSource.Token, graph);
         }
 
         public void CancelAsyncGeneration()
@@ -484,48 +636,18 @@ namespace Dalichrome.RandomGenerator
             events.RaiseGenerationEnd(lastGeneration);
         }
 
-        public void SetConfigs(List<AbstractGeneratorConfig> configs)
+        public void SetGraph(GeneratorGraph inputGraph)
         {
-            generationParameters.Configs = configs.DeepClone();
-            lastGeneratedConfigs = configs.DeepClone();
-
+            lastGeneratedGraph = Graph.Clone();
+            generationParameters.Graph = inputGraph.Clone();
             CheckUngeneratedChanges();
         }
 
-        public void RevertToLastConfig()
+        public void RevertToLastGraph()
         {
             if (!GetUngeneratedChanges()) return;
 
-            generationParameters.Configs = lastGeneratedConfigs.DeepClone();
-            CheckUngeneratedChanges();
-        }
-
-        public void AddConfig(GeneratorType type)
-        {
-            AbstractGeneratorConfig config = GeneratorTypeConversions.GetConfig(type);
-            if (config == null) return;
-
-            Configs.Add(config);
-            CheckUngeneratedChanges();
-        }
-
-        public void RemoveConfig(AbstractGeneratorConfig config)
-        {
-            Configs.Remove(config);
-            CheckUngeneratedChanges();
-        }
-
-        public void RemoveAllConfigs()
-        {
-            Configs.Clear();
-            CheckUngeneratedChanges();
-        }
-
-        public void MoveConfig(int index, AbstractGeneratorConfig config)
-        {
-            Configs.Remove(config);
-            Configs.Insert(index, config);
-
+            generationParameters.Graph = lastGeneratedGraph.Clone();
             CheckUngeneratedChanges();
         }
 
@@ -536,8 +658,7 @@ namespace Dalichrome.RandomGenerator
 
         public bool GetUngeneratedChanges()
         {
-            if (Configs == null || lastGeneratedConfigs == null) return Configs == lastGeneratedConfigs;
-            return !lastGeneratedConfigs.SequenceEqual(Configs);
+            return Graph != lastGeneratedGraph;
         }
 
         public List<int> GetTileIds() 

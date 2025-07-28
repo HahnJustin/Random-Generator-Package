@@ -10,14 +10,15 @@ namespace Dalichrome.RandomGenerator.Data
     {
         public Generation() : base()
         {
+
         }
 
         public Generation(AbstractGridOperationData data) : base(data) { }
 
-        public Generation(GenerationParams genParams) : base()
+        public Generation(int width, int height, uint seed) : base()
         {
-            Grid = new(genParams.Width, genParams.Height);
-            Seed = genParams.Seed;
+            Grid = new(width, height);
+            Seed = seed;
         }
     }
 }

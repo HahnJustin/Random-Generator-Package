@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Nodes;
+using UnityEditor.Graphs;
 
 namespace Dalichrome.RandomGenerator.Data
 {
@@ -22,7 +24,7 @@ namespace Dalichrome.RandomGenerator.Data
             get { return seed; }
             set { seed = value; }
         }
-        [Condition("IsSeeded", true),SerializeField] private uint seed = 0;
+        [Condition("IsSeeded", true), SerializeField] private uint seed = 0;
 
         public int Width
         {
@@ -38,22 +40,30 @@ namespace Dalichrome.RandomGenerator.Data
         }
         [SerializeField] private int height = 100;
 
-        public List<AbstractGeneratorConfig> Configs
+        public GeneratorGraph Graph
         {
-            get { return configs; }
-            set { configs = value; }
+            get { return graph; }
+            set { graph = value; }
         }
-        [SerializeReference] private List<AbstractGeneratorConfig> configs = new();
+        [SerializeReference] private GeneratorGraph graph = null;
 
         public object Clone()
         {
             GenerationParams newParams = new();
             newParams.height = height;
             newParams.width = width;
-            newParams.configs = configs.DeepClone();
             newParams.seed = seed;
             newParams.isSeeded = isSeeded;
+
+            if (graph != null) newParams.graph = graph.Clone();
+
             return newParams;
+        }
+
+        public Generation ToGeneration()
+        {
+            Generation generation = new (width, height, seed);
+            return generation;
         }
     }
 }

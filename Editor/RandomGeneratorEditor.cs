@@ -83,7 +83,7 @@ public class RandomGeneratorEditor : Editor
         // TODO: Remove this later
         if (GUILayout.Button("Generate Graph"))
         {
-            genMan.GenerateGraphAsync();
+            genMan.GenerateAsync();
         }
     }
 }
