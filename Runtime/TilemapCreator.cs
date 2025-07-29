@@ -185,7 +185,6 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-
         private void SetNumberTiles()
         {
             numberTilemap.ClearAllTiles();
@@ -236,7 +235,7 @@ namespace Dalichrome.RandomGenerator
                     rb.bodyType = RigidbodyType2D.Static;
                     rb.simulated = true;
 
-                    tilemapCollider.usedByComposite = true;
+                    tilemapCollider.compositeOperation = Collider2D.CompositeOperation.Intersect;
                 }
             }
 

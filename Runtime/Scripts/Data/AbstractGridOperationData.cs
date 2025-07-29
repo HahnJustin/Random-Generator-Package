@@ -86,9 +86,9 @@ namespace Dalichrome.RandomGenerator.Data
         {
             if (grid != null && grid.IsValid)
             {
-                Debug.Log($"[GridOpData #{_id}] disposing seed={Seed}");
                 grid.Dispose();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                Debug.Log($"[GridOpData #{_id}] disposing seed={Seed}");
                 _disposed = true;
 #endif
             }

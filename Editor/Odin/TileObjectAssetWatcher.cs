@@ -25,7 +25,9 @@ sealed class TileObjectAssetWatcher : AssetPostprocessor
         if (touchesTileObject)
         {
             TileDisplayHelper.Invalidate();        // non-Odin cache
+#if ODIN_INSPECTOR
             TileDropdownOdinUtility.Invalidate();  // Odin cache
+#endif
         }
     }
 

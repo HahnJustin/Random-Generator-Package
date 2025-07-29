@@ -41,7 +41,19 @@ namespace Dalichrome.RandomGenerator
             {
                 return LayerMask.NameToLayer("Default");
             }
-            return LayerMask.NameToLayer(database.GetValue(layer).layerName);
+
+            string tempName = database.GetValue(layer).layerName;
+            if (string.IsNullOrEmpty(tempName))
+            {
+                tempName = "Default";
+            }
+
+            int layerID = LayerMask.NameToLayer(tempName);
+            if( layerID == -1)
+            {
+                Debug.LogError($"LayerType {layer}'s layer name defined in LayerDatabase '{tempName}' does not exist");
+            }
+            return LayerMask.NameToLayer(tempName);
         }
 
         public string GetTag(LayerType layer)

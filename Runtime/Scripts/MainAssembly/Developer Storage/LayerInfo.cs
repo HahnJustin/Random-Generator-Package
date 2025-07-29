@@ -17,7 +17,7 @@ public class LayerInfo
     [ShowIf("hasCollider", true)]
 #endif
     public bool useCompositeCollider = false;
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && UNITY_EDITOR
     [ValueDropdown(nameof(AllTags))]
 #endif
     public string tag = "Untagged";

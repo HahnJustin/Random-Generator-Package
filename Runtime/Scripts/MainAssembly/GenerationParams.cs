@@ -5,7 +5,6 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
-using UnityEditor.Graphs;
 
 namespace Dalichrome.RandomGenerator.Data
 {

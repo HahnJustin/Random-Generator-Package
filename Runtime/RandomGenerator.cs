@@ -14,8 +14,6 @@ using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.UserData;
-using Sirenix.OdinInspector;
-using System.Security.Cryptography;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -30,6 +28,8 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private NumberSpriteDatabase numberSpriteDatabase;
 
         [SerializeField] private bool generateOnStart = true;
+
+        [SerializeField] private bool disposeAfter = true;
 
         private TileInfoGrabber tileGrabber = new();
         private LayerInfoGrabber layerGrabber = new();
@@ -186,21 +186,21 @@ namespace Dalichrome.RandomGenerator
             CancelAsyncGeneration();
             if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
 
-            Debug.Log("==== Starting Generation via Graph " + Graph.name);
+            Debug.Log($"==== Starting Generation via Graph '{Graph.name}' and seed {generationParameters.Seed}");
             Generation data = CreateGeneration();
             events.RaiseGenerationStart(generationParameters);
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            bool success = RunGraphTraversalLoop(
+            Generation result = RunGraphTraversalLoop(
                 Graph,
                 data,
                 (node, input) => Task.FromResult(node.Operate(input))
             );
 
             watch.Stop();
-            FinalizeGeneration(success, data, watch.ElapsedMilliseconds);
+            FinalizeGeneration(result, watch.ElapsedMilliseconds);
         }
 
         public void GenerateAsync()
@@ -216,7 +216,10 @@ namespace Dalichrome.RandomGenerator
             if (CannotGenerate()) return;
             last = this;
 
-            Debug.Log("==== Starting Generation via Graph " + Graph.name);
+
+            if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
+
+            Debug.Log($"==== Starting Async Generation via Graph '{Graph.name}' and seed {generationParameters.Seed}");
             AbstractGridOperationData data = CreateGeneration(token);
             events.RaiseGenerationStart(generationParameters);
 
@@ -312,7 +315,7 @@ namespace Dalichrome.RandomGenerator
             }
 
             watch.Stop();
-            FinalizeGeneration(true, (Generation)data, watch.ElapsedMilliseconds);
+            FinalizeGeneration((Generation)data, watch.ElapsedMilliseconds);
         }
 
         public void GenerateCoroutine()
@@ -330,7 +333,7 @@ namespace Dalichrome.RandomGenerator
             if (!generationParameters.IsSeeded || generationParameters.Seed == 0)
                 generationParameters.Seed = GetRandomSeed();
 
-            Debug.Log("==== Starting Coroutine Generation via Graph " + Graph.name);
+            Debug.Log($"==== Starting Coroutine Generation via Graph '{Graph.name}' and seed {generationParameters.Seed}");
             AbstractGridOperationData data = CreateGeneration();
             events.RaiseGenerationStart(generationParameters);
 
@@ -410,11 +413,11 @@ namespace Dalichrome.RandomGenerator
             }
 
             watch.Stop();
-            FinalizeGeneration(true, (Generation) data, watch.ElapsedMilliseconds);
+            FinalizeGeneration((Generation) data, watch.ElapsedMilliseconds);
         }
 
 
-        private bool RunGraphTraversalLoop(
+        private Generation RunGraphTraversalLoop(
             GeneratorGraph graph,
             AbstractGridOperationData data,
             Func<ConfigGraphNode, AbstractGridOperationData, Task<AbstractGridOperationData>> runOperation)
@@ -452,7 +455,7 @@ namespace Dalichrome.RandomGenerator
                     {
                         events.RaiseGenerationError(ex.ToString());
                         data?.Dispose();
-                        return false;
+                        return null;
                     }
                 }
 
@@ -473,7 +476,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
                     data?.Dispose();
-                    return false;
+                    return null;
                 }
             }
 
@@ -485,14 +488,17 @@ namespace Dalichrome.RandomGenerator
                 events.RaiseGenerationError("Generator returned a null generation");
             }
 
-            return true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"[GridOpData #{data._id}] final data");
+#endif
+
+            return (Generation)data;
         }
 
-        private void FinalizeGeneration(bool success, Generation data, long elapsedMs)
+        private void FinalizeGeneration(Generation data, long elapsedMs)
         {
-            if (!success || data == null)
+            if (data == null)
             {
-                data?.Dispose();
                 return;
             }
 
@@ -503,6 +509,7 @@ namespace Dalichrome.RandomGenerator
 
             tilemapCreator?.CreateTilemaps(data.Grid);
             events.RaiseGenerationEnd(data);
+            if(disposeAfter) data?.Dispose();
 
             Debug.Log("Ended Generation of Graph " + Graph.name);
         }
@@ -594,7 +601,7 @@ namespace Dalichrome.RandomGenerator
                 var watch = new System.Diagnostics.Stopwatch();
                 watch.Start();
 
-                bool success = RunGraphTraversalLoop(
+                Generation result = RunGraphTraversalLoop(
                     Graph,
                     generationOutput,
                     (node, input) => Task.FromResult(node.Operate(input)) // force sync
@@ -602,7 +609,7 @@ namespace Dalichrome.RandomGenerator
 
                 watch.Stop();
 
-                if (!success)
+                if (result == null)
                 {
                     generationOutput.Dispose();
                     return null;

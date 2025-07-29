@@ -582,7 +582,6 @@ namespace Dalichrome.RandomGenerator.Editor
             _treeCache.Clear();
         }
 
-#endif
         private static bool IsRegionFilterField(InspectorProperty property)
         {
             var member = property.Info.GetMemberInfo();
@@ -591,6 +590,7 @@ namespace Dalichrome.RandomGenerator.Editor
 
             return member.DeclaringType == typeof(AbstractRegionFilterConfig);
         }
+#endif
     }
 }
 #endif
