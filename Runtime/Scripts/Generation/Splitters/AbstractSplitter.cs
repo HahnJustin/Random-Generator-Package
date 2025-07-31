@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public abstract class AbstractSplitter<C> : AbstractGridOperation<C, Generation, RegionSplits>, ISplitter
+    public abstract class AbstractSplitter<C> : AbstractMaskedGridOperation<C, RegionSplits>, ISplitter
         where C : AbstractRegionSplitterConfig
     {
         private readonly int expectedOutputs;
@@ -18,12 +18,6 @@ namespace Dalichrome.RandomGenerator.Generators
 
         public void AddOutputComplete() => filledOutputs++;
         public bool Done => filledOutputs >= expectedOutputs;
-
-        protected override void Initialize(Generation generation)
-        {
-            TileGrid = generation.Grid;
-            SetUtilsTileGrid();
-        }
 
         protected override void InitializeUtils()
         {

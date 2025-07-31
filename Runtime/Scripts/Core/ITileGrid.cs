@@ -81,9 +81,14 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool IsInBounds(int x, int y);
         public abstract bool IsInBounds(int2 pos);
 
-        // Restricted = Either Mask Excluded, Out of Bounds or Region Excluded
+        // Restricted = Either Universal Mask Excluded, Out of Bounds or Region Excluded
         public abstract bool IsRestricted(int x, int y);
         public abstract bool IsRestricted(int2 pos);
+
+        // IsInsideMask
+        public abstract bool IsInsideMask(int x, int y);
+
+        public abstract bool IsInsideMask(int2 pos);
 
         // Ienumeration
         public abstract NativeArray<Tile> AsNativeArray();

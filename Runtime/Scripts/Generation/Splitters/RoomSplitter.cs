@@ -36,7 +36,7 @@ namespace Dalichrome.RandomGenerator.Generators
             // Adding Rooms to RegionSplits
             foreach (Room room in roomList) 
             {
-                regionSplits.AddRegion(room.ToRegionBounds());
+                regionSplits.AddRegion(room.ToRegionBounds(TileGrid));
             }
 
             return regionSplits;

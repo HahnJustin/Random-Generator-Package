@@ -385,6 +385,16 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.IsRestricted(pos);
         }
 
+        public bool IsInsideMask(int2 pos)
+        {
+            return subgrid.IsInsideMask(pos);
+        }
+
+        public bool IsInsideMask(int x, int y)
+        {
+            return subgrid.IsInsideMask(x, y);
+        }
+
         // Ienumeration
         public IEnumerator GetEnumerator()
         {

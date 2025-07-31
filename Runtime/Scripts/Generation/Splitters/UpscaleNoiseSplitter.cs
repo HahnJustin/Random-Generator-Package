@@ -154,7 +154,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 foreach (var r in regions)
                     if (r.Count > 0)
-                        splits.AddRegion(new RegionBounds(r));
+                        splits.AddRegion(new RegionBounds(r, TileGrid));
             }
             else
             {
@@ -195,7 +195,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         }
 
                         if (region.Count > 0)
-                            splits.AddRegion(new RegionBounds(region));
+                            splits.AddRegion(new RegionBounds(region, TileGrid));
                     }
                 }
             }

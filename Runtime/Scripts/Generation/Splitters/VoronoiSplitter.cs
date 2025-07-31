@@ -105,7 +105,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     regionMax = math.max(regionMax, p);
                 }
 
-                regionSplits.AddRegion(new RegionBounds(regionMin, regionMax, positions));
+                regionSplits.AddRegion(new RegionBounds(regionMin, regionMax, positions, TileGrid));
             }
 
             return regionSplits;

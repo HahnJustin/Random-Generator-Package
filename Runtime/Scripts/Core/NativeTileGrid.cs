@@ -467,7 +467,7 @@ namespace Dalichrome.RandomGenerator.Core
             foreach (var pos in regionPositions)
                 list.Add(pos);
 
-            return new RegionBounds(regionMin, regionMax, list);
+            return new RegionBounds(regionMin, regionMax, list, this);
         }
 
         public void SetRegionBounds(int2 min, int2 max, List<int2> regionAddPositions)
@@ -539,6 +539,16 @@ namespace Dalichrome.RandomGenerator.Core
         public bool IsRestricted(int2 pos)
         {
             return IsRestricted(pos.x, pos.y);
+        }
+
+        public bool IsInsideMask(int2 pos)
+        {
+            return IsInsideMask(pos.x, pos.y);
+        }
+
+        public bool IsInsideMask(int x, int y)
+        {
+            return tileMask.CanModifyTile(GetTile(x,y));
         }
 
         public NativeArray<Tile> AsNativeArray()

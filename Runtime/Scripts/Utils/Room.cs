@@ -140,11 +140,11 @@ namespace Dalichrome.RandomGenerator.Utils
             return 0;
         }
 
-        public RegionBounds ToRegionBounds()
+        public RegionBounds ToRegionBounds(TileGrid grid)
         {
             List<int2> regionPositions = tiles.Select(x => x.Int2).ToList();
 
-            return new(Minimum, Maximum, regionPositions);
+            return new(Minimum, Maximum, regionPositions, grid);
         }
 
         public IEnumerator<Tile> GetEnumerator()

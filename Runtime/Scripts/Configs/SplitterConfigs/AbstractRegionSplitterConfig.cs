@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public abstract class AbstractRegionSplitterConfig : AbstractConfig
+    public abstract class AbstractRegionSplitterConfig : AbstractMaskedOperationConfig
     {
         public override string IconName => "splitter-icon";
 

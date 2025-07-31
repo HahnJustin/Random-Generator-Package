@@ -58,7 +58,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         }
                     }
                 }
-                RegionBounds bounds = new(positions);
+                RegionBounds bounds = new(positions, TileGrid);
                 regionSplits.AddRegion(bounds);
             }
 
