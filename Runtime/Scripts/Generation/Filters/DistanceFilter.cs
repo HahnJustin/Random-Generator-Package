@@ -32,10 +32,15 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             if (math.all(mainPosition == CANNOT_FIND_TILE_POS)) return false;
 
-            foreach (Tile tile in TileGrid)
+            foreach (int2 pos in region)
             {
-                if (math.distance(mainPosition, tile.Int2) <= config.MaxDistance && 
-                    math.distance(mainPosition, tile.Int2) >= config.MinDistance)
+                int2 delta = pos - mainPosition;
+                int distSq = delta.x * delta.x + delta.y * delta.y;
+
+                int minSq = config.MinDistance * config.MinDistance;
+                int maxSq = config.MaxDistance * config.MaxDistance;
+
+                if (distSq <= maxSq && distSq >= minSq)
                 {
                     return true;
                 }
