@@ -10,6 +10,7 @@ namespace Dalichrome.RandomGenerator.Configs
         RegionSize,
         Chance,
         Guarantee,
-        Contains
+        Contains,
+        Distance
     }
 }

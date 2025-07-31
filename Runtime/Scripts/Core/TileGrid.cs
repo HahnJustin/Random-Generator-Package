@@ -406,6 +406,11 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.GetRegionGrid();
         }
 
+        public IEnumerable<Tile> GetTiles()
+        {
+            return subgrid.GetTiles();
+        }
+
         public ref NativeTileGrid GetNative() => ref subgrid;
 
         public NativeTileGrid CloneNativeGrid()

@@ -137,19 +137,68 @@ namespace Dalichrome.RandomGenerator.Generators
             }
 
             // Convert final grid into RegionSplits
-            var regions = new List<List<int2>>();
-            for (int i = 0; i <= config.RegionCount; i++) regions.Add(new());
+            if (!config.SplitDisconnectedRegions)
+            {
+                // Original grouping logic
+                var regions = new List<List<int2>>();
+                for (int i = 0; i <= config.RegionCount; i++) regions.Add(new());
 
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) continue;
+                        int id = grid[x, y];
+                        if (id != 0) regions[id - 1].Add(new int2(x, y));
+                        TileGrid.SetTileValue(x, y, id);
+                    }
+
+                foreach (var r in regions)
+                    if (r.Count > 0)
+                        splits.AddRegion(new RegionBounds(r));
+            }
+            else
+            {
+                // New disconnected-region split logic
+                bool[,] visited = new bool[width, height];
+
+                for (int x = 0; x < width; x++)
                 {
-                    if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) continue;
-                    int id = grid[x, y];
-                    if (id != 0) regions[id - 1].Add(new int2(x, y));
-                    TileGrid.SetTileValue(x, y, id); // Write to output tile‑grid
-                }
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (visited[x, y]) continue;
+                        int id = grid[x, y];
+                        if (id == 0) continue;
 
-            foreach (var r in regions) splits.AddRegion(new RegionBounds(r));
+                        List<int2> region = new();
+                        Queue<int2> queue = new();
+                        queue.Enqueue(new int2(x, y));
+                        visited[x, y] = true;
+
+                        while (queue.Count > 0)
+                        {
+                            var pos = queue.Dequeue();
+                            region.Add(pos);
+                            TileGrid.SetTileValue(pos.x, pos.y, id);
+
+                            foreach (var (dx, dy) in Neighbor9)
+                            {
+                                int nx = pos.x + dx;
+                                int ny = pos.y + dy;
+
+                                if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                                if (visited[nx, ny]) continue;
+                                if (grid[nx, ny] != id) continue;
+
+                                visited[nx, ny] = true;
+                                queue.Enqueue(new int2(nx, ny));
+                            }
+                        }
+
+                        if (region.Count > 0)
+                            splits.AddRegion(new RegionBounds(region));
+                    }
+                }
+            }
 
             return splits;
         }

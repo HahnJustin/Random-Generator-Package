@@ -41,6 +41,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 RegionSizeFilterConfig c => new RegionSizeFilter(c),
                 GuaranteeFilterConfig c => new GuaranteeFilter(c),
                 ContainsFilterConfig c => new ContainsFilter(c),
+                DistanceFilterConfig c => new DistanceFilter(c),
                 _ => throw new ArgumentException($"Unknown filter config: {config.GetType().Name}")
             };
         }

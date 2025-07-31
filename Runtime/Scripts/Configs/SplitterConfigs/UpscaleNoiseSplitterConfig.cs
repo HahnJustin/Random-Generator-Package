@@ -31,6 +31,9 @@ namespace Dalichrome.RandomGenerator.Configs
         public float LastGridImpact { get { return _lastGridImpact; } set { _lastGridImpact = value; } }
         [SerializeField] private float _lastGridImpact = 0.15f;
 
+        public bool SplitDisconnectedRegions { get { return _splitDisconnectedRegions; } set { _splitDisconnectedRegions = value; } }
+        [SerializeField] private bool _splitDisconnectedRegions = false;
+
         public bool MajoritySmooth { get { return _majoritySmooth; } set { _majoritySmooth = value; } }
         [SerializeField] private bool _majoritySmooth = false;
 
