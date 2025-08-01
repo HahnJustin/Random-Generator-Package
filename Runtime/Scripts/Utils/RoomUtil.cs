@@ -82,7 +82,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 for (int k = 0; k < tileGrid.height; k++)
                 {
                     Tile tile = tileGrid.GetTile(j, k);
-                    if (IsOccupied(tile) <= 0 && tile.Value == 0)
+                    if (tileGrid.IsInRegion(tile) && IsOccupied(tile) <= 0 && tile.Value == 0)
                     {
                         Room newRoom = new(currentRoomNumber);
                         RoomFill(tileGrid, j, k, newRoom, true);

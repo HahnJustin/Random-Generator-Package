@@ -20,7 +20,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Hidden] public bool ShowUniversalMask { get { return _addSpawnsToMask; } }
 
         public bool UseEntranceDistance { get { return _useEntranceDistance; } set { _useEntranceDistance = value; } }
-        [SerializeField] private bool _useEntranceDistance = true;
+        [SerializeField] private bool _useEntranceDistance = false;
 
         [Condition("UseEntranceDistance", true)] public int MinimumDistanceFromEntrance { get { return _minimumSpawnDistance; } set { _minimumSpawnDistance = value; } }
         [Condition("UseEntranceDistance", true), SerializeField] private int _minimumSpawnDistance = 10;
