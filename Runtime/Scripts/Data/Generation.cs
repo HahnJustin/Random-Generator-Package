@@ -20,5 +20,10 @@ namespace Dalichrome.RandomGenerator.Data
             Grid = new(width, height);
             Seed = seed;
         }
+
+        public void ToSerial()
+        {
+            Grid.ToSerial();
+        }
     }
 }

@@ -9,11 +9,13 @@ using UnityEngine;
 namespace Dalichrome.RandomGenerator.Core
 {
 
-    public interface ITileGrid
+    public interface ITileGrid : IDisposable, IEnumerable
     {
+        public int2 Minimum { get; }
+        public int2 Maximum { get; }
 
         // Validity
-        public bool IsValid { get; }
+        public bool IsValid { get; set; }
 
         // Masking Properties
         public bool IsIncludingTiles { get; }
@@ -42,7 +44,12 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool SetTileValue(int2 position, int value);
         public abstract bool SetTileValue(Tile tile, int value);
 
+        // Set All Tiles
+        public abstract void SetAllTiles(Tile[] tileArray);
+
         // Masking Funcs
+        public bool Masked { get; }
+        public ITileMask TileMask { get; set; }
         public abstract void RemoveMask();
         public abstract void CreateMask(List<int> includeList, List<int> excludeList);
         public abstract void ToggleMasked(bool on);
@@ -94,6 +101,7 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract NativeArray<Tile> AsNativeArray();
         public abstract IEnumerable<Tile> GetRegionTiles();
         public abstract IEnumerable<Tile> GetRegionGrid();
+        public abstract IEnumerable<Tile> GetTiles();
 
         // Layer Table Funcs
         public abstract void AddLayersLookups(Dictionary<int, LayerType> layerLookup);

@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public struct TileMask : IDisposable
+    public struct NativeTileMask : ITileMask, IDisposable
     {
         [ReadOnly] public NativeParallelHashSet<int> includeSet;
         [ReadOnly] public NativeParallelHashSet<int> excludeSet;
@@ -32,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public TileMask(List<int> includeList, List<int> excludeList)
+        public NativeTileMask(List<int> includeList, List<int> excludeList)
         {
             AbstractRandom random = new UnityMathematicsRandom(1);
             id = random.NextInt(100000000);
@@ -79,10 +79,10 @@ namespace Dalichrome.RandomGenerator.Core
             else return !IsIncludingTiles;
         }
 
-        public TileMask DeepClone()
+        public ITileMask DeepClone()
         {
             Allocator allocator = Allocator.Persistent;
-            var clone = new TileMask
+            var clone = new NativeTileMask
             {
                 includeSet = new(includeSet.Count(), allocator),
                 excludeSet = new(excludeSet.Count(), allocator),
@@ -113,6 +113,36 @@ namespace Dalichrome.RandomGenerator.Core
             }
 
             IsValid = false;
+        }
+
+        public SerialTileMask ToSerialMask()
+        {
+            var include = new List<int>();
+            var exclude = new List<int>();
+
+            if (includeSet.IsCreated)
+            {
+                using (var keys = includeSet.ToNativeArray(Allocator.Temp))
+                {
+                    include = new List<int>(keys.Length);
+                    // Either a for-loopÅc
+                    for (int i = 0; i < keys.Length; i++) include.Add(keys[i]);
+                    // Åcor, if you prefer:
+                    // include.AddRange(keys.ToArray());
+                }
+            }
+
+            if (excludeSet.IsCreated)
+            {
+                using (var keys = excludeSet.ToNativeArray(Allocator.Temp))
+                {
+                    exclude = new List<int>(keys.Length);
+                    for (int i = 0; i < keys.Length; i++) exclude.Add(keys[i]);
+                    // exclude.AddRange(keys.ToArray());
+                }
+            }
+
+            return new SerialTileMask(include, exclude);
         }
     }
 }

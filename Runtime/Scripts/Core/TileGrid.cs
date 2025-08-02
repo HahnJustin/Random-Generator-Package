@@ -19,7 +19,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool Masked { get { return subgrid.Masked; } }
 
-        private NativeTileGrid subgrid;
+        public ITileMask TileMask { get { return subgrid.TileMask; } set { subgrid.TileMask = value; } }
+
+        private ITileGrid subgrid;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private string allocationStack;
@@ -29,23 +31,23 @@ namespace Dalichrome.RandomGenerator.Core
         public bool IsValid 
         {
             get { return subgrid.IsValid; }
-            internal set { subgrid.IsValid = value; }
+            set { subgrid.IsValid = value; }
         }
 
         public bool IsIncludingTiles
         {
             get
             {
-                if (!subgrid.tileMask.IsValid) return false;
-                return subgrid.tileMask.IsIncludingTiles;
+                if (!subgrid.TileMask.IsValid) return false;
+                return subgrid.TileMask.IsIncludingTiles;
             }
         }
         public bool IsExcludingTiles
         {
             get
             {
-                if (!subgrid.tileMask.IsValid) return false;
-                return subgrid.tileMask.IsExcludingTiles;
+                if (!subgrid.TileMask.IsValid) return false;
+                return subgrid.TileMask.IsExcludingTiles;
             }
         }
 
@@ -64,7 +66,7 @@ namespace Dalichrome.RandomGenerator.Core
             this.width = width;
             this.height = height;
 
-            subgrid = new (width, height);
+            subgrid = new NativeTileGrid(width, height);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             allocationStack = Environment.StackTrace;
@@ -189,7 +191,7 @@ namespace Dalichrome.RandomGenerator.Core
         public void CreateMask(List<int> includeList, List<int> excludeList)
         {
             subgrid.CreateMask(includeList, excludeList);
-            SetGridData(subgrid);
+            if(subgrid is NativeTileGrid grid) SetGridData(grid);
         }
 
         public void ToggleMasked(bool on)
@@ -421,11 +423,14 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.GetTiles();
         }
 
-        public ref NativeTileGrid GetNative() => ref subgrid;
+        public NativeTileGrid GetNative() =>
+            subgrid is NativeTileGrid grid ? grid : default;
 
         public NativeTileGrid CloneNativeGrid()
         {
-            return NativeTileGrid.DeepClone(subgrid);
+            if (subgrid is NativeTileGrid grid)
+                return NativeTileGrid.DeepClone(grid);
+            else return default;
         }
 
         public void OverrideSubGrid(NativeTileGrid _data)
@@ -437,6 +442,21 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
         {
             subgrid.AddLayersLookups(layerLookup);
+        }
+
+        public void SetAllTiles(Tile[] tileArray)
+        {
+            subgrid.SetAllTiles(tileArray);
+        }
+
+        public void ToSerial()
+        {
+            if(subgrid is NativeTileGrid nativeGrid)
+            {
+                SerialTileGrid newGrid = nativeGrid.ToSerial();
+                nativeGrid.Dispose();
+                subgrid = newGrid;
+            }
         }
     }
 }

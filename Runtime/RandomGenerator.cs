@@ -29,7 +29,7 @@ namespace Dalichrome.RandomGenerator
 
         [SerializeField] private bool generateOnStart = true;
 
-        [SerializeField] private bool disposeAfter = true;
+        [SerializeField] private bool toSerialAfter = true;
 
         private TileInfoGrabber tileGrabber = new();
         private LayerInfoGrabber layerGrabber = new();
@@ -507,9 +507,9 @@ namespace Dalichrome.RandomGenerator
             lastGeneration = data;
             CheckUngeneratedChanges();
 
+            if (toSerialAfter) data.ToSerial();
             tilemapCreator?.CreateTilemaps(data.Grid);
             events.RaiseGenerationEnd(data);
-            if(disposeAfter) data?.Dispose();
 
             Debug.Log("Ended Generation of Graph " + Graph.name);
         }
