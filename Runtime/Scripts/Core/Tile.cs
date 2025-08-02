@@ -1,11 +1,13 @@
 using System;
 using UnityEngine;
 using Unity.Mathematics;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Dalichrome.RandomGenerator.Core
 {
     [Serializable]
-    public unsafe struct Tile
+    public unsafe struct Tile : IEnumerable, IEquatable<Tile>
     {
         public readonly int x, y;
 
@@ -13,7 +15,7 @@ namespace Dalichrome.RandomGenerator.Core
         private fixed int layerTypes[layerCount];
         private int _value;
 
-        public int LayerCount { get {return layerCount;} }
+        public int LayerCount { get { return layerCount; } }
 
         public bool IsValid { get; internal set; }
 
@@ -37,9 +39,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int this[LayerType layer]
         {
-            get 
+            get
             {
-                if(layer == LayerType.NA) return (int)TileType.NA;
+                if (layer == LayerType.NA) return (int)TileType.NA;
                 return layerTypes[ConvertLayerTypeToIndex(layer)];
             }
             internal set => layerTypes[ConvertLayerTypeToIndex(layer)] = (int)value;
@@ -79,7 +81,7 @@ namespace Dalichrome.RandomGenerator.Core
         {
             return (int)type - 1;
         }
-        
+
         internal void Invalidate()
         {
             IsValid = false;
@@ -153,5 +155,25 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         public int GetIdInLayer(LayerType layer) => this[layer];
+
+        public IEnumerator GetEnumerator()
+        {
+            List<int> ids = new();
+            for (int i = 0; i < layerCount; i++)
+            {
+                ids.Add(layerTypes[i]);
+            }
+            return ids.GetEnumerator();
+        }
+
+        public bool Equals(Tile tile)
+        {
+            bool equality = true;
+            for (int i = 0; i < layerCount; i++)
+            {
+                equality = equality && tile.layerTypes[i].Equals(layerTypes[i]);
+            }
+            return equality;
+        }
     }
 }
