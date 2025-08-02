@@ -23,6 +23,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         private ITileGrid subgrid;
 
+        public bool IsSerial{ get { return isSerial; }}
+        private bool isSerial = false;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private string allocationStack;
         private bool isDisposed = false;
@@ -283,7 +286,7 @@ namespace Dalichrome.RandomGenerator.Core
         ~TileGrid()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (!isDisposed)
+            if (!isDisposed && subgrid is NativeTileGrid)
             {
                 Debug.LogError($"[TileGrid] Native memory leak detected! TileGrid was not disposed properly.\nAllocation stack:\n{allocationStack}");
             }
@@ -456,6 +459,7 @@ namespace Dalichrome.RandomGenerator.Core
                 SerialTileGrid newGrid = nativeGrid.ToSerial();
                 nativeGrid.Dispose();
                 subgrid = newGrid;
+                isSerial = true;
             }
         }
     }

@@ -102,7 +102,7 @@ namespace Dalichrome.RandomGenerator.Data
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         ~AbstractGridOperationData()
         {
-            if (!_disposed && Grid != null)
+            if (!_disposed && Grid != null && Grid.IsValid && !Grid.IsSerial)
             {
                 Debug.LogError($"[GridOpData #{_id}] FINALIZER — leaked {GetType()}! seed={Seed}");
             }
