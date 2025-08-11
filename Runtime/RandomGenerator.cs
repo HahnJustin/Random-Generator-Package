@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator
     {
         [SerializeField] private GenerationParams generationParameters;
 
-        [SerializeField] private TilemapCreator tilemapCreator;
+        [SerializeField] private TilemapInteractor tilemapInteractor;
 
         [SerializeField] private TileInfoDatabase tileDatabase;
         [SerializeField] private LayerDatabase layerDatabase;
@@ -135,7 +135,7 @@ namespace Dalichrome.RandomGenerator
         private void Awake()
         {
             last = this;
-            if (tilemapCreator != null) tilemapCreator.SetRandomGenerator(this);
+            if (tilemapInteractor != null) tilemapInteractor.SetRandomGenerator(this);
             ThreadSafeRandom.InitState();
 
             ids.Clear();
@@ -508,7 +508,7 @@ namespace Dalichrome.RandomGenerator
             CheckUngeneratedChanges();
 
             if (toSerialAfter) data.ToSerial();
-            tilemapCreator?.CreateTilemaps(data.Grid);
+            tilemapInteractor?.CreateWithTilegrid(data.Grid);
             events.RaiseGenerationEnd(data);
 
             Debug.Log("Ended Generation of Graph " + Graph.name);
@@ -671,6 +671,11 @@ namespace Dalichrome.RandomGenerator
         public List<int> GetTileIds() 
         { 
             return ids; 
+        }
+
+        public TilemapInteractor GetTilemapInteractor()
+        {
+            return tilemapInteractor;
         }
     }
 }
