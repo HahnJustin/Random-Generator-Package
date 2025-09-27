@@ -504,6 +504,7 @@ namespace Dalichrome.RandomGenerator
 
             data.OverallOperationMilliseconds = elapsedMs;
             Dispose(); // dispose previous generation
+            lastGeneratedGraph = Graph;
             lastGeneration = data;
             CheckUngeneratedChanges();
 
@@ -548,7 +549,7 @@ namespace Dalichrome.RandomGenerator
 
         public void SetParams(GenerationParams genParams)
         {
-            if( Graph != null) lastGeneratedGraph = Graph.Clone();
+            if( Graph != null) lastGeneratedGraph = Graph;
             generationParameters = (GenerationParams) genParams.Clone();
 
             CheckUngeneratedChanges();
@@ -645,7 +646,7 @@ namespace Dalichrome.RandomGenerator
 
         public void SetGraph(GeneratorGraph inputGraph)
         {
-            lastGeneratedGraph = Graph.Clone();
+            lastGeneratedGraph = Graph;
             generationParameters.Graph = inputGraph.Clone();
             CheckUngeneratedChanges();
         }
@@ -654,7 +655,7 @@ namespace Dalichrome.RandomGenerator
         {
             if (!GetUngeneratedChanges()) return;
 
-            generationParameters.Graph = lastGeneratedGraph.Clone();
+            generationParameters.Graph = lastGeneratedGraph;
             CheckUngeneratedChanges();
         }
 
