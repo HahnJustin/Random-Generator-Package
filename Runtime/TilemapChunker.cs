@@ -36,10 +36,19 @@ namespace Dalichrome.RandomGenerator
         private readonly HashSet<Chunk> inRenderQ = new();
         private readonly HashSet<Chunk> inDerenderQ = new();
 
-        private static readonly LayerType[] layers = Array.FindAll(
-            (LayerType[])Enum.GetValues(typeof(LayerType)),
-            l => l != LayerType.NA
-        );
+        private static LayerType[] layers;
+
+        private void Awake()
+        {
+            if (layers == null)
+            {
+                var vals = (LayerType[])Enum.GetValues(typeof(LayerType));
+                var list = new List<LayerType>(vals.Length);
+                for (int i = 0; i < vals.Length; i++)
+                    if (vals[i] != LayerType.NA) list.Add(vals[i]);
+                layers = list.ToArray();
+            }
+        }
 
         private bool WithinDistanceOfMainChunk(Chunk a) =>
             Mathf.Abs(a.chunkX - mainChunk.chunkX) <= chunkDistance &&
