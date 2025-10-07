@@ -5,50 +5,45 @@ using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
-public abstract class GenericIdOdinDrawerBase<TEnum, TRes, TMarker> : OdinValueDrawer<int>
-    where TEnum : struct, Enum
-    where TRes : ScriptableObject // or AbstractUserData if you prefer
+public abstract class GenericIdOdinDrawerBase<TRes, TMarker> : OdinValueDrawer<int>
+    where TRes : ScriptableObject
     where TMarker : PropertyAttribute
 {
     protected abstract string ResourcesPath { get; }
-    protected virtual string EnumPrefix => "enum/";
-    protected virtual string AssetPrefix => "asset/";
 
     public override bool CanDrawTypeFilter(Type t) => t == typeof(int);
 
     protected override void DrawPropertyLayout(GUIContent label)
     {
-        // Only handle fields with our marker attribute
         if (Property.GetAttribute<TMarker>() == null)
         {
             CallNextDrawer(label);
             return;
         }
 
-        var entry = GenericIdDropdownCache.GetOrBuild(
-            typeof(TEnum), typeof(TRes), ResourcesPath, EnumPrefix, AssetPrefix);
-
+        var entry = GenericIdDropdownCache.GetOrBuild(typeof(TRes), ResourcesPath);
         var items = entry.Items;
-        if (items.Count == 0)
-        {
-            CallNextDrawer(label);
-            return;
-        }
+        if (items.Count == 0) { CallNextDrawer(label); return; }
+
+        // (optional) apply a filter using entry.CategoryOf[...] if you want
 
         int current = ValueEntry.SmartValue;
         int idx = Math.Max(0, items.FindIndex(i => i.id == current));
 
-        // Layout (no BeginProperty/EndProperty in Odin drawers)
-        var r = EditorGUILayout.GetControlRect();
-        var lab = label ?? Property.Label ?? GUIContent.none;
+        // AFTER (safe)
+        Rect r = EditorGUILayout.GetControlRect();
 
-        // Draw label and popup
-        float lw = EditorGUIUtility.labelWidth;
-        var labelR = new Rect(r.x, r.y, lw, r.height);
-        var fieldR = new Rect(r.x + lw, r.y, r.width - lw, r.height);
+        var labelRect = new Rect(r.x, r.y, EditorGUIUtility.labelWidth, r.height);
+        var fieldRect = new Rect(labelRect.xMax, r.y, r.width - labelRect.width, r.height);
 
-        EditorGUI.LabelField(labelR, lab);
-        int newIdx = EditorGUI.Popup(fieldR, idx, items.Select(i => i.label).ToArray());
+        // Draw label
+        EditorGUI.LabelField(labelRect, label ?? GUIContent.none);
+
+        // Draw popup
+        var names = items.Select(i => i.label).ToArray();
+        int newIdx = EditorGUI.Popup(fieldRect, idx, names);
+
+        // Apply
         ValueEntry.SmartValue = items[newIdx].id;
     }
 }

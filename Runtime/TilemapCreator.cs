@@ -99,7 +99,7 @@ namespace Dalichrome.RandomGenerator
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                tileInfoGrabber.GetTileBase(tile.GetIdInLayer(layer));
+                                TileObjectInfo.GetTileBase(tile.GetIdInLayer(layer));
                     }
                 }
                 // push one bulk call --------------------------------------------------
@@ -130,7 +130,7 @@ namespace Dalichrome.RandomGenerator
                 {
                     int tempIndex = x + (y * tileGrid.width);
                     Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = tileInfoGrabber.GetNumberTileBase(tile.Value);
+                    TileBase tileBase = TileObjectInfo.GetNumberTileBase(tile.Value);
                     tileBaseArray[tempIndex] = tileBase;
                 }
             }

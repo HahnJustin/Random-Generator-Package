@@ -4,68 +4,38 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Collections.LowLevel.Unsafe;
+using System.Text.RegularExpressions;
+using UnityEditor.PackageManager; // PackageInfo
 
-public abstract class TypeResourceCollisionDrawer<T, R> : PropertyDrawer
-    where T : struct, Enum
-    where R : AbstractUserData
+/// Collides int IDs against other ScriptableObjects of type R found in Resources/<GetResourceFolderPath()>
+public abstract class ResourceCollisionDrawer<R> : PropertyDrawer where R : AbstractUserData
 {
-    protected abstract string GetTypeName();
-    protected abstract string GetResourceName();
-    protected abstract string GetResourceFolderPath();
-
-    // Enum Lookup
-    private static readonly Lazy<Dictionary<int, string>> TypeByValue =
-        new(() =>
-        {
-            var vals = (T[])Enum.GetValues(typeof(T));
-            var map = new Dictionary<int, string>(vals.Length);
-            foreach (var e in vals)
-            {
-                int key = ToInt(e);
-                if (map.TryGetValue(key, out var existing))
-                    map[key] = existing + ", " + e.ToString();
-                else
-                    map[key] = e.ToString();
-            }
-            return map;
-        });
+    protected abstract string GetResourceName();        // e.g., "TileLayer" or "TileObject"
+    protected abstract string GetResourceFolderPath();  // e.g., "TileLayers" (Resources subpath)
 
     private static readonly object _lock = new();
 
-    // Resource Cache
-    private static readonly Dictionary<(Type resType, string path), Dictionary<int, List<R>>> ResourceCache
-        = new();
+    // (type,path) Å® id Å® list<R>
+    private static readonly Dictionary<(Type resType, string path), Dictionary<int, List<R>>> ResourceCache = new();
 
-    // Subscribe once per closed generic
-    static TypeResourceCollisionDrawer()
+    static ResourceCollisionDrawer()
     {
-        // invalidate on asset value edits
         AbstractUserData.AnyChanged += OnAnyUserDataChanged;
-
-        // invalidate on undo/redo (values change without reimport)
         Undo.undoRedoPerformed += () => { lock (_lock) ResourceCache.Clear(); };
-
-        // invalidate on project (re)imports/renames
         EditorApplication.projectChanged += () => { lock (_lock) ResourceCache.Clear(); };
-
-        // invalidate on domain reload
         AssemblyReloadEvents.afterAssemblyReload += () => { lock (_lock) ResourceCache.Clear(); };
     }
 
     private static void OnAnyUserDataChanged(AbstractUserData obj)
     {
-        // If the changed object is of our R type, zap entries for that type.
         if (obj is R)
         {
             lock (_lock)
             {
-                // Remove only (typeof(R), *) entries
-                var toRemove = new List<(Type, string)>();
-                foreach (var key in ResourceCache.Keys)
-                    if (key.resType == typeof(R)) toRemove.Add(key);
-
-                foreach (var k in toRemove) ResourceCache.Remove(k);
+                var remove = new List<(Type, string)>();
+                foreach (var k in ResourceCache.Keys)
+                    if (k.resType == typeof(R)) remove.Add(k);
+                foreach (var k in remove) ResourceCache.Remove(k);
             }
         }
     }
@@ -79,9 +49,8 @@ public abstract class TypeResourceCollisionDrawer<T, R> : PropertyDrawer
                 return buckets;
 
             var arr = Resources.LoadAll<R>(path);
-            buckets = arr
-                .GroupBy(r => r.GetId())
-                .ToDictionary(g => g.Key, g => g.ToList());
+            buckets = arr.GroupBy(r => r.GetId())
+                         .ToDictionary(g => g.Key, g => g.ToList());
             ResourceCache[key] = buckets;
             return buckets;
         }
@@ -94,62 +63,59 @@ public abstract class TypeResourceCollisionDrawer<T, R> : PropertyDrawer
         int id = property.intValue;
         float y = position.y + EditorGUI.GetPropertyHeight(property, label, true)
                   + EditorGUIUtility.standardVerticalSpacing;
-        float line = EditorGUIUtility.singleLineHeight;
-        float helpH = 2f * line;
+        float boxH = 2f * EditorGUIUtility.singleLineHeight;
 
-        if (TypeByValue.Value.TryGetValue(id, out var typeHit))
+        if (TryGetOtherHits(id, GetResourceFolderPath(), property.serializedObject.targetObjects, out var hitList))
         {
-            var r = new Rect(position.x, y, position.width, helpH);
-            EditorGUI.HelpBox(r, $"ID {id} collides with {GetTypeName()}: {typeHit}", MessageType.Warning);
-            y += helpH + EditorGUIUtility.standardVerticalSpacing;
-        }
-
-        if (TryGetOtherHits(id, GetResourceFolderPath(), property.serializedObject.targetObjects, out var resHit))
-        {
-            var r = new Rect(position.x, y, position.width, helpH);
-            EditorGUI.HelpBox(r, $"ID {id} collides with {GetResourceName()}: {resHit}", MessageType.Warning);
+            // Include the Resources subpath in the message so you know which set was scanned.
+            string msg = $"ID {id} collides with {GetResourceName()} in '{GetResourceFolderPath()}': {string.Join("; ", hitList)}";
+            var r = new Rect(position.x, y, position.width, boxH);
+            EditorGUI.HelpBox(r, msg, MessageType.Warning);
         }
     }
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float h = EditorGUI.GetPropertyHeight(property, label, true);
-        int id = property.intValue;
-
-        int boxes = 0;
-        if (TypeByValue.Value.ContainsKey(id)) boxes++;
-        if (TryGetOtherHits(id, GetResourceFolderPath(), property.serializedObject.targetObjects, out _)) boxes++;
-
-        if (boxes == 0) return h;
-
-        float line = EditorGUIUtility.singleLineHeight;
-        float helpH = 2f * line;
-        return h + boxes * (helpH + EditorGUIUtility.standardVerticalSpacing);
+        return TryGetOtherHits(property.intValue, GetResourceFolderPath(), property.serializedObject.targetObjects, out _)
+             ? h + (2f * EditorGUIUtility.singleLineHeight) + EditorGUIUtility.standardVerticalSpacing
+             : h;
     }
 
-    private static bool TryGetOtherHits(
-    int id, string path, UnityEngine.Object[] currentTargets, out string hitNames)
+    // Builds "Group/Name" per conflicting asset (Group is "Assets" or package display name)
+    private static bool TryGetOtherHits(int id, string path, UnityEngine.Object[] currentTargets, out List<string> hits)
     {
+        hits = null;
         var buckets = GetResourceBuckets(path);
-        hitNames = null;
 
         if (!buckets.TryGetValue(id, out var list) || list == null || list.Count == 0)
             return false;
 
-        // Build a hash set of the current asset(s) being edited
-        var selfSet = new HashSet<R>(currentTargets.OfType<R>());
+        var self = new HashSet<R>(currentTargets.OfType<R>());
+        var others = list.Where(r => !self.Contains(r)).ToList();
+        if (others.Count == 0) return false;
 
-        // Exclude the current targets
-        var others = list.Where(r => !selfSet.Contains(r)).ToList();
-        if (others.Count == 0)
-            return false;
-
-        hitNames = string.Join(", ", others.Select(o => o.ToString())); // or o.name
+        hits = others.Select(o => $"{GetSourceTabName(o)}/{o.name}").ToList();
         return true;
     }
 
+    private static string GetSourceTabName(ScriptableObject so)
+    {
+        var path = AssetDatabase.GetAssetPath(so);
+        if (string.IsNullOrEmpty(path)) return "Assets";
+        if (path.StartsWith("Assets/"))
+            return "Assets";
 
-    private static int ToInt(T e) => UnsafeUtility.EnumToInt(e);
-    // private static int ToInt(T e) => Convert.ToInt32(e); // fallback
+        if (path.StartsWith("Packages/"))
+        {
+            var info = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(path);
+            if (info != null && !string.IsNullOrWhiteSpace(info.displayName)) return info.displayName;
+            if (info != null) return info.name;
+
+            var m = Regex.Match(path, @"^Packages/([^/]+)/");
+            return m.Success ? m.Groups[1].Value : "Package";
+        }
+        return "Assets";
+    }
 }
 #endif

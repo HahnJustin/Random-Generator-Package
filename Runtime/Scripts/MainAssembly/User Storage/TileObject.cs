@@ -18,7 +18,8 @@ namespace Dalichrome.RandomGenerator.UserData
         [Header("Core Fields")]
         [SerializeField,TileTypeCollision] public int id;
         [SerializeField, LayerDisplay] public int layer;
-
+        [SerializeField] public TileKind tileKind = TileKind.Normal;
+        
         public override int GetId() => id;
 
         [Header("Generator UI Fields")]

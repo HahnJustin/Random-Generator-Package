@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Threading;
-using System.Linq;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Generators;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Databases;
@@ -23,16 +20,11 @@ namespace Dalichrome.RandomGenerator
 
         [SerializeField] private TilemapInteractor tilemapInteractor;
 
-        [SerializeField] private TileInfoDatabase tileDatabase;
-        [SerializeField] private LayerDatabase layerDatabase;
         [SerializeField] private NumberSpriteDatabase numberSpriteDatabase;
 
         [SerializeField] private bool generateOnStart = true;
 
         [SerializeField] private bool toSerialAfter = true;
-
-        private TileInfoGrabber tileGrabber = new();
-        private LayerInfoGrabber layerGrabber = new();
 
         private Dictionary<int, LayerType> tileObjectLayerLookup = new();
         private List<int> ids = new();
@@ -84,16 +76,6 @@ namespace Dalichrome.RandomGenerator
         }
 
         //Properties
-        public TileInfoGrabber TileInfoGrabber
-        {
-            get { return tileGrabber; }
-        }
-
-        public LayerInfoGrabber LayerInfoGrabber
-        {
-            get { return layerGrabber; }
-        }
-
         public GenerationEvents Events
         {
             get { return events; }
@@ -154,10 +136,8 @@ namespace Dalichrome.RandomGenerator
                 ids.Add(tileObject.id);
             }
 
-            tileGrabber.SetDatabase(tileDatabase, numberSpriteDatabase);
-            tileGrabber.SetTileObjects(tileObjects);
-
-            layerGrabber.SetDatabase(layerDatabase);
+            // Change this later - probably remove this with metadata changes
+            TileObjectInfo.SetNumberSpriteDatabase(numberSpriteDatabase);
         }
 
         private void Start()

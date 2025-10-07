@@ -108,7 +108,7 @@ namespace Dalichrome.RandomGenerator
 
                         if (useGameObjects)
                         {
-                            var prefab = tileInfoGrabber.GetGameObject(tileId);
+                            var prefab = TileObjectInfo.GetGameObject(tileId);
                             if (SpawnTileGameObject(tile, prefab, chunk))
                             {
                                 buf[rowBase + x] = null;
@@ -116,7 +116,7 @@ namespace Dalichrome.RandomGenerator
                             }
                         }
 
-                        buf[rowBase + x] = tileInfoGrabber.GetTileBase(tileId);
+                        buf[rowBase + x] = TileObjectInfo.GetTileBase(tileId);
                     }
                 }
 

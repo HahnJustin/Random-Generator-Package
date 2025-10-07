@@ -6,7 +6,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Sirenix.OdinInspector.Editor;
 
 public sealed class LayerIdOdinDrawer
-    : GenericIdOdinDrawerBase<LayerType, TileLayer, LayerDisplayAttribute>
+    : GenericIdOdinDrawerBase<TileLayer, LayerDisplayAttribute>
 {
     protected override string ResourcesPath => "TileLayers";
 }

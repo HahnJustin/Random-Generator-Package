@@ -8,9 +8,8 @@ using System.Linq;
 using Dalichrome.RandomGenerator.UserData;
 
 [CustomPropertyDrawer(typeof(LayerTypeCollisionAttribute))]
-public class LayerTypeCollisionDrawer : TypeResourceCollisionDrawer<LayerType, TileLayer>
+public class LayerTypeCollisionDrawer : ResourceCollisionDrawer<TileLayer>
 {
-    protected override string GetTypeName() => "LayerType";
     protected override string GetResourceName() => "TileLayer";
     protected override string GetResourceFolderPath() => "TileLayers";
 }
