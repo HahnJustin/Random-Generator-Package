@@ -59,6 +59,10 @@ MonoBehaviour:
       type: {class: RoomSplitterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
         _minimumRoomSize: 1
         _maximumRoomSize: 2147483647
         _occupance: 1
@@ -313,7 +317,7 @@ MonoBehaviour:
         _regionAmountFilterType: 0
         _regionAmount: 0
         _regionProportion: 0
-        _tileToCheck: 3500
+        _tileToCheck: 1500
         _amount: 1
         _metric: 0
 --- !u!114 &-6517725862149913408
@@ -666,6 +670,10 @@ MonoBehaviour:
         asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
         _tiles: 64000000
         _minimumRadiusSize: 1
         _maximumRadiusSize: 4
@@ -1426,6 +1434,10 @@ MonoBehaviour:
         asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 10270000
         _regionMin: 10
         _regionMax: 10
 --- !u!114 &8204280645802008378

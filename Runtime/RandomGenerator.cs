@@ -149,9 +149,9 @@ namespace Dalichrome.RandomGenerator
             TileObject[] tileObjectArray = Resources.LoadAll<TileObject>("TileObjects/");
             foreach (TileObject tileObject in tileObjectArray)
             {
-                tileObjects[tileObject.tileId] = tileObject;
-                tileObjectLayerLookup[tileObject.tileId] = tileObject.layer;
-                ids.Add(tileObject.tileId);
+                tileObjects[tileObject.id] = tileObject;
+                //tileObjectLayerLookup[tileObject.id] = tileObject.layer;
+                ids.Add(tileObject.id);
             }
 
             tileGrabber.SetDatabase(tileDatabase, numberSpriteDatabase);

@@ -34,7 +34,7 @@ internal static class TileDisplayHelper
 
         // 2) TileObject assets (Resources/)
         foreach (var obj in Resources.LoadAll<TileObject>(""))
-            list.Add(($"asset/{obj.name}", obj.tileId));
+            list.Add(($"asset/{obj.name}", obj.id));
 
         list.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.OrdinalIgnoreCase));
 

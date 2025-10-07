@@ -13,11 +13,13 @@ using Sirenix.OdinInspector;
 namespace Dalichrome.RandomGenerator.UserData
 {
     [CreateAssetMenu(menuName = "RandomGenerator/UserData/TileObject")]
-    public class TileObject : ScriptableObject
+    public class TileObject : AbstractUserData
     {
         [Header("Core Fields")]
-        [SerializeField,TileTypeCollision] public int tileId;
-        [SerializeField] public LayerType layer;
+        [SerializeField,TileTypeCollision] public int id;
+        [SerializeField, LayerDisplay] public int layer;
+
+        public override int GetId() => id;
 
         [Header("Generator UI Fields")]
         [SerializeField] public string tileName;

@@ -81,11 +81,11 @@ public static class TileDropdownOdinUtility
         // TileObjects in Resources/TileObjects ---------------------------------
         foreach (TileObject so in Resources.LoadAll<TileObject>("TileObjects"))
         {
-            int id = so.tileId;
+            int id = so.id;
             if (_cache.All(c => c.Value != id))
                 _cache.Add(new($"asset/{so.tileName}", id));
 
-            _layerOf[id] = so.layer;
+            //_layerOf[id] = so.layer;
         }
 
         _cache = _cache.OrderBy(i => i.Text, StringComparer.OrdinalIgnoreCase).ToList();
