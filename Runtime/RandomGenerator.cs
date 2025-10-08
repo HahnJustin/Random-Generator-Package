@@ -498,7 +498,7 @@ namespace Dalichrome.RandomGenerator
         private Generation CreateGeneration()
         {
             Generation generationInput = generationParameters.ToGeneration();
-            generationInput.AddLayersLookups(tileObjectLayerLookup);
+            generationInput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
             return generationInput;
         }
 
@@ -506,7 +506,7 @@ namespace Dalichrome.RandomGenerator
         {
             Generation generationInput = generationParameters.ToGeneration();
             generationInput.Token = token;
-            generationInput.AddLayersLookups(tileObjectLayerLookup);
+            generationInput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
             return generationInput;
         }
 
@@ -575,7 +575,7 @@ namespace Dalichrome.RandomGenerator
             Generation generationOutput = generationParameters.ToGeneration();
             generationOutput.Seed = seed;
             generationOutput.Token = token;
-            generationOutput.AddLayersLookups(tileObjectLayerLookup);
+            generationOutput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
 
             try
             {

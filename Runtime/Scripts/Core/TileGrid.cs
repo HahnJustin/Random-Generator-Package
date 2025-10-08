@@ -5,6 +5,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
+using static Unity.Collections.AllocatorManager;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -442,9 +443,13 @@ namespace Dalichrome.RandomGenerator.Core
             subgrid = _data;
         }
 
-        public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
+        public void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
         {
-            subgrid.AddLayersLookups(layerLookup);
+            subgrid.SetTileIdToLayerIndexLookup(newLookup);
+        }
+        public void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
+        {
+            subgrid.SetLayerIdToLayerIndexLookup(newLookup);
         }
 
         public void SetAllTiles(Tile[] tileArray)

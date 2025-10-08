@@ -103,7 +103,9 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract IEnumerable<Tile> GetRegionGrid();
         public abstract IEnumerable<Tile> GetTiles();
 
-        // Layer Table Funcs
-        public abstract void AddLayersLookups(Dictionary<int, LayerType> layerLookup);
+        // Layer Lookup Funcs
+        public abstract void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> tileIdToLayerIndex);
+
+        public abstract void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> layerIdToLayerIndex);
     }
 }

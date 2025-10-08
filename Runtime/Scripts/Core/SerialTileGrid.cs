@@ -5,6 +5,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
+using static Unity.Collections.AllocatorManager;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -23,7 +24,8 @@ namespace Dalichrome.RandomGenerator.Core
         public ITileMask TileMask { get { return tileMask; } set { tileMask = (SerialTileMask)value; } }
 
         [ReadOnly] internal SerialTileMask tileMask;
-        [ReadOnly] private Dictionary<int, LayerType> tileLayerLookup;
+        [ReadOnly] private Dictionary<int, int> tileIdToLayerIndexLookup;
+        [ReadOnly] private Dictionary<int, int> layerIdToLayerIndexLookup;
         [ReadOnly] private HashSet<int2> excludePositions;
 
         // Region Variables
@@ -76,7 +78,8 @@ namespace Dalichrome.RandomGenerator.Core
             tileMask = new();
             masked = false;
 
-            tileLayerLookup = TileTypeLayerLookup.CreateLookup();
+            tileIdToLayerIndexLookup = new();
+            layerIdToLayerIndexLookup = new();
 
             excludePositions = new();
 
@@ -117,7 +120,8 @@ namespace Dalichrome.RandomGenerator.Core
                 };
 
             // Tile Layer Lookup
-            grid.tileLayerLookup = other.tileLayerLookup;
+            grid.tileIdToLayerIndexLookup = other.tileIdToLayerIndexLookup;
+            grid.layerIdToLayerIndexLookup = other.layerIdToLayerIndexLookup;
 
             grid.excludePositions = new(other.excludePositions);
             grid.regionPositions = new(other.regionPositions);
@@ -133,12 +137,20 @@ namespace Dalichrome.RandomGenerator.Core
             return grid;
         }
 
-        private LayerType GetLayerFromId(int id)
+        private int GetLayerIndexFromTileId(int id)
         {
-            if (tileLayerLookup.TryGetValue(id, out LayerType layer))
-                return layer;
+            if (tileIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
 
-            return LayerType.NA;
+            return -1;
+        }
+
+        private int GetLayerIndexFromLayedId(int id)
+        {
+            if (layerIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+
+            return -1;
         }
 
         private Tile GetTileFromNativeArray(int x, int y)
@@ -170,7 +182,7 @@ namespace Dalichrome.RandomGenerator.Core
             Tile t = GetTileFromNativeArray(x, y);
             if (!t.IsValid || !CanModifyTile(t)) return false;
 
-            t.SetId(id, GetLayerFromId(id));
+            t.SetId(id, (LayerType)GetLayerIndexFromTileId(id));
             tiles[PositionToIndex(x, y)] = t;
             return true;
         }
@@ -182,7 +194,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool SetTileId(Tile tile, int id)
         {
-            tile.SetId(id, GetLayerFromId(id));
+            tile.SetId(id, (LayerType)GetLayerIndexFromTileId(id));
             return SetTileId(tile.Int2, id);
         }
 
@@ -561,12 +573,14 @@ namespace Dalichrome.RandomGenerator.Core
             else return GetTiles().GetEnumerator();
         }
 
-        public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
+        public void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
         {
-            foreach (var pair in layerLookup)
-                tileLayerLookup[pair.Key] = pair.Value;
+            tileIdToLayerIndexLookup = (Dictionary<int,int>)newLookup;
         }
-
+        public void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
+        {
+            layerIdToLayerIndexLookup = (Dictionary<int, int>)newLookup;
+        }
 
         public void SetAllTiles(Tile[] tileArray)
         {

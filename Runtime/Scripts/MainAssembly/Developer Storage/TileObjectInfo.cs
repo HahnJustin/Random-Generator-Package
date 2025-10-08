@@ -6,6 +6,8 @@ using System;
 using UnityEngine.Tilemaps;
 using UnityEngine;
 using System.Linq;
+using Unity.Collections;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,6 +26,8 @@ namespace Dalichrome.RandomGenerator
         private static TileObject[] _allTiles;                      // ordered by id
         private static Dictionary<int, List<TileObject>> _byLayer;  // layerId -> list
         private static Dictionary<TileKind, List<TileObject>> _byKind; // kind -> list
+        private static Dictionary<int, int> _tileIdToLayerId; // tileId -> layerId
+        private static Dictionary<int, int> _tileIdToLayerZ;  // tileId -> z (compressed)
 
         private static readonly Dictionary<int, TileBase> _tileBaseCache = new();
         private static readonly Dictionary<int, TileBase> _numberTileBaseCache = new();
@@ -41,6 +45,8 @@ namespace Dalichrome.RandomGenerator
                 _allTiles = null;
                 _byLayer = null;
                 _byKind = null;
+                _tileIdToLayerId = null;
+                _tileIdToLayerZ = null;
                 _tileBaseCache.Clear();
                 _numberTileBaseCache.Clear();
             }
@@ -109,10 +115,22 @@ namespace Dalichrome.RandomGenerator
                         _byKind[t.tileKind] = listK = new List<TileObject>();
                     listK.Add(t);
                 }
+
+                _tileIdToLayerId = new Dictionary<int, int>(_allTiles.Length);
+                _tileIdToLayerZ = new Dictionary<int, int>(_allTiles.Length);
+
+                // Ensure TileLayerInfo is built so z lookups are ready
+                _ = TileLayerInfo.AllLayerIds; // touches EnsureBuilt()
+
+                foreach (var t in _allTiles)
+                {
+                    _tileIdToLayerId[t.id] = t.layer;
+                    _tileIdToLayerZ[t.id] = TileLayerInfo.GetLayerZ(t.layer, -1); // -1 if missing
+                }
             }
         }
 
-        // ---------- Iteration APIs ----------
+        // Iteration
 
         /// <summary>Snapshot of all TileObjects, ordered by id (project overrides applied).</summary>
         public static IReadOnlyList<TileObject> AllTiles
@@ -157,8 +175,17 @@ namespace Dalichrome.RandomGenerator
         {
             get { EnsureBuilt(); return _allIds; }
         }
+        public static IReadOnlyDictionary<int, int> TileIdToLayerId
+        {
+            get { EnsureBuilt(); return _tileIdToLayerId; }
+        }
 
-        // ---------- Existing Queries (unchanged) ----------
+        public static IReadOnlyDictionary<int, int> TileIdToLayerZ
+        {
+            get { EnsureBuilt(); return _tileIdToLayerZ; }
+        }
+
+        // Getters
         public static bool TryGet(int tileId, out TileObject tile)
         {
             EnsureBuilt();
@@ -222,9 +249,6 @@ namespace Dalichrome.RandomGenerator
             return _byId.TryGetValue(tileId, out var t) ? t : null;
         }
 
-        /// <summary>
-        /// The ScriptableObject asset name (not the tileName field).
-        /// </summary>
         public static string GetAssetName(int tileId, string fallback = null)
         {
             EnsureBuilt();
@@ -243,7 +267,48 @@ namespace Dalichrome.RandomGenerator
             return TryGet(tileId, out var t) ? t.tileKind : fallback;
         }
 
-        // ---------- Numbers ----------
+        public static bool TryGetLayerIdForTile(int tileId, out int layerId)
+        {
+            EnsureBuilt();
+            return _tileIdToLayerId.TryGetValue(tileId, out layerId);
+        }
+
+        public static int GetLayerIdForTile(int tileId, int fallback = 0)
+        {
+            return TryGetLayerIdForTile(tileId, out var lid) ? lid : fallback;
+        }
+
+        public static bool TryGetLayerZForTile(int tileId, out int z)
+        {
+            EnsureBuilt();
+            return _tileIdToLayerZ.TryGetValue(tileId, out z);
+        }
+
+        public static int GetLayerZForTile(int tileId, int fallback = -1)
+        {
+            return TryGetLayerZForTile(tileId, out var z) ? z : fallback;
+        }
+
+
+        // Native Lookups
+        public static NativeParallelHashMap<int, int> BuildTileIdToLayerIdNative(Allocator alloc)
+            {
+                EnsureBuilt();
+                var map = new NativeParallelHashMap<int, int>(_tileIdToLayerId.Count, alloc);
+                foreach (var kv in _tileIdToLayerId) map.TryAdd(kv.Key, kv.Value);
+                return map;
+            }
+
+        public static NativeParallelHashMap<int, int> BuildTileIdToLayerZNative(Allocator alloc)
+        {
+            EnsureBuilt();
+            var map = new NativeParallelHashMap<int, int>(_tileIdToLayerZ.Count, alloc);
+            foreach (var kv in _tileIdToLayerZ) map.TryAdd(kv.Key, kv.Value);
+            return map;
+        }
+
+
+        // Number Tiles - TODO: Move elsewhere
         public static TileBase GetNumberTileBase(int number)
         {
             if (_numberTileBaseCache.TryGetValue(number, out var tb))
@@ -260,7 +325,7 @@ namespace Dalichrome.RandomGenerator
             return tb;
         }
 
-        // ---------- Helpers ----------
+        // Helpers
         private static TileBase CreateCustomTileFromSprite(Sprite sprite)
         {
             var tile = ScriptableObject.CreateInstance<CustomTileBase>();

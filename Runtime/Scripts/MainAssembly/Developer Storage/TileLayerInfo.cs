@@ -13,35 +13,39 @@ namespace Dalichrome.RandomGenerator
     /// <summary>
     /// Static access to TileLayer metadata loaded from Resources/TileLayers.
     /// Project assets override package defaults on duplicate IDs.
+    /// Also provides compact Z indices (0..N-1) for active layers.
     /// </summary>
     public static class TileLayerInfo
     {
-        // Adjust if your Resources path differs
         public const string ResourcesPath = "TileLayers";
 
-        // Fallbacks when a layer id is missing
         public const string DefaultSortingLayer = "Default";
         public const string DefaultUnityLayerName = "Default";
         public const string DefaultTag = "Untagged";
 
         private static readonly object _lock = new();
-        private static Dictionary<int, TileLayer> _byId; // id -> TileLayer
-        private static int[] _allIds;
 
-        /// <summary>Clear caches (rebuilt on next query).</summary>
+        private static Dictionary<int, TileLayer> _byId; // layerId -> TileLayer
+        private static int[] _allIds;                    // sorted ascending by layerId
+
+        // NEW: compact Z mapping
+        private static Dictionary<int, int> _layerIdToZ; // layerId -> z (0..N-1)
+        private static int[] _zToLayerId;                // z -> layerId
+
         public static void Invalidate()
         {
             lock (_lock)
             {
                 _byId = null;
                 _allIds = null;
+                _layerIdToZ = null;
+                _zToLayerId = null;
             }
         }
 
         static TileLayerInfo()
         {
 #if UNITY_EDITOR
-            // Keep cache fresh while editing in the editor
             AbstractUserData.AnyChanged += _ => Invalidate();
             Undo.undoRedoPerformed += Invalidate;
             EditorApplication.projectChanged += Invalidate;
@@ -60,7 +64,6 @@ namespace Dalichrome.RandomGenerator
                 var all = Resources.LoadAll<TileLayer>(ResourcesPath);
 
 #if UNITY_EDITOR
-                // Prefer project asset over package default on duplicate IDs.
                 foreach (var tl in all)
                 {
                     int id = tl.id;
@@ -83,11 +86,60 @@ namespace Dalichrome.RandomGenerator
 #endif
 
                 _byId = dict;
-                _allIds = dict.Keys.OrderBy(k => k).ToArray();
+
+                // Order by ascending layerId Å® z is the compressed index (0..N-1)
+                _allIds = _byId.Keys.OrderBy(k => k).ToArray();
+
+                // Build compact Z maps
+                _layerIdToZ = new Dictionary<int, int>(_allIds.Length);
+                _zToLayerId = new int[_allIds.Length];
+                for (int z = 0; z < _allIds.Length; z++)
+                {
+                    int lid = _allIds[z];
+                    _layerIdToZ[lid] = z;
+                    _zToLayerId[z] = lid;
+                }
             }
         }
 
-        // ---------- Queries ----------
+        // ---------- Compact Z / index API ----------
+
+        /// <summary>Total active layers (also the depth of your compact grid).</summary>
+        public static int LayerCount { get { EnsureBuilt(); return _zToLayerId.Length; } }
+
+        /// <summary>Returns true and sets z if layerId exists; z is in [0, LayerCount-1].</summary>
+        public static bool TryGetLayerZ(int layerId, out int z)
+        {
+            EnsureBuilt();
+            return _layerIdToZ.TryGetValue(layerId, out z);
+        }
+
+        /// <summary>Gets the compact z for layerId, or fallback (-1 by default) if missing.</summary>
+        public static int GetLayerZ(int layerId, int fallback = -1)
+        {
+            return TryGetLayerZ(layerId, out var z) ? z : fallback;
+        }
+
+        /// <summary>Gets the layerId for a compact z; returns -1 if z is out of range.</summary>
+        public static int GetLayerIdByZ(int z)
+        {
+            EnsureBuilt();
+            return (uint)z < _zToLayerId.Length ? _zToLayerId[z] : -1;
+        }
+
+        /// <summary>Read-only view: layerId Å® z.</summary>
+        public static IReadOnlyDictionary<int, int> LayerIdToZ
+        {
+            get { EnsureBuilt(); return _layerIdToZ; }
+        }
+
+        /// <summary>Read-only view: z Å® layerId.</summary>
+        public static IReadOnlyList<int> ZToLayerId
+        {
+            get { EnsureBuilt(); return _zToLayerId; }
+        }
+
+        // ---------- Existing metadata queries ----------
 
         public static bool TryGet(int layerId, out TileLayer layer)
         {
@@ -112,7 +164,7 @@ namespace Dalichrome.RandomGenerator
             return SortingLayer.NameToID(DefaultSortingLayer);
         }
 
-        /// Tie-breaker order for layers that share the same sortingOrder.
+        /// <summary>Tie-breaker order for equal sortingOrder.</summary>
         public static int GetTieOrder(int layerId, int fallback = 0)
         {
             return TryGet(layerId, out var tl) ? tl.tieOrder : fallback;

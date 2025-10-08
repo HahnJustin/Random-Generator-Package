@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   layer: 0
+  tileKind: 1
   tileName: Empty
   menuSprite: {fileID: 0}
   color: {r: 0, g: 0, b: 0, a: 0}

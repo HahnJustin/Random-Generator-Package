@@ -6,6 +6,8 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using System.Linq;
+using Codice.Client.BaseCommands;
+using static UnityEditor.PlayerSettings;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -24,7 +26,8 @@ namespace Dalichrome.RandomGenerator.Core
         public ITileMask TileMask { get { return tileMask; } set { tileMask = (NativeTileMask)value; } }
 
         [ReadOnly] internal NativeTileMask tileMask;
-        [ReadOnly] private NativeParallelHashMap<int, LayerType> tileLayerLookup;
+        [ReadOnly] private NativeParallelHashMap<int, int> tileIdToLayerIndexLookup;
+        [ReadOnly] private NativeParallelHashMap<int, int> layerIdToLayerIndexLookup;
         [ReadOnly] private NativeParallelHashSet<int2> excludePositions;
 
         // Region Variables
@@ -32,6 +35,9 @@ namespace Dalichrome.RandomGenerator.Core
         private int2 regionMin;
         private int2 regionMax;
         private bool regionLimited;
+
+        // Allocator
+        private Allocator allocator;
 
         // Validity
         public bool IsValid { get; set; }
@@ -68,7 +74,7 @@ namespace Dalichrome.RandomGenerator.Core
             this.width = width;
             this.height = height;
 
-            Allocator allocator = Allocator.Persistent;
+            allocator = Allocator.Persistent;
 
             tiles = allocateCollections
                 ? new NativeArray<Tile>(width * height, allocator)
@@ -79,15 +85,19 @@ namespace Dalichrome.RandomGenerator.Core
             tileMask = allocateCollections
                 ? new NativeTileMask
                 {
-                    includeSet = new NativeParallelHashSet<int>(1, Allocator.Persistent),
-                    excludeSet = new NativeParallelHashSet<int>(1, Allocator.Persistent),
+                    includeSet = new NativeParallelHashSet<int>(1, allocator),
+                    excludeSet = new NativeParallelHashSet<int>(1, allocator),
                     IsValid = true
                 }
                 : default;
             masked = false;
 
-            tileLayerLookup = allocateCollections
-                ? TileTypeLayerLookup.CreateLookup(Allocator.Persistent)
+            tileIdToLayerIndexLookup = allocateCollections
+                ? new NativeParallelHashMap<int, int>(1, allocator)
+                : default;
+
+            layerIdToLayerIndexLookup = allocateCollections
+                ? new NativeParallelHashMap<int, int>(1, allocator)
                 : default;
 
             excludePositions = allocateCollections
@@ -136,26 +146,15 @@ namespace Dalichrome.RandomGenerator.Core
                     IsValid = true
                 };
 
-            // Tile Layer Lookup
-            grid.tileLayerLookup = new NativeParallelHashMap<int, LayerType>(
-                math.ceilpow2(other.tileLayerLookup.Count()), allocator);
-
-            foreach (var kvp in other.tileLayerLookup)
-                grid.tileLayerLookup.TryAdd(kvp.Key, kvp.Value);
+            // Lookups
+            grid.tileIdToLayerIndexLookup = NativeParallelHashMapCopy(other.tileIdToLayerIndexLookup, allocator);
+            grid.tileIdToLayerIndexLookup = NativeParallelHashMapCopy(other.layerIdToLayerIndexLookup, allocator);
 
             // Exclude Positions
-            grid.excludePositions = new NativeParallelHashSet<int2>(
-                math.ceilpow2(other.excludePositions.Count()), allocator);
-
-            foreach (var pos in other.excludePositions)
-                grid.excludePositions.Add(pos);
+            grid.excludePositions = NativeParallelHashSetCopy(other.excludePositions, allocator);
 
             // Regional Exclude Positions
-            grid.regionPositions = new NativeParallelHashSet<int2>(
-                math.ceilpow2(other.regionPositions.Count()), allocator);
-
-            foreach (var pos in other.regionPositions)
-                grid.regionPositions.Add(pos);
+            grid.regionPositions = NativeParallelHashSetCopy(other.regionPositions, allocator);
 
             // Set Region Bounds
             grid.regionMax = other.regionMax;
@@ -168,12 +167,34 @@ namespace Dalichrome.RandomGenerator.Core
             return grid;
         }
 
-        private LayerType GetLayerFromId(int id)
+        private static NativeParallelHashMap<int, int> NativeParallelHashMapCopy(NativeParallelHashMap<int, int> map, Allocator allocator)
         {
-            if (tileLayerLookup.TryGetValue(id, out LayerType layer))
-                return layer;
+            NativeParallelHashMap<int, int> newMap = new NativeParallelHashMap<int, int>(
+                math.ceilpow2(map.Count()), allocator);
+
+            foreach (var kvp in map)
+                newMap.TryAdd(kvp.Key, kvp.Value);
+
+            return newMap;
+        }
+
+        private static NativeParallelHashSet<int2> NativeParallelHashSetCopy(NativeParallelHashSet<int2> set, Allocator allocator)
+        {
+            NativeParallelHashSet<int2> newSet = new NativeParallelHashSet<int2>(
+                math.ceilpow2(set.Count()), allocator);
+
+            foreach (var pos in set)
+                newSet.Add(pos);
+
+            return newSet;
+        }
+
+        private int GetLayerIndexFromTileId(int id)
+        {
+            if (tileIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
             
-            return LayerType.NA;
+            return -1;
         }
 
         private Tile GetTileFromNativeArray(int x, int y)
@@ -206,7 +227,7 @@ namespace Dalichrome.RandomGenerator.Core
             Tile t = GetTileFromNativeArray(x, y);
             if (!t.IsValid || !CanModifyTile(t)) return false;
 
-            t.SetId(id, GetLayerFromId(id));
+            t.SetId(id, (LayerType)GetLayerIndexFromTileId(id));
             tiles[PositionToIndex(x, y)] = t;
             return true;
         }
@@ -218,7 +239,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool SetTileId(Tile tile, int id)
         {
-            tile.SetId(id, GetLayerFromId(id));
+            tile.SetId(id, (LayerType)GetLayerIndexFromTileId(id));
             return SetTileId(tile.Int2, id);
         }
 
@@ -412,7 +433,8 @@ namespace Dalichrome.RandomGenerator.Core
             tiles.Dispose();
             tileMask.Dispose();
 
-            tileLayerLookup.Dispose();
+            tileIdToLayerIndexLookup.Dispose();
+            layerIdToLayerIndexLookup.Dispose();
             excludePositions.Dispose();
             regionPositions.Dispose();
 
@@ -602,24 +624,17 @@ namespace Dalichrome.RandomGenerator.Core
             else return GetTiles().GetEnumerator();
         }
 
-        public void AddLayersLookups(Dictionary<int, LayerType> layerLookup)
+        public void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
         {
-            int needed = tileLayerLookup.Count() + layerLookup.Count;
-            if (needed > tileLayerLookup.Capacity)
-            {
-                int newCap = math.ceilpow2(needed);  // power-of-two rule
-                var bigger = new NativeParallelHashMap<int, LayerType>(newCap, Allocator.Persistent);
-
-                // Copy existing pairs
-                foreach (var kvp in tileLayerLookup)
-                    bigger.TryAdd(kvp.Key, kvp.Value);
-
-                tileLayerLookup.Dispose();
-                tileLayerLookup = bigger;
-            }
-
-            foreach (var pair in layerLookup)
-                tileLayerLookup[pair.Key] = pair.Value;
+            var map = new NativeParallelHashMap<int, int>(newLookup.Count, allocator);
+            foreach (var kv in newLookup) map.TryAdd(kv.Key, kv.Value);
+            tileIdToLayerIndexLookup = map;
+        }
+        public void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
+        {
+            var map = new NativeParallelHashMap<int, int>(newLookup.Count, allocator);
+            foreach (var kv in newLookup) map.TryAdd(kv.Key, kv.Value);
+            layerIdToLayerIndexLookup = map;
         }
 
         public void SetAllTiles(Tile[] tileArray)
