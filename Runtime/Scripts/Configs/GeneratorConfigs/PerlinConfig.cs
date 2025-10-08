@@ -29,6 +29,6 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private float _ovalScale = 0.5f;
 
         [TileDisplay] public List<int> Tiles { get { return _tiles; } set { _tiles = value; } }
-        [TileDisplay, SerializeField] private List<int> _tiles = new() { (int)TileType.Wall_Cave };
+        [TileDisplay, SerializeField] private List<int> _tiles = new() { (int)TileDefaults.Wall_Cave };
     }
 }

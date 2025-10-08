@@ -2,6 +2,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Utils
@@ -94,7 +95,7 @@ namespace Dalichrome.RandomGenerator.Utils
             return validNeighbors;
         }
 
-        private bool IsWalkable(Tile tile)
+        private bool IsWalkable(int2 pos)
         {
             return occupanceUtil.IsOccupied(tile) == 0;
         }

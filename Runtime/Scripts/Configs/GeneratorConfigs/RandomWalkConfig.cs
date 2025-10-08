@@ -23,7 +23,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private float _originRange = 8;
 
         [TileDisplay] public int Path { get { return _path; } set { _path = value; } }
-        [TileDisplay, SerializeField] private int _path = (int)TileType.Wall_NA;
+        [TileDisplay, SerializeField] private int _path = (int)TileDefaults.Wall_NA;
 
         public bool DebugEnds { get { return _debugEnds; } set { _debugEnds = value; } }
         [SerializeField] private bool _debugEnds = false;

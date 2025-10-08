@@ -35,7 +35,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("WrapBounds", false), SerializeField] private bool _outOfBoundsOccupied = false;
 
         [TileDisplay] public int FillTile { get { return _fillTile; } set { _fillTile = value; } }
-        [TileDisplay, SerializeField] private int _fillTile = (int)TileType.Wall_Cave;
+        [TileDisplay, SerializeField] private int _fillTile = (int)TileDefaults.Wall_Cave;
 
     }
 }

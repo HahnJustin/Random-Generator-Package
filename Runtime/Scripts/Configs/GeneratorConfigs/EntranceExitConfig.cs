@@ -25,7 +25,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] protected EEPlaceableType _placeable = EEPlaceableType.One_Side_Wall;
 
         [TileDisplay] public int SpawnInTile { get { return _spawnInTile; } set { _spawnInTile = value; } }
-        [TileDisplay, SerializeField] private int _spawnInTile = (int)TileType.Wall_Cave;
+        [TileDisplay, SerializeField] private int _spawnInTile = (int)TileDefaults.Wall_Cave;
 
         [Hidden] public bool ShowUniversalMask { get { return _addEntranceExitToMask || (_addPathToMask && _createPath); } }
 
@@ -48,7 +48,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
-        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

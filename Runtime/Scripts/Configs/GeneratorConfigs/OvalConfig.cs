@@ -20,9 +20,9 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private float _radius = 1f;
 
         public int Interior { get { return _interior; } set { _interior = value; } }
-        [SerializeField] private int _interior = (int)TileType.NA;
+        [SerializeField] private int _interior = (int)TileDefaults.NA;
 
         public int Exterior { get { return _exterior; } set { _exterior = value; } }
-        [SerializeField] private int _exterior = (int)TileType.Wall_Cave;
+        [SerializeField] private int _exterior = (int)TileDefaults.Wall_Cave;
     }
 }

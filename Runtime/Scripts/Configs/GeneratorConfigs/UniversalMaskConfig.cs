@@ -18,6 +18,6 @@ namespace Dalichrome.RandomGenerator.Configs
 
         [Hidden] public bool ShowUniversalMask { get { return _addToUniversalMaskTIles.Count > 0; } }
         [TileDisplay] public List<int> AddToUniversalMaskTiles { get { return _addToUniversalMaskTIles; } set { _addToUniversalMaskTIles = value; } }
-        [TileDisplay, SerializeField] private List<int> _addToUniversalMaskTIles = new() { (int)TileType.Wall_Cave };
+        [TileDisplay, SerializeField] private List<int> _addToUniversalMaskTIles = new() { (int)TileDefaults.Wall_Cave };
     }
 }

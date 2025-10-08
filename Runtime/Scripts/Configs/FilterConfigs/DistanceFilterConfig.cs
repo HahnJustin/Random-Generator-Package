@@ -17,7 +17,7 @@ namespace Dalichrome.RandomGenerator.Configs
         public override FilterType Type { get { return FilterType.Distance; } }
 
         [TileDisplay] public int TileToCheck { get { return _tileToCheck; } set { _tileToCheck = value; } }
-        [TileDisplay, SerializeField] protected int _tileToCheck = (int)TileType.Object_Ore_Iron;
+        [TileDisplay, SerializeField] protected int _tileToCheck = (int)TileDefaults.Object_Ore_Iron;
 
         public int MaxDistance { get { return _maxDistance; } set { _maxDistance = value; } }
         [SerializeField] protected int _maxDistance = 1;

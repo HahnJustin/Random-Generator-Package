@@ -32,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private int _maximumAmount = 10;
 
         [TilePairDisplay(showValue:false)] public List<SerialPair<int,int>> TileWeights { get { return _tileWeights; } set { _tileWeights = value; } }
-        [TilePairDisplay(showValue: false), SerializeField] private List<SerialPair<int, int>> _tileWeights = new () { new((int)TileType.Object_Sack_Grub, 1) };
+        [TilePairDisplay(showValue: false), SerializeField] private List<SerialPair<int, int>> _tileWeights = new () { new((int)TileDefaults.Object_Sack_Grub, 1) };
 
         public bool AddSpawnsToMask { get { return _addSpawnsToMask; } set { _addSpawnsToMask = value; } }
         [SerializeField] private bool _addSpawnsToMask = true;
@@ -44,7 +44,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
-        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

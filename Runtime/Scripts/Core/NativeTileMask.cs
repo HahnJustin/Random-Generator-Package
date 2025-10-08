@@ -43,13 +43,25 @@ namespace Dalichrome.RandomGenerator.Core
             excludeSet = new NativeParallelHashSet<int>(excludeList.Count, Allocator.Persistent);
 
             foreach (var t in includeList)
-                includeSet.Add((int)t);
+                includeSet.Add(t);
 
             foreach (var t in excludeList)
-                excludeSet.Add((int)t);
+                excludeSet.Add(t);
         }
 
-        public bool CanModifyTile(Tile tile)
+        public bool CanModifyTileId(int id)
+        {
+            if (!IsValid) return true;
+
+            bool included = includeSet.Contains(id);
+            bool excluded = excludeSet.Contains(id);
+
+            if (IsExcludingTiles && excluded) return false;
+            else if (IsIncludingTiles && included) return true;
+            else return !IsIncludingTiles;
+        }
+
+        public bool CanModifyTile(NativeArray<int> array)
         {
             if (!IsValid) return true;
 
@@ -58,7 +70,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             foreach (int id in includeSet)
             {
-                if (tile.ContainsId(id))
+                if (array.Contains(id))
                 {
                     included = true;
                     break;
@@ -67,7 +79,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             foreach (int id in excludeSet)
             {
-                if (tile.ContainsId(id))
+                if (array.Contains(id))
                 {
                     excluded = true;
                     break;

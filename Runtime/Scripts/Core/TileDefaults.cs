@@ -1,7 +1,7 @@
 
 namespace Dalichrome.RandomGenerator.Core
 {
-    public enum TileType
+    public enum TileDefaults
     {
         NA = 0,
         Wall_Cave = 100,

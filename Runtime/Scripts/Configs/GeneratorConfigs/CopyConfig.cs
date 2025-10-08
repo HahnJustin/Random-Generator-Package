@@ -17,6 +17,6 @@ namespace Dalichrome.RandomGenerator.Configs
         public override GeneratorType Type { get { return GeneratorType.Copy; } }
 
         [TilePairDisplay] public List<SerialPair<int, int>> FromTo { get { return _fromTo; } set { _fromTo = value; } }
-        [TilePairDisplay, SerializeField] public List<SerialPair<int, int>> _fromTo = new() { new((int)TileType.Wall_Cave, (int)TileType.Wall_Cave_Light) };
+        [TilePairDisplay, SerializeField] public List<SerialPair<int, int>> _fromTo = new() { new((int)TileDefaults.Wall_Cave, (int)TileDefaults.Wall_Cave_Light) };
     }
 }

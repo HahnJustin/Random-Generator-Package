@@ -24,28 +24,24 @@ namespace Dalichrome.RandomGenerator.Core
         // Set Tile Id Funcs
         public abstract bool SetTileId(int x, int y, int id);
         public abstract bool SetTileId(int2 position, int id);
-        public abstract bool SetTileId(Tile tile, int id);
+
+        // Set All Ids At Pos Funcs
+        public abstract bool CopyColumn(int2 replacer, int2 replaced);
 
         // Contains Id Funcs
-        public abstract bool ContainsId(int x, int y, int id);
-        public abstract bool ContainsId(int2 position, int id);
+        public abstract bool ColumnContainsId(int x, int y, int id);
+        public abstract bool ColumnContainsId(int2 position, int id);
 
-        // Get Tile Funcs
-        public abstract Tile GetTile(int x, int y);
-        public abstract Tile GetTile(int2 position);
-
-        // Set Tile Funcs
-        public abstract bool SetTile(int x, int y, Tile toSet);
-        public abstract bool SetTile(int2 position, Tile toSet);
-        public abstract bool SetTile(Tile oldTile, Tile toSet);
+        // Get Tile Id Funcs
+        public abstract int GetTileId(int x, int y, int layerId);
+        public abstract int GetTileId(int2 position, int layerId);
 
         // Set Tile Value Funcs
         public abstract bool SetTileValue(int x, int y, int value);
         public abstract bool SetTileValue(int2 position, int value);
-        public abstract bool SetTileValue(Tile tile, int value);
 
         // Set All Tiles
-        public abstract void SetAllTiles(Tile[] tileArray);
+        public abstract void SetAllTiles(IEnumerable<int> tileArray);
 
         // Masking Funcs
         public bool Masked { get; }
@@ -68,8 +64,8 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool CanHaveTiles();
 
         // Transversal Funcs
-        public abstract List<Tile> GetEightNeighborTiles(Tile tile);
-        public abstract List<Tile> GetFourNeighborTiles(Tile tile);
+        public abstract List<int2> GetEightNeighborPositions(int2 pos);
+        public abstract List<int2> GetFourNeighborPositions(int2 pos);
 
         // Region Funcs
         public abstract RegionBounds GetRegionBounds();
@@ -80,7 +76,6 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract void AddRegionPosition(int x, int y);
         public abstract void AddRegionPosition(int2 pos);
 
-        public abstract bool IsInRegion(Tile tile);
         public abstract bool IsInRegion(int x, int y);
         public abstract bool IsInRegion(int2 pos);
 
@@ -98,10 +93,11 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool IsInsideMask(int2 pos);
 
         // Ienumeration
-        public abstract NativeArray<Tile> AsNativeArray();
-        public abstract IEnumerable<Tile> GetRegionTiles();
-        public abstract IEnumerable<Tile> GetRegionGrid();
-        public abstract IEnumerable<Tile> GetTiles();
+        public abstract NativeArray<int> AsNativeArray();
+        public abstract IEnumerable<int2> GetRegionPositions();
+        public abstract IEnumerable<int2> GetRegionGridPositions();
+        public abstract IEnumerable<int2> GetPositions();
+        public abstract IEnumerable<int3> GetPositions3D();
 
         // Layer Lookup Funcs
         public abstract void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> tileIdToLayerIndex);

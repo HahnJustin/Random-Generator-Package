@@ -11,7 +11,7 @@ namespace Dalichrome.RandomGenerator.Configs
 
         [SerializeField, DefaultValue(LayerType.Wall), Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get; set; }
 
-        [SerializeField, DefaultValue((int)TileType.Wall_Cave), Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get; set; }
+        [SerializeField, DefaultValue((int)TileDefaults.Wall_Cave), Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get; set; }
 
         [SerializeField, DefaultValue(false)] public bool InvertOccupance { get; set; }
     }

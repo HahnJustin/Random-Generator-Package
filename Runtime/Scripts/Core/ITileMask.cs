@@ -13,7 +13,7 @@ namespace Dalichrome.RandomGenerator.Core
         public bool IsIncludingTiles { get; }
         public bool IsExcludingTiles { get; }
 
-        public bool CanModifyTile(Tile tile);
+        public bool CanModifyTileId(int id);
 
         public ITileMask DeepClone();
         

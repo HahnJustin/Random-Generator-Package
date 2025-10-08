@@ -23,7 +23,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private int _upperDepth = 1;
 
         [TileDisplay]public int FillTile { get { return _filTile; } set { _filTile = value; } }
-        [TileDisplay, SerializeField] private int _filTile = (int)TileType.Wall_Cave;
+        [TileDisplay, SerializeField] private int _filTile = (int)TileDefaults.Wall_Cave;
 
         public DistanceType Distance { get { return _distance; } set { _distance = value; } }
         [SerializeField] protected DistanceType _distance = DistanceType.Cardinal;
@@ -38,7 +38,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
-        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileType.Wall_NA;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_NA;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

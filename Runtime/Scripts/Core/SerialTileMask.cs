@@ -51,7 +51,7 @@ namespace Dalichrome.RandomGenerator.Core
                 this.excludeList.Add((int)t);
         }
 
-        public bool CanModifyTile(Tile tile)
+        public bool CanModifyTile(List<int> ids)
         {
             if (!IsValid) return true;
 
@@ -60,7 +60,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             foreach (int id in includeList)
             {
-                if (tile.ContainsId(id))
+                if (ids.Contains(id))
                 {
                     included = true;
                     break;
@@ -69,7 +69,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             foreach (int id in excludeList)
             {
-                if (tile.ContainsId(id))
+                if (ids.Contains(id))
                 {
                     excluded = true;
                     break;
@@ -80,6 +80,19 @@ namespace Dalichrome.RandomGenerator.Core
             else if (IsIncludingTiles && included) return true;
             else return !IsIncludingTiles;
         }
+
+        public bool CanModifyTileId(int id)
+        {
+            if (!IsValid) return true;
+
+            bool included = includeList.Contains(id);
+            bool excluded = excludeList.Contains(id);
+
+            if (IsExcludingTiles && excluded) return false;
+            else if (IsIncludingTiles && included) return true;
+            else return !IsIncludingTiles;
+        }
+
 
         public ITileMask DeepClone()
         {

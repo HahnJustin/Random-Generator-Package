@@ -18,7 +18,7 @@ namespace Dalichrome.RandomGenerator.Configs
 
 
         [TileDisplay] public int Border { get { return _border; } set { _border = value; } }
-        [SerializeField, TileDisplay] private int _border = (int)TileType.Wall_Cave;
+        [SerializeField, TileDisplay] private int _border = (int)TileDefaults.Wall_Cave;
 
         public int Depth { get { return _depth; } set { _depth = value; } }
         [SerializeField] private int _depth = 5;

@@ -18,10 +18,10 @@ namespace Dalichrome.RandomGenerator.Configs
         public override GeneratorType Type { get { return GeneratorType.Room_Connection; } }
 
         [TileDisplay] public int HallwayTile { get { return _hallwayTile; } set { _hallwayTile = value; } }
-        [TileDisplay, SerializeField] private int _hallwayTile = (int)TileType.Wall_NA;
+        [TileDisplay, SerializeField] private int _hallwayTile = (int)TileDefaults.Wall_NA;
 
         [TileDisplay] public List<int> CarveThroughTiles { get { return _carveThroughTiles; } set { _carveThroughTiles = value; } }
-        [TileDisplay, SerializeField] private List<int> _carveThroughTiles = new() { (int)TileType.Wall_Cave, (int)TileType.Wall_NA };
+        [TileDisplay, SerializeField] private List<int> _carveThroughTiles = new() { (int)TileDefaults.Wall_Cave, (int)TileDefaults.Wall_NA };
 
         public bool AdditionalConnections { get { return _additionalConnections; } set { _additionalConnections = value; } }
         [SerializeField] private bool _additionalConnections = false;
@@ -39,7 +39,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
-        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;

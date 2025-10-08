@@ -59,6 +59,6 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _includeList = new() { };
 
         [Condition("Masked", true), Color("#4d728f"), TileDisplay] public List<int> ExcludeList { get { return _excludeList; } set { _excludeList = value; } }
-        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _excludeList = new() { (int)TileType.Wall_Object_NA };
+        [SerializeField, Condition("TryingMask", true), TileDisplay] private List<int> _excludeList = new() { (int)TileDefaults.Wall_Object_NA };
     }
 }

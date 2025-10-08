@@ -5,7 +5,6 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
-using static Unity.Collections.AllocatorManager;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -13,6 +12,7 @@ namespace Dalichrome.RandomGenerator.Core
     {
         public readonly int width;
         public readonly int height;
+        public readonly int depth;
 
         public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width / 2, 0, width), Mathf.Clamp(height / 2, 0, height)); } }
 
@@ -65,12 +65,13 @@ namespace Dalichrome.RandomGenerator.Core
             get { return subgrid.Maximum; }
         }
 
-        public TileGrid(int width, int height)
+        public TileGrid(int width, int height, int depth)
         {
             this.width = width;
             this.height = height;
+            this.depth = depth;
 
-            subgrid = new NativeTileGrid(width, height);
+            subgrid = new NativeTileGrid(width, height, depth);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             allocationStack = Environment.StackTrace;
@@ -79,7 +80,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public static TileGrid DeepClone(TileGrid other)
         {
-            TileGrid grid = new(other.width, other.height);
+            TileGrid grid = new(other.width, other.height, other.depth);
             if(other.IsValid) grid.subgrid = other.subgrid.DeepClone();
             return grid;
         }
@@ -103,65 +104,42 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTileId(position.x, position.y, id);
         }
 
-        public bool SetTileId(Tile tile, int id)
-        {
-            return SetTileId(tile.x, tile.y, id);
-        }
-
-
         // Contains Type
-        public bool ContainsId(int x, int y, int id)
+        public bool ColumnContainsId(int x, int y, int id)
         {
-            return subgrid.ContainsId(x, y, id);
+            return subgrid.ColumnContainsId(x, y, id);
         }
 
-        public bool ContainsId(int2 position, int id)
+        public bool ColumnContainsId(int2 position, int id)
         {
-            return ContainsId(position.x, position.y, id);
+            return ColumnContainsId(position.x, position.y, id);
         }
 
-        public bool ContainsId(Vector2Int position, int id)
+        public bool ColumnContainsId(Vector2Int position, int id)
         {
-            return ContainsId(position.x, position.y, id);
+            return ColumnContainsId(position.x, position.y, id);
         }
 
         // Get Tile
-        public Tile GetTile(int x, int y)
+        public int GetTileId(int x, int y, int layerId)
         {
-            return subgrid.GetTile(x, y);
+            return subgrid.GetTileId(x, y, layerId);
         }
 
-        public Tile GetTile(Vector2Int position)
+        public int GetTileId(Vector2Int position, int layerId)
         {
-            return GetTile(position.x, position.y);
+            return GetTileId(position.x, position.y, layerId);
         }
 
-        public Tile GetTile(int2 position)
+        public int GetTileId(int2 position, int layerId)
         {
-            return GetTile(position.x, position.y);
+            return GetTileId(position.x, position.y, layerId);
         }
 
-
-        // Set Tile
-        public bool SetTile(int x, int y, Tile toSet)
+        // Copy Column
+        public bool CopyColumn(int2 replacer, int2 replaced)
         {
-            subgrid.SetTile(x, y, toSet);
-            return true;
-        }
-
-        public bool SetTile(int2 position, Tile toSet)
-        {
-            return SetTile(position.x, position.y, toSet);
-        }
-
-        public bool SetTile(Vector2Int position, Tile toSet)
-        {
-            return SetTile(position.x, position.y, toSet);
-        }
-
-        public bool SetTile(Tile oldTile, Tile toSet)
-        {
-            return SetTile(oldTile.Position, toSet);
+            return subgrid.CopyColumn(replacer, replaced);
         }
 
         // Set Tile Value
@@ -178,12 +156,6 @@ namespace Dalichrome.RandomGenerator.Core
         public bool SetTileValue(int2 position, int value)
         {
             return SetTileValue(position.x, position.y, value);
-        }
-
-        public bool SetTileValue(Tile tile, int value)
-        {
-            tile.SetValue(value);
-            return SetTileValue(tile.x, tile.y, value);
         }
 
         // Mask Funcs
@@ -226,11 +198,6 @@ namespace Dalichrome.RandomGenerator.Core
         public bool IsExcluding(int2 position)
         {
             return subgrid.IsExcluding(position);
-        }
-
-        public bool IsExcluding(Tile tile)
-        {
-            return IsExcluding(tile.Int2);
         }
 
         public int2 GetNearestPosition(int x, int y, int id)
@@ -294,15 +261,14 @@ namespace Dalichrome.RandomGenerator.Core
 #endif
         }
 
-
-        public List<Tile> GetEightNeighborTiles(Tile tile)
+        public List<int2> GetEightNeighborPositions(int2 pos)
         {
-            return subgrid.GetEightNeighborTiles(tile);
+            return subgrid.GetEightNeighborPositions(pos);
         }
 
-        public List<Tile> GetFourNeighborTiles(Tile tile)
+        public List<int2> GetFourNeighborPositions(int2 pos)
         {
-            return subgrid.GetFourNeighborTiles(tile);
+            return subgrid.GetFourNeighborPositions(pos);
         }
 
 
@@ -356,11 +322,6 @@ namespace Dalichrome.RandomGenerator.Core
             subgrid.AddRegionPosition(pos);
         }
 
-        public bool IsInRegion(Tile tile)
-        {
-            return subgrid.IsInRegion(tile);
-        }
-
         public bool IsInRegion(Vector2Int pos)
         {
             return subgrid.IsInRegion(pos.x, pos.y);
@@ -407,24 +368,29 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.GetEnumerator();
         }
 
-        public NativeArray<Tile> AsNativeArray()
+        public NativeArray<int> AsNativeArray()
         {
             return subgrid.AsNativeArray();
         }
 
-        public IEnumerable<Tile> GetRegionTiles()
+        public IEnumerable<int2> GetRegionPositions()
         {
-            return subgrid.GetRegionTiles();
+            return subgrid.GetRegionPositions();
         }
 
-        public IEnumerable<Tile> GetRegionGrid()
+        public IEnumerable<int2> GetRegionGridPositions()
         {
-            return subgrid.GetRegionGrid();
+            return subgrid.GetRegionGridPositions();
         }
 
-        public IEnumerable<Tile> GetTiles()
+        public IEnumerable<int2> GetPositions()
         {
-            return subgrid.GetTiles();
+            return subgrid.GetPositions();
+        }
+
+        public IEnumerable<int3> GetPositions3D()
+        {
+            return subgrid.GetPositions3D();
         }
 
         public NativeTileGrid GetNative() =>
@@ -452,7 +418,7 @@ namespace Dalichrome.RandomGenerator.Core
             subgrid.SetLayerIdToLayerIndexLookup(newLookup);
         }
 
-        public void SetAllTiles(Tile[] tileArray)
+        public void SetAllTiles(IEnumerable<int> tileArray)
         {
             subgrid.SetAllTiles(tileArray);
         }

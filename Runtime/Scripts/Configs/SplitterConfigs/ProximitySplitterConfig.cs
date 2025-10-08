@@ -16,7 +16,7 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public override SplitterType Type { get { return SplitterType.Proximity; } }
         [TileDisplay] public List<int> Tiles { get { return _tiles; } set { _tiles = value; } }
-        [TileDisplay, SerializeField] private List<int> _tiles = new() { (int)TileType.Wall_Cave };
+        [TileDisplay, SerializeField] private List<int> _tiles = new() { (int)TileDefaults.Wall_Cave };
 
         public int MinimumRadiusSize { get { return _minimumRadiusSize; } set { _minimumRadiusSize = value; } }
         [SerializeField] private int _minimumRadiusSize = 1;
@@ -34,7 +34,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
-        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileType.Wall_Cave;
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;
