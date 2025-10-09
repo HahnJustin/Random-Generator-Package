@@ -184,7 +184,15 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (tileIdToLayerIndexLookup.TryGetValue(id, out int index))
                 return index;
-            
+
+            return -1;
+        }
+
+        private int GetLayerIndexFromLayedId(int id)
+        {
+            if (layerIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+
             return -1;
         }
 
@@ -198,47 +206,42 @@ namespace Dalichrome.RandomGenerator.Core
             return GetTileIdFromNativeArray(pos2.x, pos2.y, layerIndex);
         }
 
-        private int GetTileIdFromNativeArray(int x, int y, int layerIndex)
+        private int GetTileIdFromNativeArray(int x, int y, int z)
         {
-            return tiles[PositionToIndex(x, y, layerIndex)];
+            return tiles[PositionToIndex(x, y, z)];
         }
 
         private int GetTileIdFromNativeArrayLayerId(int2 pos2, int layerId)
         {
-            return tiles[PositionToIndex(pos2.x, pos2.y, layerIdToLayerIndexLookup[layerId])];
+            return tiles[PositionToIndex(pos2.x, pos2.y, GetLayerIndexFromLayedId(layerId))];
         }
 
         private int GetTileIdFromNativeArrayLayerId(int x, int y, int layerId)
         {
-            return tiles[PositionToIndex(x, y, layerIdToLayerIndexLookup[layerId])];
-        }
-
-        private int PositionToIndex(int x, int y, int z)
-        {
-            return (z * width * height) + (y * width) + x;
+            return tiles[PositionToIndex(x, y, GetLayerIndexFromLayedId(layerId))];
         }
 
         private int PositionToIndexLayerId(int x, int y, int layerId)
         {
-            int z = layerIdToLayerIndexLookup[layerId];
-            return (z * width * height) + (y * width) + x;
+            int z = GetLayerIndexFromLayedId(layerId);
+            return PositionToIndex(x, y, z);
         }
 
         private int PositionToIndexTileId(int x, int y, int tileId)
         {
-            int z = tileIdToLayerIndexLookup[tileId];
-            return (z * width * height) + (y * width) + x;
+            int z = GetLayerIndexFromTileId(tileId);
+            return PositionToIndex(x, y, z);
         }
 
-        private int PositionToIndex(int3 pos)
-        {
-            return (pos.z * width * height) + (pos.y * width) + pos.x;
-        }
-
+        private int PositionToIndex(int x, int y, int z) => depth * (y * width + x) + z;
+        private int PositionToIndex(int x, int y) => PositionToIndex(x, y, 0);
+        private int PositionToIndex(int2 position) => PositionToIndex(position.x, position.y, 0);
+        private int PositionToIndex(int3 pos) => PositionToIndex(pos.x, pos.y, pos.z);
 
         private int3 IndexToInt3(int index)
         {
-            return new(index % width, index / width, index % (width * height));
+            int tmp = index / depth;
+            return new(tmp % width, tmp / width, index % depth);
         }
 
         private bool CanModifyPosition(int3 pos)
@@ -258,15 +261,10 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (!Masked) return true;
 
-            for (int i = 0; i < depth; i++)
-            {
-                int tileId = GetTileIdFromNativeArray(x, y, i);
-                if (tileMask.CanModifyTileId(tileId)) return false;
-            }
-            return true;
+            return tileMask.CanModifyColumn(GetColumn(x, y));
         }
 
-
+        // Set Tile Id
         public bool SetTileId(int x, int y, int id)
         {
             if (IsRestricted(x,y) || !CanModifyColumn(x,y)) return false;
@@ -280,12 +278,13 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTileId(position.x, position.y, id);
         }
 
+        // Column Contains Id
         public bool ColumnContainsId(int x, int y, int id)
         {
-            for (int i = 0; i < depth; i++)
+            TileColumn column = GetColumn(x, y);
+            for (int i = 0; i < column.Length; i++)
             {
-                int tileId = GetTileIdFromNativeArray(x, y, i);
-                if (tileId == id) return true;
+                if (column[i] == id) return true;
             }
             return false;
         }
@@ -294,6 +293,8 @@ namespace Dalichrome.RandomGenerator.Core
         {
             return ColumnContainsId(position.x, position.y, id);
         }
+
+        // Get Tile Id
 
         public int GetTileId(int x, int y, int layerId)
         {
@@ -307,6 +308,7 @@ namespace Dalichrome.RandomGenerator.Core
             return GetTileId(position.x, position.y, layerId);
         }
 
+        // Copy Column
         public bool CopyColumn(int2 replacer, int2 replaced)
         {
             if (!IsInBounds(replaced.x, replaced.y) || !IsInBounds(replacer.x, replacer.y)) return false;
@@ -320,6 +322,18 @@ namespace Dalichrome.RandomGenerator.Core
             return true;
         }
 
+        // Get Column
+        public TileColumn GetColumn(int2 position)
+        {
+            return GetColumn(position.x, position.y);
+        }
+
+        public TileColumn GetColumn(int x, int y)
+        {
+            return TileColumn.FromNative(new NativeSlice<int>(tiles, PositionToIndex(x, y), depth));
+        }
+
+        // NA Value stuff
         //Can still set the value for a masked tile
         public bool SetTileValue(int x, int y, int value)
         {
@@ -334,6 +348,8 @@ namespace Dalichrome.RandomGenerator.Core
         {
             return SetTileValue(position.x, position.y, value);
         }
+
+        // Masking
 
         public void RemoveMask()
         {
@@ -362,6 +378,8 @@ namespace Dalichrome.RandomGenerator.Core
             masked = on;
         }
 
+        // Persistent / Universal Masking
+
         public void AddExcludedPosition(int2 position)
         {
             excludePositions.Add(position);
@@ -377,6 +395,7 @@ namespace Dalichrome.RandomGenerator.Core
             return excludePositions.Contains(new(x,y));
         }
 
+        // Helpers
         public int2 GetNearestPosition(int x, int y, int id)
         {
             // Iterate through all distances from the center
@@ -428,26 +447,6 @@ namespace Dalichrome.RandomGenerator.Core
             // TODO - NA after Metadata changes
         }
 
-        public bool CanHaveTiles()
-        {
-            return width > 0 && height > 0;
-        }
-
-        public void Dispose()
-        {
-            if (!IsValid) return;
-
-            tiles.Dispose();
-            tileMask.Dispose();
-
-            tileIdToLayerIndexLookup.Dispose();
-            layerIdToLayerIndexLookup.Dispose();
-            excludePositions.Dispose();
-            regionPositions.Dispose();
-
-            IsValid = false;
-        }
-
         private void NeighborPosHelper(int2 pos, List<int2> positions)
         {
             if(IsInBounds(pos)) positions.Add(pos);
@@ -489,6 +488,7 @@ namespace Dalichrome.RandomGenerator.Core
             else return new (random.NextInt(width), 0);
         }
 
+        // Regions
         public RegionBounds GetRegionBounds()
         {
             var list = new List<int2>(regionPositions.Count());
@@ -532,6 +532,7 @@ namespace Dalichrome.RandomGenerator.Core
             regionPositions.Add(pos);
         }
 
+        // Position Bools
         public bool IsInRegion(int2 pos)
         {
             if (!regionLimited) return true;
@@ -575,6 +576,7 @@ namespace Dalichrome.RandomGenerator.Core
             return CanModifyColumn(x,y);
         }
 
+        // Iteration
         public NativeArray<int> AsNativeArray()
         {
             return tiles;
@@ -597,10 +599,46 @@ namespace Dalichrome.RandomGenerator.Core
             {
                 for (int x = 0; x < width; x++)
                 {
-                    for (int z = 0; x < depth; z++)
+                    for (int z = 0; z < depth; z++)
                     {
                         yield return new(x, y, z);
                     }
+                }
+            }
+        }
+
+        public IEnumerable<int4> GetPositionsWithId()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    for (int z = 0; z < depth; z++)
+                    {
+                        yield return new (x, y, z, GetTileIdFromNativeArray(x,y,z));
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<TileColumn> GetColumns()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    yield return GetColumn(x,y);
+                }
+            }
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetColumnsWithPosition()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    yield return new (x, y, GetColumn(x, y));
                 }
             }
         }
@@ -610,13 +648,47 @@ namespace Dalichrome.RandomGenerator.Core
             return regionPositions;
         }
 
+        public IEnumerable<TileColumn> GetRegionColumns()
+        {
+            foreach (int2 pos in GetRegionPositions())
+                yield return GetColumn(pos);
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetRegionColumnsWithPosition()
+        {
+            foreach (int2 pos in GetRegionPositions())
+                yield return new(pos.x, pos.y, GetColumn(pos));
+        }
+
         public IEnumerable<int2> GetRegionGridPositions()
         {
             for (int y = regionMin.y; y <= regionMax.y; y++)
             {
                 for (int x = regionMin.x; x <= regionMax.x; x++)
                 {
-                    yield return new(x, y);
+                    yield return new (x, y);
+                }
+            }
+        }
+
+        public IEnumerable<TileColumn> GetRegionGridColumns()
+        {
+            for (int y = regionMin.y; y <= regionMax.y; y++)
+            {
+                for (int x = regionMin.x; x <= regionMax.x; x++)
+                {
+                    yield return GetColumn(x, y);
+                }
+            }
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetRegionGridColumnsWithPosition()
+        {
+            for (int y = regionMin.y; y <= regionMax.y; y++)
+            {
+                for (int x = regionMin.x; x <= regionMax.x; x++)
+                {
+                    yield return new (x, y, GetColumn(x, y));
                 }
             }
         }
@@ -625,11 +697,12 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (regionLimited)
             {
-                return GetRegionPositions().GetEnumerator();
+                return GetRegionColumnsWithPosition().GetEnumerator();
             }
-            else return GetPositions().GetEnumerator();
+            else return GetColumnsWithPosition().GetEnumerator();
         }
 
+        // Setting Lookups
         public void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
         {
             var map = new NativeParallelHashMap<int, int>(newLookup.Count, allocator);
@@ -643,6 +716,7 @@ namespace Dalichrome.RandomGenerator.Core
             layerIdToLayerIndexLookup = map;
         }
 
+        // Misc
         public void SetAllTiles(IEnumerable<int> array)
         {
             if (array.Count() != tiles.Count()) return;
@@ -665,6 +739,26 @@ namespace Dalichrome.RandomGenerator.Core
             //TODO finish adding other stuff here later
 
             return grid;
+        }
+
+        public bool CanHaveTiles()
+        {
+            return width > 0 && height > 0 && depth > 0;
+        }
+
+        public void Dispose()
+        {
+            if (!IsValid) return;
+
+            tiles.Dispose();
+            tileMask.Dispose();
+
+            tileIdToLayerIndexLookup.Dispose();
+            layerIdToLayerIndexLookup.Dispose();
+            excludePositions.Dispose();
+            regionPositions.Dispose();
+
+            IsValid = false;
         }
     }
 }

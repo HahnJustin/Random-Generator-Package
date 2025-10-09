@@ -142,6 +142,23 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.CopyColumn(replacer, replaced);
         }
 
+        // Get Column
+        public TileColumn GetColumn(int2 pos)
+        {
+            return subgrid.GetColumn(pos);
+        }
+
+        public TileColumn GetColumn(int x, int y)
+        {
+            return subgrid.GetColumn(x, y);
+        }
+
+        public TileColumn GetColumn(Vector2Int pos)
+        {
+            return subgrid.GetColumn(pos.x, pos.y);
+        }
+
+
         // Set Tile Value
         public bool SetTileValue(int x, int y, int value)
         {
@@ -373,16 +390,6 @@ namespace Dalichrome.RandomGenerator.Core
             return subgrid.AsNativeArray();
         }
 
-        public IEnumerable<int2> GetRegionPositions()
-        {
-            return subgrid.GetRegionPositions();
-        }
-
-        public IEnumerable<int2> GetRegionGridPositions()
-        {
-            return subgrid.GetRegionGridPositions();
-        }
-
         public IEnumerable<int2> GetPositions()
         {
             return subgrid.GetPositions();
@@ -391,6 +398,51 @@ namespace Dalichrome.RandomGenerator.Core
         public IEnumerable<int3> GetPositions3D()
         {
             return subgrid.GetPositions3D();
+        }
+
+        public IEnumerable<int4> GetPositionsWithId()
+        {
+            return subgrid.GetPositionsWithId();
+        }
+
+        public IEnumerable<TileColumn> GetColumns()
+        {
+            return subgrid.GetColumns();
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetColumnsWithPosition()
+        {
+            return subgrid.GetColumnsWithPosition();
+        }
+
+        public IEnumerable<int2> GetRegionPositions()
+        {
+            return subgrid.GetRegionPositions();
+        }
+
+        public IEnumerable<TileColumn> GetRegionColumns()
+        {
+            return subgrid.GetRegionColumns();
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetRegionColumnsWithPosition()
+        {
+            return subgrid.GetRegionColumnsWithPosition();
+        }
+
+        public IEnumerable<int2> GetRegionGridPositions()
+        {
+            return subgrid.GetRegionGridPositions();
+        }
+
+        public IEnumerable<TileColumn> GetRegionGridColumns()
+        {
+            return subgrid.GetRegionGridColumns();
+        }
+
+        public IEnumerable<(int, int, TileColumn)> GetRegionGridColumnsWithPosition()
+        {
+            return subgrid.GetRegionGridColumnsWithPosition();
         }
 
         public NativeTileGrid GetNative() =>

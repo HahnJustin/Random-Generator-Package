@@ -61,25 +61,25 @@ namespace Dalichrome.RandomGenerator.Core
             else return !IsIncludingTiles;
         }
 
-        public bool CanModifyTile(NativeArray<int> array)
+        public bool CanModifyColumn(TileColumn column)
         {
             if (!IsValid) return true;
 
             bool included = false;
             bool excluded = false;
 
-            foreach (int id in includeSet)
+            for (int i = 0; i < column.Length; i++)
             {
-                if (array.Contains(id))
+                if (includeSet.Contains(column[i]))
                 {
                     included = true;
                     break;
                 }
             }
 
-            foreach (int id in excludeSet)
+            for (int i = 0; i < column.Length; i++)
             {
-                if (array.Contains(id))
+                if (excludeSet.Contains(column[i]))
                 {
                     excluded = true;
                     break;

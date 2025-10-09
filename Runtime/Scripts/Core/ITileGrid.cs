@@ -28,6 +28,10 @@ namespace Dalichrome.RandomGenerator.Core
         // Set All Ids At Pos Funcs
         public abstract bool CopyColumn(int2 replacer, int2 replaced);
 
+        // Get Column
+        public abstract TileColumn GetColumn(int2 pos);
+        public abstract TileColumn GetColumn(int x, int y);
+
         // Contains Id Funcs
         public abstract bool ColumnContainsId(int x, int y, int id);
         public abstract bool ColumnContainsId(int2 position, int id);
@@ -94,10 +98,18 @@ namespace Dalichrome.RandomGenerator.Core
 
         // Ienumeration
         public abstract NativeArray<int> AsNativeArray();
-        public abstract IEnumerable<int2> GetRegionPositions();
-        public abstract IEnumerable<int2> GetRegionGridPositions();
         public abstract IEnumerable<int2> GetPositions();
         public abstract IEnumerable<int3> GetPositions3D();
+        public abstract IEnumerable<int4> GetPositionsWithId();
+        public abstract IEnumerable<TileColumn> GetColumns();
+        public abstract IEnumerable<(int, int, TileColumn)> GetColumnsWithPosition();
+        public abstract IEnumerable<int2> GetRegionPositions();
+        public abstract IEnumerable<TileColumn> GetRegionColumns();
+        public abstract IEnumerable<(int, int, TileColumn)> GetRegionColumnsWithPosition();
+        public abstract IEnumerable<int2> GetRegionGridPositions();
+        public abstract IEnumerable<TileColumn> GetRegionGridColumns();
+        public abstract IEnumerable<(int, int, TileColumn)> GetRegionGridColumnsWithPosition();
+
 
         // Layer Lookup Funcs
         public abstract void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> tileIdToLayerIndex);
