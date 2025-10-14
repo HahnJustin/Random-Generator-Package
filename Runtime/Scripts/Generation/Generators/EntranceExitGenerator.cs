@@ -4,6 +4,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -74,61 +75,60 @@ namespace Dalichrome.RandomGenerator.Generators
                 TileGrid.ClearNumbers();
                 //Creates readGrid of applicalbe wall tiles
                 int[,] grid = new int[width, height];
-                foreach (Tile tile in TileGrid)
+                foreach (int2 pos in TileGrid.GetPositions())
                 {
-                    if (!tile.ContainsId((int)config.SpawnInTile)) continue;
-                    int x = tile.x;
-                    int y = tile.y;
-
+                    if (!TileGrid.ColumnContainsId(pos, config.SpawnInTile)) continue;
+   
                     int cardinal = 0;
                     int corner = 0;
 
-                    Vector2Int unoccCard = Constants.OutsideGridVectorInt;
-                    Vector2Int unoccCorn = Constants.OutsideGridVectorInt;
-                    Vector2Int unoccCorn2 = Constants.OutsideGridVectorInt;
+                    int2 unoccCard = Constants.OutsideGridInt2;
+                    int2 unoccCorn = Constants.OutsideGridInt2;
+                    int2 unoccCorn2 = Constants.OutsideGridInt2;
 
-                    List<Tile> neighbors = TileGrid.GetEightNeighborTiles(tile);
+                    List<int2> neighbors = TileGrid.GetEightNeighborPositions(pos);
 
-                    foreach (Tile neighbor in neighbors)
+                    foreach (int2 neighbor in neighbors)
                     {
                         if (util.IsOccupied(neighbor) == 1)
                         {
-                            if (neighbor.x == x || neighbor.y == y) cardinal += 1;
+                            if (neighbor.x == pos.x || neighbor.y == pos.y) cardinal += 1;
                             else corner += 1;
                         }
                         else
                         {
-                            if (neighbor.x == x || neighbor.y == y) unoccCard = neighbor.Position;
-                            else if (unoccCorn == null) unoccCorn = neighbor.Position;
-                            else if (unoccCorn2 == null) unoccCorn2 = neighbor.Position;
+                            if (neighbor.x == pos.x || neighbor.y == pos.y) unoccCard = neighbor;
+                            else if (math.all(unoccCorn == Constants.OutsideGridInt2)) unoccCorn = neighbor;
+                            else if (math.all(unoccCorn2 == Constants.OutsideGridInt2)) unoccCorn2 = neighbor;
                         }
                     }
 
                     if (cardinal == 3 && corner >= 2 && neighbors.Count > 6 &&
-                       (((unoccCorn == Constants.OutsideGridVectorInt || unoccCard.x == unoccCorn.x) && 
-                       (unoccCorn2 == Constants.OutsideGridVectorInt || unoccCard.x == unoccCorn2.x)) ||
-                       ((unoccCorn == Constants.OutsideGridVectorInt || unoccCard.y == unoccCorn.y) && 
-                       (unoccCorn2 == Constants.OutsideGridVectorInt || unoccCard.y == unoccCorn2.y))))
+                       (((math.all(unoccCorn == Constants.OutsideGridInt2) || unoccCard.x == unoccCorn.x) && 
+                       (math.all(unoccCorn2 == Constants.OutsideGridInt2) || unoccCard.x == unoccCorn2.x)) ||
+                       ((math.all(unoccCorn == Constants.OutsideGridInt2) || unoccCard.y == unoccCorn.y) && 
+                       (math.all(unoccCorn2 == Constants.OutsideGridInt2)|| unoccCard.y == unoccCorn2.y))))
                     {
-                        grid[x, y] = 1;
-                        TileGrid.SetTileValue(x,y,1);
+                        grid[pos.x, pos.y] = 1;
+                        TileGrid.SetTileValue(pos,1);
                     }
                 }
 
                 entrancePos = grid.GetNearestPosition(entranceBorder, 1);
-                entranceAir = TileGrid.GetNearestPosition(entrancePos, (int)TileType.Wall_Object_NA);
+                entranceAir = TileGrid.GetNearestPosition(entrancePos, (int)TileDefaults.Wall_Object_NA);
 
                 exitPos = grid.GetNearestPosition(exitBorder, 1);
-                exitAir = TileGrid.GetNearestPosition(exitPos, (int)TileType.Wall_Object_NA);
+                exitAir = TileGrid.GetNearestPosition(exitPos, (int)TileDefaults.Wall_Object_NA);
 
                 Debug.Log("ent:" + entranceBorder + " " + entrancePos + " air: " + entranceAir);
                 Debug.Log("ext:" + exitBorder + " " + exitPos + " air: " + exitAir);
             }
             else
             {
+                // TODO this Wall Object NA thing is completely broken, so think hard and fix this
                 //Finding nearest air tile, then nearest wall then spawing entrance/exit
-                entranceAir = TileGrid.GetNearestPosition(entranceBorder, (int)TileType.Wall_Object_NA);
-                exitAir = TileGrid.GetNearestPosition(exitBorder, (int)TileType.Wall_Object_NA);
+                entranceAir = TileGrid.GetNearestPosition(entranceBorder, (int)TileDefaults.Wall_Object_NA);
+                exitAir = TileGrid.GetNearestPosition(exitBorder, (int)TileDefaults.Wall_Object_NA);
 
                 entrancePos = TileGrid.GetNearestPosition(entranceAir, (int)config.SpawnInTile);
                 exitPos = TileGrid.GetNearestPosition(exitAir, (int)config.SpawnInTile);
@@ -143,8 +143,8 @@ namespace Dalichrome.RandomGenerator.Generators
                 return input;
             }
 
-            TileGrid.SetTileId(entrancePos, (int)TileType.Object_Entrance);
-            TileGrid.SetTileId(exitPos, (int)TileType.Object_Exit);
+            TileGrid.SetTileId(entrancePos, (int)TileDefaults.Object_Entrance);
+            TileGrid.SetTileId(exitPos, (int)TileDefaults.Object_Exit);
 
             //Add Entrance Exit to Universal Mask
             if (config.AddEntranceExitToMask)
@@ -161,7 +161,7 @@ namespace Dalichrome.RandomGenerator.Generators
             foreach (Vector2Int pos in path)
             {
                 if (config.DebugPath) {
-                    TileGrid.SetTileId(pos, (int)TileType.Debug_Path_Green);
+                    TileGrid.SetTileId(pos, (int)TileDefaults.Debug_Path_Green);
                 }
                 if (config.AddPathToMask)
                 {

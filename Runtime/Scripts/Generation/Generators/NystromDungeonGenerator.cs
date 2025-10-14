@@ -6,6 +6,7 @@ using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
 using System.Linq;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -154,9 +155,9 @@ namespace Dalichrome.RandomGenerator.Generators
 
 
                 //Fill room being worked on to ROOM_VALUE (Should be negative)
-                foreach (Tile tile in room)
+                foreach (int2 pos in room)
                 {
-                    occupanceGrid[tile.x, tile.y] = ROOM_VALUE;
+                    occupanceGrid[pos.x, pos.y] = ROOM_VALUE;
                 }
 
                 int value = ORIGINAL_VALUE;
@@ -325,7 +326,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 Debug.Log("Connectors Left:" + connectors.Count);
                 foreach (Vector2Int position in connectors)
                 {
-                    TileGrid.SetTileId(position, (int)TileType.Debug_Circle_Red);
+                    TileGrid.SetTileId(position, (int)TileDefaults.Debug_Circle_Red);
                 }
 
                 //must redefine pruning to consider all values of 'maze' rooms

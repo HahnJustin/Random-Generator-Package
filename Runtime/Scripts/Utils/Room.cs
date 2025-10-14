@@ -10,17 +10,17 @@ using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
-    public class Room : IComparable, IEnumerable<Tile>
+    public class Room : IComparable, IEnumerable<int2>
     {
-        private List<Tile> tiles = new();
-        private List<Tile> edges = new();
+        private HashSet<int2> tiles = new();
+        private HashSet<int2> edges = new();
 
-        private Dictionary<Vector2Int, Tile> tileDictionary = new();
+        private int2 top = new (-1,-1);
+        private int2 bottom = new(-1, -1);
+        private int2 right = new(-1, -1);
+        private int2 left = new(-1, -1);
 
-        private Tile top;
-        private Tile bottom;
-        private Tile right;
-        private Tile left;
+        private int2 initial = new(-1, -1);
 
         public int Width
         {
@@ -37,15 +37,24 @@ namespace Dalichrome.RandomGenerator.Utils
             }
         }
 
-        public List<int2> Int2TilesList
+        public HashSet<int2> Tiles
         {
-            get { return tiles.Select(tile => tile.Int2).ToList(); }
+            get { return tiles; }
         }
 
-
-        public List<int2> Int2EdgesList
+        public List<int2> TileList
         {
-            get { return edges.Select(tile => tile.Int2).ToList(); }
+            get { return tiles.ToList(); }
+        }
+
+        public HashSet<int2> Edges
+        {
+            get { return edges; }
+        }
+
+        public List<int2> EdgeList
+        {
+            get { return edges.ToList(); }
         }
 
         public int Value { get; private set; }
@@ -63,72 +72,82 @@ namespace Dalichrome.RandomGenerator.Utils
             Value = roomNumber;
         }
 
-        public void AddTile(Tile tile)
+        private void FarEdgeHelper(int2 pos)
         {
-            Vector2Int position = new (tile.x, tile.y);
-            if (tileDictionary.ContainsKey(position))
-            {
-                return;
-            }
-            tiles.Add(tile);
-            tileDictionary.Add(position, tile);
-
-            if (!top.IsValid || top.y < tile.y) top = tile;
-            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
-            if (!right.IsValid || right.x < tile.x) right = tile;
-            if (!left.IsValid || left.x > tile.x) left = tile;
+            if (math.all(top == initial) || top.y < pos.y) top = pos;
+            if (math.all(top == initial) || bottom.y > pos.y) bottom = pos;
+            if (math.all(top == initial) || right.x < pos.x) right = pos;
+            if (math.all(top == initial) || left.x > pos.x) left = pos;
         }
 
-        public void RemoveTile(Tile tile)
+        public void AddPosition(int x, int y)
         {
-            Vector2Int position = new (tile.x, tile.y);
-            if (!tileDictionary.ContainsKey(position))
+            AddPosition(new int2(x, y));
+        }
+
+        public void AddPosition(int2 pos)
+        {
+            if (tiles.Contains(pos))
             {
                 return;
             }
-            tiles.Remove(tile);
-            tileDictionary.Remove(position);
+            tiles.Add(pos);
+
+            FarEdgeHelper(pos);
+        }
+
+        public void RemovePosition(int2 pos)
+        {
+            if (!tiles.Contains(pos))
+            {
+                return;
+            }
+            tiles.Remove(pos);
 
             //TODO: Redo these here :o
-            if (!top.IsValid || top.y < tile.y) top = tile;
-            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
-            if (!right.IsValid || right.x < tile.x) right = tile;
-            if (!left.IsValid || left.x > tile.x) left = tile;
+            FarEdgeHelper(pos);
         }
 
-        public Tile GetFirstTile()
+        public int2 GetFirstPosition()
         {
-            return tiles[0];
+            return tiles.First();
         }
 
-        public Tile GetRandomTile(AbstractRandom random)
+        public int2 GetRandomPosition(AbstractRandom random)
         {
-            return tiles[random.NextInt(0, tiles.Count)];
+            return tiles.ElementAt(random.NextInt(tiles.Count));
         }
 
-        public bool ContainsTile(Tile tile)
+        public bool ContainsPosition(int2 position)
         {
-            return tileDictionary.ContainsKey(tile.Position);
+            return tiles.Contains(position);
         }
 
-        public void AddEdge(Tile tile)
+        public bool ContainsPosition(int x, int y)
         {
-            edges.Add(tile);
+            return tiles.Contains(new int2(x,y));
         }
 
-        public void AddEdgeRange(List<Tile> otherEdges)
+        public void AddEdge(int x, int y)
         {
-            edges.AddRange(otherEdges);
+            edges.Add(new int2(x,y));
         }
 
-        public List<Tile> GetEdges()
+        public void AddEdge(int2 position)
         {
-            return edges;
+            edges.Add(position);
         }
 
-        public void AddTileRange(List<Tile> otherTiles)
+        public void AddEdgeRange(List<int2> otherEdges)
         {
-            tiles.AddRange(otherTiles);
+            foreach (int2 edge in otherEdges)
+                edges.Add(edge);
+        }
+
+        public void AddTileRange(List<int2> otherTiles)
+        {
+            foreach (int2 pos in otherTiles)
+                edges.Add(pos);
         }
 
         //Biggest First
@@ -142,12 +161,10 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public RegionBounds ToRegionBounds(TileGrid grid)
         {
-            List<int2> regionPositions = tiles.Select(x => x.Int2).ToList();
-
-            return new(Minimum, Maximum, regionPositions, grid);
+            return new(Minimum, Maximum, tiles.ToList(), grid);
         }
 
-        public IEnumerator<Tile> GetEnumerator()
+        public IEnumerator<int2> GetEnumerator()
         {
             return tiles.GetEnumerator();
         }

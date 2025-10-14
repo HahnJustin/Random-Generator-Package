@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Utils
@@ -43,6 +44,44 @@ namespace Dalichrome.RandomGenerator.Utils
                     break;
             }
             return new Vector2Int(searchX, searchY);
+        }
+
+        public static int2 GetPointInDirection(this int2 point, Direction direction, int movement = 1)
+        {
+            int searchX = point.x;
+            int searchY = point.y;
+            switch (direction)
+            {
+                case Direction.Up:
+                    searchY += movement;
+                    break;
+                case Direction.Up_Right:
+                    searchX += movement;
+                    searchY += movement;
+                    break;
+                case Direction.Right:
+                    searchX += movement;
+                    break;
+                case Direction.Down_Right:
+                    searchX += movement;
+                    searchY -= movement;
+                    break;
+                case Direction.Down:
+                    searchY -= movement;
+                    break;
+                case Direction.Down_Left:
+                    searchX -= movement;
+                    searchY -= movement;
+                    break;
+                case Direction.Left:
+                    searchX -= movement;
+                    break;
+                case Direction.Up_Left:
+                    searchX -= movement;
+                    searchY += movement;
+                    break;
+            }
+            return new int2(searchX, searchY);
         }
 
         private static readonly List<Direction> _cardinalDirections = new()

@@ -35,9 +35,8 @@ public struct GuaranteeSpawnJob : IJob
         for (int i = 0; i < candidateTiles.Length && placed < maxSpawns; ++i)
         {
             int2 pos = candidateTiles[i];
-            Tile tile = inputGrid.GetTile(pos);
 
-            if ((useEntranceDistance && tile.Value > -minDistance) ||
+            if ((useEntranceDistance && inputGrid.GetTileValue(pos) > -minDistance) ||
                 inputGrid.IsExcluding(pos))
                 continue;
 

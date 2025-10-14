@@ -3,6 +3,7 @@ using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -30,14 +31,14 @@ namespace Dalichrome.RandomGenerator.Generators
                 if ((room.Count <= config.MinimumRoomSize && config.FillType == RoomFillType.Size_Fill) || 
                     (util.Rooms.Count > config.RoomLimit && config.FillType == RoomFillType.Fill_Until_X_Left ))
                 {
-                    Tile tile = room.GetFirstTile();
-                    util.RoomFill(tile.x, tile.y, null);
+                    int2 pos = room.GetFirstPosition();
+                    util.RoomFill(pos.x, pos.y, null);
                     util.Rooms.Remove(room.Value);
                     if (config.DebugRooms)
                     {
-                        foreach (Tile roomTile in room)
+                        foreach (int2 pos2 in room)
                         {
-                            TileGrid.SetTileId(tile, (int)TileType.Debug_Path_Red);
+                            TileGrid.SetTileId(pos2, (int)TileDefaults.Debug_Path_Red);
                         }
                     }
                 }

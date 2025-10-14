@@ -87,7 +87,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 {
                     continue;
                 }
-                else if (IsWalkable(tileGrid.GetTile(pos)))
+                else if (IsWalkable(pos.x, pos.y))
                 {
                     validNeighbors.Add(pos);
                 }
@@ -95,9 +95,9 @@ namespace Dalichrome.RandomGenerator.Utils
             return validNeighbors;
         }
 
-        private bool IsWalkable(int2 pos)
+        private bool IsWalkable(int x, int y)
         {
-            return occupanceUtil.IsOccupied(tile) == 0;
+            return occupanceUtil.IsOccupied(x, y) == 0;
         }
 
         //Add custom configurable traversability types here

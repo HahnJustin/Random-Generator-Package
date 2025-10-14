@@ -19,8 +19,15 @@ namespace Dalichrome.RandomGenerator.UserData
         [SerializeField, LayerTypeCollision] public int id;
         public override int GetId() => id;
 
+        [Tooltip("This is the name of the Unity Layer that you want the eventual tile map object to have")]
         public string layerName;
         public string sortingLayerName;
+        public int sortingOrder;
+        public int tieOrder;
+
+        [Tooltip("On the default occupancy setting, any non-empty tile will be considered occupied")]
+        public bool occupyOnDefault;
+
         public bool hasCollider = false;
 #if ODIN_INSPECTOR
         [ShowIf("hasCollider", true)]
@@ -30,8 +37,7 @@ namespace Dalichrome.RandomGenerator.UserData
         [ValueDropdown(nameof(AllTags))]
 #endif
         public string tag = "Untagged";
-        public int sortingOrder;
-        public int tieOrder;
+
         public Material material;
 
 #if UNITY_EDITOR

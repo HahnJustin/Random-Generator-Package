@@ -32,6 +32,8 @@ namespace Dalichrome.RandomGenerator
         private static Dictionary<int, int> _layerIdToZ; // layerId -> z (0..N-1)
         private static int[] _zToLayerId;                // z -> layerId
 
+        private static int[] _zToDefaultLayerOccupance;  // z -> default occupance (0 = false, 1 = true)
+
         public static void Invalidate()
         {
             lock (_lock)
@@ -40,6 +42,7 @@ namespace Dalichrome.RandomGenerator
                 _allIds = null;
                 _layerIdToZ = null;
                 _zToLayerId = null;
+                _zToDefaultLayerOccupance = null;
             }
         }
 
@@ -93,11 +96,19 @@ namespace Dalichrome.RandomGenerator
                 // Build compact Z maps
                 _layerIdToZ = new Dictionary<int, int>(_allIds.Length);
                 _zToLayerId = new int[_allIds.Length];
+                _zToDefaultLayerOccupance = new int[_allIds.Length];
                 for (int z = 0; z < _allIds.Length; z++)
                 {
                     int lid = _allIds[z];
                     _layerIdToZ[lid] = z;
                     _zToLayerId[z] = lid;
+                }
+
+                // Build Occupance Map
+                _zToDefaultLayerOccupance = new int[_allIds.Length];
+                for (int z = 0; z < _allIds.Length; z++)
+                {
+                    _zToDefaultLayerOccupance[z] = _byId[_zToLayerId[z]].occupyOnDefault ? 1 : 0;
                 }
             }
         }
@@ -137,6 +148,12 @@ namespace Dalichrome.RandomGenerator
         public static IReadOnlyList<int> ZToLayerId
         {
             get { EnsureBuilt(); return _zToLayerId; }
+        }
+
+        /// <summary>Read-only view: z Å® defaultLayerOccupance ( 1 == true).</summary>
+        public static IReadOnlyList<int> ZToDefaultOccupance
+        {
+            get { EnsureBuilt(); return _zToDefaultLayerOccupance; }
         }
 
         // ---------- Existing metadata queries ----------

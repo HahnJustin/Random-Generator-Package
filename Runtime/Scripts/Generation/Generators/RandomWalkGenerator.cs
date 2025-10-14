@@ -66,7 +66,7 @@ namespace Dalichrome.RandomGenerator.Generators
             Walker drunkGuy = new(intOrigin.x, intOrigin.y);
             TileGrid.SetTileId(intOrigin, (int)config.Path);
 
-            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Green);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileDefaults.Debug_Star_Green);
 
             for (int step = 0; step < config.Steps; step++)
             {
@@ -76,7 +76,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 CancelCheck();
             }
 
-            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Red);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileDefaults.Debug_Star_Red);
 
             return input;
         }

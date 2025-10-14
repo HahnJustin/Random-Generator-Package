@@ -15,7 +15,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             foreach (int2 pos in region) 
             { 
-                if (TileGrid.ContainsId(pos, config.TileToCheck))
+                if (TileGrid.ColumnContainsId(pos, config.TileToCheck))
                 {
                     amount += 1;
                     if (amount > config.Amount)

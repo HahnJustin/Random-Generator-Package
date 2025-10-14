@@ -14,10 +14,6 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public abstract int IsOccupied(int2 position);
 
-        public abstract int IsOccupied(Tile tile);
-
-        public abstract void Fill(Tile tile);
-
         public abstract bool GetIfOccupiedTileNextToPosition(int x, int y, int movement = 1);
 
         public abstract OccupanceData GetOccupanceData();

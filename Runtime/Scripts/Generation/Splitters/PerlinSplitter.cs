@@ -29,15 +29,15 @@ namespace Dalichrome.RandomGenerator.Generators
             for (int i = 0; i < numBiomes; i++)
                 biomeBuckets[i] = new List<int2>();
 
-            foreach (Tile tile in generation.Grid)
+            foreach (int2 pos in generation.Grid.GetPositions())
             {
-                float2 samplePos = (float2)tile.Int2 * frequency + offset;
+                float2 samplePos = (float2)pos * frequency + offset;
                 float noiseValue = noise.cnoise(samplePos);
                 float normalized = math.saturate((noiseValue + 1f) * 0.5f); // 0 to 1
 
                 int biomeIndex = (int)(normalized * numBiomes);
                 biomeIndex = math.clamp(biomeIndex, 0, numBiomes - 1);
-                biomeBuckets[biomeIndex].Add(tile.Int2);
+                biomeBuckets[biomeIndex].Add(pos);
             }
 
             // Build RegionBounds from each bucket

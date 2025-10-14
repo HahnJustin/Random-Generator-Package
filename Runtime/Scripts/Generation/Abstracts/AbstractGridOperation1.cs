@@ -1,6 +1,7 @@
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -12,14 +13,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
         private void ApplyAfterMask(TileGrid finalGrid)
         {
-            for (int x = 0; x < TileGrid.width; x++)
-            {
-                for (int y = 0; y < TileGrid.height; y++)
-                {
-                    Tile tile = TileGrid.GetTile(x, y);
-                    finalGrid.SetTile(x, y, tile);
-                }
-            }
+            TileGrid.SetAllTiles(finalGrid.AsNativeArray());
             TileGrid.Dispose();
         }
 

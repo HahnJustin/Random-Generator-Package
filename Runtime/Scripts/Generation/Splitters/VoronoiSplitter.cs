@@ -84,10 +84,10 @@ namespace Dalichrome.RandomGenerator.Generators
                 regionBuckets[i] = new List<int2>();
 
             // Assign each tile in the region to the nearest seed
-            foreach (Tile tile in generation.Grid)
+            foreach (int2 pos in generation.Grid.GetPositions())
             {
-                int closestSeed = FindNearestSeedStep(seeds, tile.Int2);
-                regionBuckets[closestSeed].Add(tile.Int2);
+                int closestSeed = FindNearestSeedStep(seeds, pos);
+                regionBuckets[closestSeed].Add(pos);
             }
             
             // Create RegionBounds from each cluster

@@ -67,14 +67,14 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private bool SpawnTileGameObject(Core.Tile tile, GameObject prefab, Chunk chunk)
+        private bool SpawnTileGameObject(int2 pos, GameObject prefab, Chunk chunk)
         {
             if (prefab == null || chunk.renderedBefore) return false;
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            GameObject spawned = Instantiate(prefab, new Vector3(tile.Position.x + circle.x + gameObjectOffset.x,
-                                            tile.Position.y + circle.y + gameObjectOffset.y,
+            GameObject spawned = Instantiate(prefab, new Vector3(pos.x + circle.x + gameObjectOffset.x,
+                                            pos.y + circle.y + gameObjectOffset.y,
                                             prefab.transform.position.z), Quaternion.identity, gameObjectParent);
             ChunkObject chunkObject;
             spawned.TryGetComponent(out chunkObject);
@@ -103,13 +103,12 @@ namespace Dalichrome.RandomGenerator
                     for (int x = 0; x < chunkSize; x++)
                     {
                         int gx = x + chunk.origin.x;
-                        var tile = tileGrid.GetTile(gx, gy);
                         int tileId = tile.GetIdInLayer(layer);
 
                         if (useGameObjects)
                         {
                             var prefab = TileObjectInfo.GetGameObject(tileId);
-                            if (SpawnTileGameObject(tile, prefab, chunk))
+                            if (SpawnTileGameObject(new int2(gx, gy) , prefab, chunk))
                             {
                                 buf[rowBase + x] = null;
                                 continue;

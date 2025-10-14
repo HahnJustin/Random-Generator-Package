@@ -21,9 +21,9 @@ namespace Dalichrome.RandomGenerator.Generators
 
         private int2 FindMainPosition()
         {
-            foreach (Tile tile in TileGrid.GetTiles())
+            foreach (int2 pos in TileGrid.GetPositions())
             {
-                if (tile.ContainsId(config.TileToCheck)) return tile.Int2;
+                if (TileGrid.ColumnContainsId(pos, config.TileToCheck)) return pos;
             }
             return CANNOT_FIND_TILE_POS;
         }

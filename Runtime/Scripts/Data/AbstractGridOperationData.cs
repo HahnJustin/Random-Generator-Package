@@ -94,10 +94,10 @@ namespace Dalichrome.RandomGenerator.Data
             }
         }
 
-        public void AddLayersLookups(IReadOnlyDictionary<int, int> tileIdToLayerIndexLookup, IReadOnlyDictionary<int, int>  layerIdToLayerIndexLookup)
+        public void SetLookupBundle(NativeLookupBundle bundle)
+
         {
-            Grid.SetTileIdToLayerIndexLookup(tileIdToLayerIndexLookup);
-            Grid.SetLayerIdToLayerIndexLookup(layerIdToLayerIndexLookup);
+            Grid.SetLookupBundle(bundle);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

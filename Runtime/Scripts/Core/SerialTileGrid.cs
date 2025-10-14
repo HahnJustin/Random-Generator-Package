@@ -5,7 +5,6 @@ using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
 using System.Linq;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -16,6 +15,7 @@ namespace Dalichrome.RandomGenerator.Core
         public readonly int depth;
 
         private int[] tiles;
+        private int[] values;
 
         // Mask Variables
         private bool masked;
@@ -23,8 +23,7 @@ namespace Dalichrome.RandomGenerator.Core
         public ITileMask TileMask { get { return tileMask; } set { tileMask = (SerialTileMask)value; } }
 
         [ReadOnly] internal SerialTileMask tileMask;
-        [ReadOnly] private Dictionary<int, int> tileIdToLayerIndexLookup;
-        [ReadOnly] private Dictionary<int, int> layerIdToLayerIndexLookup;
+        [ReadOnly] private SerialLookupBundle bundle;
         [ReadOnly] private HashSet<int2> excludePositions;
 
         // Region Variables
@@ -74,8 +73,7 @@ namespace Dalichrome.RandomGenerator.Core
             tileMask = new();
             masked = false;
 
-            tileIdToLayerIndexLookup = new();
-            layerIdToLayerIndexLookup = new();
+            bundle = default;
 
             excludePositions = new();
 
@@ -109,8 +107,7 @@ namespace Dalichrome.RandomGenerator.Core
                 };
 
             // Tile Layer Lookup
-            grid.tileIdToLayerIndexLookup = other.tileIdToLayerIndexLookup;
-            grid.layerIdToLayerIndexLookup = other.layerIdToLayerIndexLookup;
+            grid.bundle = other.bundle;
 
             grid.excludePositions = new(other.excludePositions);
             grid.regionPositions = new(other.regionPositions);
@@ -128,7 +125,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         private int GetLayerIndexFromTileId(int id)
         {
-            if (tileIdToLayerIndexLookup.TryGetValue(id, out int index))
+            if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
                 return index;
 
             return -1;
@@ -136,10 +133,33 @@ namespace Dalichrome.RandomGenerator.Core
 
         private int GetLayerIndexFromLayedId(int id)
         {
-            if (layerIdToLayerIndexLookup.TryGetValue(id, out int index))
+            if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
                 return index;
 
             return -1;
+        }
+
+        private int GetTileKindFromTileId(int id)
+        {
+            if (bundle.tileIdToTileKindLookup.TryGetValue(id, out int kind))
+                return kind;
+
+            return -1;
+        }
+
+        private int GetEmptyFromTileId(int id)
+        {
+            return GetTileKindFromTileId(id) == 1 ? 1 : 0;
+        }
+
+        private int GetNotEmptyFromTileId(int id)
+        {
+            return GetTileKindFromTileId(id) == 1 ? 0 : 1;
+        }
+
+        private int GetDefaultOccupanceFromLayerIndex(int layerIndex)
+        {
+            return bundle.layerIndexToDefaultOccupanceLookup[layerIndex];
         }
 
         private int GetTileIdFromNativeArray(int3 pos)
@@ -179,6 +199,9 @@ namespace Dalichrome.RandomGenerator.Core
             return PositionToIndex(x, y, z);
         }
 
+        private int PositionToValueIndex(int x, int y) => y * width + x;
+        private int PositionToValueIndex(int2 position) => PositionToValueIndex(position.x, position.y);
+
         private int PositionToIndex(int x, int y, int z) => depth * (y * width + x) + z;
         private int PositionToIndex(int x, int y) => PositionToIndex(x, y, 0);
         private int PositionToIndex(int2 position) => PositionToIndex(position.x, position.y, 0);
@@ -188,16 +211,6 @@ namespace Dalichrome.RandomGenerator.Core
         {
             int tmp = index / depth;
             return new (tmp % width, tmp / width, index % depth);
-        }
-
-        public TileColumn GetColumn(int2 pos)
-        {
-            return GetColumn(pos.x, pos.y);
-        }
-
-        public TileColumn GetColumn(int x, int y)
-        {
-            return TileColumn.FromManaged(tiles, PositionToIndex(x, y), depth);
         }
 
         private bool CanModifyTile(int3 pos)
@@ -278,6 +291,77 @@ namespace Dalichrome.RandomGenerator.Core
             return true;
         }
 
+        // Get Column
+        public ITileColumn GetColumn(int2 pos)
+        {
+            return GetColumn(pos.x, pos.y);
+        }
+
+        public ITileColumn GetColumn(int x, int y)
+        {
+            return new ManagedTileColumn(tiles, PositionToIndex(x, y), depth, x, y);
+        }
+
+        // Set Column
+        public bool SetColumn(ITileColumn col)
+        {
+            if (!IsInBounds(col.X, col.Y) || !col.IsValid) return false;
+
+            for (int z = 0; z < col.Length; z++)
+                tiles[PositionToIndex(col.X, col.Y, z)] = col[z];
+
+            return true;
+        }
+
+        // Get Empty
+        public int GetEmpty(int tileId)
+        {
+            return GetEmptyFromTileId(tileId);
+        }
+
+        public int GetNotEmpty(int tileId)
+        {
+            return -(GetEmptyFromTileId(tileId) - 1);
+        }
+
+        public int GetNotEmptyAt(int x, int y, int layerId)
+        {
+            return GetNotEmpty(GetTileId(x, y, layerId));
+        }
+
+        public int GetNotEmptyAt(int2 pos, int layerId)
+        {
+            return GetNotEmpty(GetTileId(pos, layerId));
+        }
+
+
+        // Get Default Occupancy
+        public int GetOccupied(int x, int y)
+        {
+            bool forceUnoccupied = false;
+            int value = 0;
+            ITileColumn column = GetColumn(x, y);
+            for (int z = 0; z < column.Length; z++)
+            {
+                if (GetTileKindFromTileId(column[z]) == (int)TileKind.ForceOccupied)
+                    return 1;
+
+                if (GetTileKindFromTileId(column[z]) == (int)TileKind.ForceUnoccupied)
+                    forceUnoccupied = true;
+
+                if (GetDefaultOccupanceFromLayerIndex(z) == 1 &&
+                    GetNotEmpty(column[z]) == 1)
+                    value = 1;
+            }
+            return forceUnoccupied ? 0 : value;
+        }
+
+        public int GetOccupied(int2 pos)
+        {
+            return GetOccupied(pos.x, pos.y);
+        }
+
+        // Set Tile Value Funcs
         //Can still set the value for a masked tile
         public bool SetTileValue(int x, int y, int value)
         {
@@ -290,6 +374,19 @@ namespace Dalichrome.RandomGenerator.Core
         public bool SetTileValue(int2 position, int value)
         {
             return SetTileValue(position.x, position.y, value);
+        }
+
+        // Get Tile Value Funcs
+        public int GetTileValue(int x, int y)
+        {
+            if (IsRestricted(x, y)) return 0;
+
+            return values[PositionToValueIndex(x, y)];
+        }
+
+        public int GetTileValue(int2 position)
+        {
+            return GetTileValue(position.x, position.y);
         }
 
         public void RemoveMask()
@@ -373,12 +470,14 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void ClearNumbers()
         {
-            //TODO - NA and will be replaced by metadata
+            for (int i = 0; i < values.Length; i++)
+                values[i] = 0;
         }
 
         public void ClearPositiveNumbers()
         {
-            //TODO - NA and will be replaced by metadata
+            for (int i = 0; i < values.Length; i++)
+                if (values[i] > 0) values[i] = 0;
         }
 
         public bool CanHaveTiles()
@@ -570,7 +669,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public IEnumerable<TileColumn> GetColumns()
+        public IEnumerable<ITileColumn> GetColumns()
         {
             for (int y = 0; y < height; y++)
             {
@@ -581,32 +680,15 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public IEnumerable<(int, int, TileColumn)> GetColumnsWithPosition()
-        {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    yield return new(x, y, GetColumn(x, y));
-                }
-            }
-        }
-
         public IEnumerable<int2> GetRegionPositions()
         {
             return regionPositions;
         }
 
-        public IEnumerable<TileColumn> GetRegionColumns()
+        public IEnumerable<ITileColumn> GetRegionColumns()
         {
             foreach (int2 pos in GetRegionPositions())
                 yield return GetColumn(pos);
-        }
-
-        public IEnumerable<(int, int, TileColumn)> GetRegionColumnsWithPosition()
-        {
-            foreach (int2 pos in GetRegionPositions())
-                yield return new(pos.x, pos.y, GetColumn(pos));
         }
 
         public IEnumerable<int2> GetRegionGridPositions()
@@ -620,7 +702,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public IEnumerable<TileColumn> GetRegionGridColumns()
+        public IEnumerable<ITileColumn> GetRegionGridColumns()
         {
             for (int y = regionMin.y; y <= regionMax.y; y++)
             {
@@ -631,34 +713,19 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public IEnumerable<(int, int, TileColumn)> GetRegionGridColumnsWithPosition()
-        {
-            for (int y = regionMin.y; y <= regionMax.y; y++)
-            {
-                for (int x = regionMin.x; x <= regionMax.x; x++)
-                {
-                    yield return new(x, y, GetColumn(x, y));
-                }
-            }
-        }
-
-        public IEnumerator GetEnumerator()
+        public IEnumerator<ITileColumn> GetEnumerator()
         {
             if (regionLimited)
-            {
-                return GetRegionPositions().GetEnumerator();
-            }
-            else return GetPositions().GetEnumerator();
+                return GetRegionColumns().GetEnumerator();
+            return GetColumns().GetEnumerator();
         }
 
-        public void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
-        {
-            tileIdToLayerIndexLookup = (Dictionary<int,int>)newLookup;
-        }
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
 
-        public void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> newLookup)
+        public void SetLookupBundle(ILookupBundle bundle)
         {
-            layerIdToLayerIndexLookup = (Dictionary<int, int>)newLookup;
+            this.bundle = (SerialLookupBundle)bundle;
         }
 
         public void SetAllTiles(IEnumerable<int> array)

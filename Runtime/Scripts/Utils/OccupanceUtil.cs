@@ -45,73 +45,39 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!tileGrid.IsInBounds(x,y))
                 return OutOfBoundsOccupancy;
             
-            Tile tile = tileGrid.GetTile(x, y);
-            return IsOccupied(tile);
-        }
+            ITileColumn col = tileGrid.GetColumn(x, y);
 
-        public int IsOccupied(Tile tile)
-        {
-            if (!tileGrid.IsInRegion(tile.Int2))
+            if (!tileGrid.IsInRegion(x, y))
                 return OutOfBoundsOccupancy; 
 
             int value = 0;
             if (config.Occupance == OccupanceType.Layer_Not_NA)
             {
-                value = tile.GetOccupied(config.OccupyLayer);
+                value = tileGrid.GetNotEmpty(tileGrid.GetTileId(x, y, (int)config.OccupyLayer));
             }
             else if (config.Occupance == OccupanceType.Contains_A)
             {
-                value = tile.ContainsId((int)config.TileA) ? 1 : 0;
+                value = tileGrid.ColumnContainsId(x, y, config.TileA) ? 1 : 0;
             }
+            // TODO make this behavior not strickly for doors
             else if (config.Occupance == OccupanceType.Doors_WO_Not_NA)
             {
-                if(tile.ContainsId((int)TileType.Object_Door)) value = 0;
-                else value = tile.GetOccupied();
+                if (tileGrid.ColumnContainsId(x, y, (int)TileDefaults.Object_Door)) value = 0;
+                else value = Mathf.Clamp(tileGrid.GetTileId(x, y, (int)LayerType.Wall) +
+                                         tileGrid.GetTileId(x, y, (int)LayerType.Object), 0, 1);
             }
             else
             {
-                value = tile.GetOccupied();
+                value = tileGrid.GetOccupied(x,y);
             }
 
             if (config.InvertOccupance) return value == 1 ? 0 : 1;
             else return value;
         }
 
-        public void Fill(Tile tile)
+        public bool GetIfOccupiedTileNextToPosition(int2 pos, int movement = 1)
         {
-            if (config.Occupance == OccupanceType.Layer_Not_NA)
-            {
-                switch (config.OccupyLayer)
-                {
-                    case LayerType.Ground:
-                        tileGrid.SetTileId(tile, (int)TileType.Ground_Light);
-                        break;
-                    case LayerType.Wall:
-                        tileGrid.SetTileId(tile, (int)TileType.Wall_Cave);
-                        break;
-                    case LayerType.Object:
-                        tileGrid.SetTileId(tile, (int)TileType.Object_Stalagmite);
-                        break;
-                    case LayerType.Debug:
-                        tileGrid.SetTileId(tile, (int)TileType.Debug_Star_Red);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else if (config.Occupance == OccupanceType.Contains_A)
-            {
-                tileGrid.SetTileId(tile, config.TileA);
-            }
-            else
-            {
-                tileGrid.SetTileId(tile, (int)TileType.Wall_Cave);
-            }
-        }
-
-        public bool GetIfOccupiedTileNextToPosition(Tile tile, int movement = 1)
-        {
-            return GetIfOccupiedTileNextToPosition(tile.x, tile.y, movement);
+            return GetIfOccupiedTileNextToPosition(pos.x, pos.y, movement);
         }
 
         public bool GetIfOccupiedTileNextToPosition(int x, int y, int movement = 1)
@@ -119,9 +85,9 @@ namespace Dalichrome.RandomGenerator.Utils
             return GetIfTileNextToPositionHelper(x, y, 1, movement);
         }
 
-        public bool GetIfUnoccupiedTileNextToPosition(Tile tile, int movement = 1)
+        public bool GetIfUnoccupiedTileNextToPosition(int2 pos, int movement = 1)
         {
-            return GetIfUnoccupiedTileNextToPosition(tile.x, tile.y, movement);
+            return GetIfUnoccupiedTileNextToPosition(pos.x, pos.y, movement);
         }
 
         public bool GetIfUnoccupiedTileNextToPosition(int x, int y, int movement = 1)
@@ -133,9 +99,9 @@ namespace Dalichrome.RandomGenerator.Utils
         {
             int[,] occupanceGrid = new int[tileGrid.width, tileGrid.height];
 
-            foreach(Tile tile in tileGrid)
+            foreach(int2 pos in tileGrid.GetPositions())
             {
-                occupanceGrid[tile.x, tile.y] = IsOccupied(tile);
+                occupanceGrid[pos.x, pos.y] = IsOccupied(pos);
             }
 
             return occupanceGrid;

@@ -43,5 +43,9 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;
+
+        public bool ConfigureFillTile => false;
+
+        public int FillTile { get { return 0; } set { } }
     }
 }

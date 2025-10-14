@@ -4,6 +4,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -54,7 +55,7 @@ namespace Dalichrome.RandomGenerator.Utils
             this.config = config;
         }
 
-        private bool EnqueueIfMatches(TileGrid grid, Queue<Tuple<Vector2Int, int>> queue, int x, int y, int number)
+        private bool EnqueueIfMatches(TileGrid grid, Queue<Tuple<int2, int>> queue, int x, int y, int number)
         {
             // Outta bounds
             if (x < 0 || x >= grid.width || y < 0 || y >= grid.height)
@@ -62,12 +63,10 @@ namespace Dalichrome.RandomGenerator.Utils
                 return true;
             }
 
-            Tile tile = grid.GetTile(x, y);
-
             // Isn't Occupied
-            if (IsOccupied(tile) <= 0)
+            if (IsOccupied(x, y) <= 0)
             {
-                queue.Enqueue(new(new Vector2Int(x, y), number));
+                queue.Enqueue(new(new int2(x, y), number));
                 return false;
             }
             return true;
@@ -77,15 +76,15 @@ namespace Dalichrome.RandomGenerator.Utils
         {
             tileGrid.ClearNumbers();
             rooms = new();
-            for (int j = 0; j < tileGrid.width; j++)
+            for (int x = 0; x < tileGrid.width; x++)
             {
-                for (int k = 0; k < tileGrid.height; k++)
+                for (int y = 0; y < tileGrid.height; y++)
                 {
-                    Tile tile = tileGrid.GetTile(j, k);
-                    if (tileGrid.IsInRegion(tile) && IsOccupied(tile) <= 0 && tile.Value == 0)
+
+                    if (tileGrid.IsInRegion(x, y) && IsOccupied(x,y) <= 0 && tileGrid.GetTileValue(x,y) == 0)
                     {
                         Room newRoom = new(currentRoomNumber);
-                        RoomFill(tileGrid, j, k, newRoom, true);
+                        RoomFill(tileGrid, x, y, newRoom, true);
                         rooms.Add(newRoom.Value, newRoom);
                         currentRoomNumber -= 1;
                     }
@@ -111,27 +110,26 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private void RoomFillHelper(TileGrid grid, int x, int y, Room room, bool useNumbers, bool decreaseNumbers = false, int number = -1)
         {
-            Queue<Tuple<Vector2Int,int>> queue = new Queue<Tuple<Vector2Int, int>>();
-            queue.Enqueue(new(new Vector2Int(x, y), number));
+            Queue<Tuple<int2, int>> queue = new Queue<Tuple<int2, int>>();
+            queue.Enqueue(new(new int2(x, y), number));
 
             while (queue.Any())
             {
-                Tuple<Vector2Int, int> tuple = queue.Dequeue();
-                Vector2Int point = tuple.Item1;
+                Tuple<int2, int> tuple = queue.Dequeue();
+                int2 point = tuple.Item1;
                 int currentNum = tuple.Item2;
-                Tile tile = grid.GetTile(point);
 
                 // Is Occupied
-                if (!grid.IsInRegion(tile) || IsOccupied(tile) >= 1 || (tile.Value < 0 && useNumbers))
+                if (!grid.IsInRegion(point) || IsOccupied(point) >= 1 || (grid.GetTileValue(point) < 0 && useNumbers))
                     continue;
                 if (room != null)
                 {
-                    room.AddTile(tile);
+                    room.AddPosition(point);
                 }
 
-                if(decreaseNumbers && useNumbers) tileGrid.SetTileValue(tile, currentNum);
-                else if (useNumbers) tileGrid.SetTileValue(tile, currentRoomNumber);
-                else Fill(tile);
+                if (decreaseNumbers && useNumbers) tileGrid.SetTileValue(point, currentNum);
+                else if (useNumbers) tileGrid.SetTileValue(point, currentRoomNumber);
+                else Fill(point);
 
                 if (decreaseNumbers) currentNum -= 1;
 
@@ -142,7 +140,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
                 if ((leftOccupied || rightOccupied || downOccupied || upOccupied) && room != null)
                 {
-                    room.AddEdge(tile);
+                    room.AddEdge(point);
                 }
             }
         }
@@ -154,19 +152,17 @@ namespace Dalichrome.RandomGenerator.Utils
                 y < 0 || y >= grid.height)
                 return;
 
-            Tile tile = grid.GetTile(x, y);
-
             // Is occupied
-            if (IsOccupied(tile) >= 1 || tile.Value <= firstNumber)
+            if (IsOccupied(x,y) >= 1 || tileGrid.GetTileValue(x,y) <= firstNumber)
                 return;
 
             //Add
             if (room != null)
             {
-                room.AddTile(tile);
+                room.AddPosition(x,y);
             }
 
-            tileGrid.SetTileValue(tile, number);
+            tileGrid.SetTileValue(x, y, number);
             int value = lowerNumber ? number - 1 : number;
 
             // Recur for north, east, south and west
@@ -185,6 +181,18 @@ namespace Dalichrome.RandomGenerator.Utils
         public void Initialize()
         {
             CreateRooms();
+        }
+
+        public void Fill(int2 pos)
+        {
+            if (config.Occupance == OccupanceType.Contains_A)
+            {
+                tileGrid.SetTileId(pos, config.TileA);
+            }
+            else
+            {
+                tileGrid.SetTileId(pos, config.FillTile);
+            }
         }
     }
 }

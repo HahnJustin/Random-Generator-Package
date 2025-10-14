@@ -20,9 +20,9 @@ namespace Dalichrome.RandomGenerator.Generators
             foreach (Generation generation in generations)
             {
                 TileGrid otherGrid = generation.Grid;
-                foreach (Tile tile in otherGrid)
+                foreach (ITileColumn col in otherGrid)
                 {
-                    grid.SetTile(tile.Int2, tile);
+                    grid.SetColumn(col);
                 }
                 otherGrid.RemoveRegion();
             }

@@ -1,6 +1,7 @@
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -10,21 +11,16 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override Generation Enact(Generation input)
         {
-            for (int x = 0; x < width; x++)
+            foreach (int2 pos in TileGrid.GetPositions())
             {
-                for (int y = 0; y < height; y++)
+                foreach (int type in config.AddToUniversalMaskTiles)
                 {
-                    Tile tile = TileGrid.GetTile(x, y);
-
-                    foreach (TileType type in config.AddToUniversalMaskTiles)
+                    if (TileGrid.ColumnContainsId(pos, type))
                     {
-                        if (tile.ContainsId((int)type))
-                        {
-                            TileGrid.AddExcludedPosition(tile.Position);
-                            break;
-                        }
+                        TileGrid.AddExcludedPosition(pos);
+                        break;
                     }
-                }
+                }     
             }
             return input;
         }

@@ -72,8 +72,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if (Mathf.Pow(x, 2) + Mathf.Pow(y, 2) <= Mathf.Pow(node.radius, 2) &&
                         finalPositon.x >= 0 && finalPositon.y >= 0 && finalPositon.x < width && finalPositon.y < height)
                     {
-                        Tile tile = TileGrid.GetTile(finalPositon);
-                        TileGrid.SetTileId(tile, (int)config.StickTo);
+                        TileGrid.SetTileId(finalPositon, (int)config.StickTo);
                     }
                 }
             }

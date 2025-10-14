@@ -10,7 +10,6 @@ using Dalichrome.RandomGenerator.Databases;
 using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Nodes;
-using Dalichrome.RandomGenerator.UserData;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -25,9 +24,6 @@ namespace Dalichrome.RandomGenerator
         [SerializeField] private bool generateOnStart = true;
 
         [SerializeField] private bool toSerialAfter = true;
-
-        private Dictionary<int, LayerType> tileObjectLayerLookup = new();
-        private List<int> ids = new();
 
         private GeneratorGraph lastGeneratedGraph;
 
@@ -120,22 +116,6 @@ namespace Dalichrome.RandomGenerator
             if (tilemapInteractor != null) tilemapInteractor.SetRandomGenerator(this);
             ThreadSafeRandom.InitState();
 
-            ids.Clear();
-            foreach (TileType tile in Enum.GetValues(typeof(TileType)))
-            {
-                ids.Add((int)tile);
-            }
-
-            Dictionary<int, TileObject> tileObjects = new();
-            tileObjectLayerLookup.Clear();
-            TileObject[] tileObjectArray = Resources.LoadAll<TileObject>("TileObjects/");
-            foreach (TileObject tileObject in tileObjectArray)
-            {
-                tileObjects[tileObject.id] = tileObject;
-                //tileObjectLayerLookup[tileObject.id] = tileObject.layer;
-                ids.Add(tileObject.id);
-            }
-
             // Change this later - probably remove this with metadata changes
             TileObjectInfo.SetNumberSpriteDatabase(numberSpriteDatabase);
         }
@@ -156,6 +136,12 @@ namespace Dalichrome.RandomGenerator
             {
                 lastGeneration.Dispose();
             }
+        }
+
+        private void GenerationCleanup(AbstractGridOperationData data)
+        {
+            data?.Dispose();
+            LookupBundleBuilder.DisposeCachedNativeBundle();
         }
 
         public void Generate()
@@ -246,13 +232,13 @@ namespace Dalichrome.RandomGenerator
                     {
                         events.RaiseGenerationCancel();
                         Debug.Log($"Generation Got Cancelled! {ex}");
-                        data?.Dispose();
+                        GenerationCleanup(data);
                         return;
                     }
                     catch (Exception ex)
                     {
                         events.RaiseGenerationError(ex.ToString());
-                        data?.Dispose();
+                        GenerationCleanup(data);
                         return;
                     }
                 }
@@ -277,7 +263,7 @@ namespace Dalichrome.RandomGenerator
                 if (!moved)
                 {
                     events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
-                    data?.Dispose();
+                    GenerationCleanup(data);
                     return;
                 }
             }
@@ -434,7 +420,7 @@ namespace Dalichrome.RandomGenerator
                     catch (Exception ex)
                     {
                         events.RaiseGenerationError(ex.ToString());
-                        data?.Dispose();
+                        GenerationCleanup(data);
                         return null;
                     }
                 }
@@ -455,7 +441,7 @@ namespace Dalichrome.RandomGenerator
                 if (!moved)
                 {
                     events.RaiseGenerationError("XNode Graph is Malformed - Hit an unexpected deadend");
-                    data?.Dispose();
+                    GenerationCleanup(data);
                     return null;
                 }
             }
@@ -488,6 +474,7 @@ namespace Dalichrome.RandomGenerator
             lastGeneration = data;
             CheckUngeneratedChanges();
 
+            LookupBundleBuilder.DisposeCachedNativeBundle();
             if (toSerialAfter) data.ToSerial();
             tilemapInteractor?.CreateWithTilegrid(data.Grid);
             events.RaiseGenerationEnd(data);
@@ -498,7 +485,7 @@ namespace Dalichrome.RandomGenerator
         private Generation CreateGeneration()
         {
             Generation generationInput = generationParameters.ToGeneration();
-            generationInput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
+            generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
         }
 
@@ -506,7 +493,7 @@ namespace Dalichrome.RandomGenerator
         {
             Generation generationInput = generationParameters.ToGeneration();
             generationInput.Token = token;
-            generationInput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
+            generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
         }
 
@@ -562,7 +549,7 @@ namespace Dalichrome.RandomGenerator
             return false;
         }
 
-        //Make clear this version lacks callbacks
+        //TODO - This needs a complete overhaul with graphs and etc
         public Generation GenerateThreadSafe(CancellationToken token = default, uint seed = 0)
         {
             if (Width == 0 || Height == 0) return null;
@@ -575,7 +562,7 @@ namespace Dalichrome.RandomGenerator
             Generation generationOutput = generationParameters.ToGeneration();
             generationOutput.Seed = seed;
             generationOutput.Token = token;
-            generationOutput.AddLayersLookups(TileObjectInfo.TileIdToLayerZ, TileLayerInfo.LayerIdToZ);
+            generationOutput.SetLookupBundle(LookupBundleBuilder.GetNative()); // TODO - Have a feeling this is not thread safe? Even though the struct should be?
 
             try
             {
@@ -647,11 +634,6 @@ namespace Dalichrome.RandomGenerator
         public bool GetUngeneratedChanges()
         {
             return Graph != lastGeneratedGraph;
-        }
-
-        public List<int> GetTileIds() 
-        { 
-            return ids; 
         }
 
         public TilemapInteractor GetTilemapInteractor()

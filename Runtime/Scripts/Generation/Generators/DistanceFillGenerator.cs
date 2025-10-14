@@ -2,6 +2,7 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -18,9 +19,10 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override Generation Enact(Generation input)
         {
-            foreach (Tile tile in TileGrid)
+            foreach (ITileColumn column in TileGrid)
             {
-                if(tile.Value >= config.LowerDepth && tile.Value <= config.UpperDepth) TileGrid.SetTileId(tile, (int)config.FillTile);
+                int value = TileGrid.GetTileValue(column.Int2);
+                if (value >= config.LowerDepth && value <= config.UpperDepth) TileGrid.SetTileId(column.Int2, (int)config.FillTile);
                 CancelCheck();
             }
             return input;

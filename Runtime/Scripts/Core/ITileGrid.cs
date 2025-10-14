@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Dalichrome.RandomGenerator.Core
 {
 
-    public interface ITileGrid : IDisposable, IEnumerable
+    public interface ITileGrid : IDisposable, IEnumerable<ITileColumn>
     {
         public int2 Minimum { get; }
         public int2 Maximum { get; }
@@ -29,8 +29,14 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool CopyColumn(int2 replacer, int2 replaced);
 
         // Get Column
-        public abstract TileColumn GetColumn(int2 pos);
-        public abstract TileColumn GetColumn(int x, int y);
+        public abstract ITileColumn GetColumn(int2 pos);
+        public abstract ITileColumn GetColumn(int x, int y);
+
+        // Set Column
+        public abstract bool SetColumn(ITileColumn col);
+
+        // Get Empty
+        public abstract int GetEmpty(int id);
 
         // Contains Id Funcs
         public abstract bool ColumnContainsId(int x, int y, int id);
@@ -40,9 +46,18 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract int GetTileId(int x, int y, int layerId);
         public abstract int GetTileId(int2 position, int layerId);
 
+        // Get Occupied
+        public abstract int GetOccupied(int2 pos);
+        public abstract int GetOccupied(int x, int y);
+
         // Set Tile Value Funcs
         public abstract bool SetTileValue(int x, int y, int value);
         public abstract bool SetTileValue(int2 position, int value);
+
+
+        // Get Tile Value Funcs
+        public abstract int GetTileValue(int x, int y);
+        public abstract int GetTileValue(int2 position);
 
         // Set All Tiles
         public abstract void SetAllTiles(IEnumerable<int> tileArray);
@@ -101,19 +116,15 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract IEnumerable<int2> GetPositions();
         public abstract IEnumerable<int3> GetPositions3D();
         public abstract IEnumerable<int4> GetPositionsWithId();
-        public abstract IEnumerable<TileColumn> GetColumns();
-        public abstract IEnumerable<(int, int, TileColumn)> GetColumnsWithPosition();
+        public abstract IEnumerable<ITileColumn> GetColumns();
         public abstract IEnumerable<int2> GetRegionPositions();
-        public abstract IEnumerable<TileColumn> GetRegionColumns();
-        public abstract IEnumerable<(int, int, TileColumn)> GetRegionColumnsWithPosition();
+        public abstract IEnumerable<ITileColumn> GetRegionColumns();
         public abstract IEnumerable<int2> GetRegionGridPositions();
-        public abstract IEnumerable<TileColumn> GetRegionGridColumns();
-        public abstract IEnumerable<(int, int, TileColumn)> GetRegionGridColumnsWithPosition();
+        public abstract IEnumerable<ITileColumn> GetRegionGridColumns();
 
 
         // Layer Lookup Funcs
-        public abstract void SetTileIdToLayerIndexLookup(IReadOnlyDictionary<int, int> tileIdToLayerIndex);
+        public abstract void SetLookupBundle(ILookupBundle bundle);
 
-        public abstract void SetLayerIdToLayerIndexLookup(IReadOnlyDictionary<int, int> layerIdToLayerIndex);
     }
 }

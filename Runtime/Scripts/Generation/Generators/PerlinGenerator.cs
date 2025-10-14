@@ -2,6 +2,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -25,8 +26,6 @@ namespace Dalichrome.RandomGenerator.Generators
                     float yCoord = yOrg + y / height * config.Scale;
                     float sample = Mathf.PerlinNoise(xCoord + newNoise, yCoord + newNoise);
 
-                    Tile tile = TileGrid.GetTile(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
-
                     if (config.OvalFade)
                     {
                         Vector2 current = new Vector2(x, y);
@@ -43,7 +42,9 @@ namespace Dalichrome.RandomGenerator.Generators
                         float separation = config.Cutoff / (float)config.Tiles.Count;
                         float roughIndex = sample / separation;
                         int index = Mathf.Clamp(Mathf.RoundToInt(roughIndex), 0, config.Tiles.Count-1);
-                        TileGrid.SetTileId(tile, (int)config.Tiles[index]);
+
+                        int2 pos = new(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
+                        TileGrid.SetTileId(pos, (int)config.Tiles[index]);
                     }
                 }
             }

@@ -35,12 +35,12 @@ namespace Dalichrome.RandomGenerator.Generators
 
             Dictionary<int, List<int2>> regionBuckets = new();
 
-            foreach (Tile tile in generation.Grid)
+            foreach (int2 pos in generation.Grid.GetPositions())
             {
                 float[] noiseVals = new float[frequencies.Length];
                 for (int i = 0; i < frequencies.Length; i++)
                 {
-                    float2 sample = (float2)tile.Int2 * frequencies[i];
+                    float2 sample = (float2)pos * frequencies[i];
                     if (config.UseRandomOffsets)
                         sample += offsets[i];
 
@@ -55,7 +55,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     regionBuckets[regionKey] = list;
                 }
 
-                list.Add(tile.Int2);
+                list.Add(pos);
             }
 
             // Create RegionBounds

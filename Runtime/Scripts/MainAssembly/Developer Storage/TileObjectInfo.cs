@@ -28,6 +28,7 @@ namespace Dalichrome.RandomGenerator
         private static Dictionary<TileKind, List<TileObject>> _byKind; // kind -> list
         private static Dictionary<int, int> _tileIdToLayerId; // tileId -> layerId
         private static Dictionary<int, int> _tileIdToLayerZ;  // tileId -> z (compressed)
+        private static Dictionary<int, int> _tileKindById;   // tileId -> tileKind
 
         private static readonly Dictionary<int, TileBase> _tileBaseCache = new();
         private static readonly Dictionary<int, TileBase> _numberTileBaseCache = new();
@@ -47,6 +48,7 @@ namespace Dalichrome.RandomGenerator
                 _byKind = null;
                 _tileIdToLayerId = null;
                 _tileIdToLayerZ = null;
+                _tileKindById = null;
                 _tileBaseCache.Clear();
                 _numberTileBaseCache.Clear();
             }
@@ -127,6 +129,10 @@ namespace Dalichrome.RandomGenerator
                     _tileIdToLayerId[t.id] = t.layer;
                     _tileIdToLayerZ[t.id] = TileLayerInfo.GetLayerZ(t.layer, -1); // -1 if missing
                 }
+
+                _tileKindById = new Dictionary<int, int>(_allTiles.Length);
+                foreach (var t in _allTiles)
+                    _tileKindById[t.id] = (int)t.tileKind;
             }
         }
 
@@ -183,6 +189,11 @@ namespace Dalichrome.RandomGenerator
         public static IReadOnlyDictionary<int, int> TileIdToLayerZ
         {
             get { EnsureBuilt(); return _tileIdToLayerZ; }
+        }
+
+        public static IReadOnlyDictionary<int, int> TileKindByTileIdInt
+        {
+            get { EnsureBuilt(); return _tileKindById; }
         }
 
         // Getters

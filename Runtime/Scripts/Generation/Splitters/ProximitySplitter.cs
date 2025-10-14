@@ -26,12 +26,12 @@ namespace Dalichrome.RandomGenerator.Generators
             List<int2> tilePositions = new();
 
             // Find all tiles matching configured ids
-            foreach (Tile tile in generation.Grid)
+            foreach (int2 pos in generation.Grid.GetPositions())
             {
                 foreach (int id in config.Tiles) {
-                    if (tile.ContainsId(id))
+                    if (generation.Grid.ColumnContainsId(pos, id))
                     {
-                        tilePositions.Add(tile.Int2);
+                        tilePositions.Add(pos);
                         break;
                     }
                 }

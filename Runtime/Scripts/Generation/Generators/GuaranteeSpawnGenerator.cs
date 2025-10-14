@@ -32,26 +32,26 @@ namespace Dalichrome.RandomGenerator.Generators
             if (config.UseEntranceDistance)
             {
 
-                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileType.Object_Entrance);
-                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, (int)TileType.Wall_Object_NA);
+                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileDefaults.Object_Entrance);
+                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, (int)TileDefaults.Wall_Object_NA);
 
                 if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return input;
 
                 Room room = new(1);
                 util.RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
-                List<Tile> tileList = room.ToList();
-                tileList.Shuffle(random);
+                List<int2> positions = room.ToList();
+                positions.Shuffle(random);
 
                 // Build NativeList of candidates
-                candidates = new(tileList.Count, Allocator.Persistent);
-                foreach (var tile in tileList)
-                    candidates.Add(tile.Int2);
+                candidates = new(positions.Count, Allocator.Persistent);
+                foreach (int2 pos in positions)
+                    candidates.Add(pos);
             }
             // Guaranteed spawn for unoccupied every tile
             else
             {
                 List<int2> roomTilePositions = new ();
-                util.RoomList.ForEach(room => roomTilePositions.AddRange(room.Int2TilesList));
+                util.RoomList.ForEach(room => roomTilePositions.AddRange(room.TileList));
                 roomTilePositions.Shuffle(random);
 
                 candidates = new(roomTilePositions.Count, Allocator.Persistent);

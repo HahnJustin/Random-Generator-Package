@@ -27,22 +27,19 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!grid.IsInBounds(pos))
                 return outOfBoundsValue;
 
-            Tile tile = grid.GetTile(pos.x, pos.y);
             int value;
 
             switch (occupanceType)
             {
                 case OccupanceType.Layer_Not_NA:
-                    value = tile.GetOccupied(occupyLayer);
+                    value = grid.GetNotEmptyAt(pos, (int)occupyLayer);
                     break;
                 case OccupanceType.Contains_A:
-                    value = tile.ContainsId(tileA) ? 1 : 0;
+                    value = grid.ColumnContainsId(pos,tileA) ? 1 : 0;
                     break;
-                case OccupanceType.Doors_WO_Not_NA:
-                    value = tile.ContainsId((int)TileType.Object_Door) ? 0 : tile.GetOccupied();
-                    break;
+                // TODO add new type that can have multiple layers then check all configged layers
                 default:
-                    value = tile.GetOccupied();
+                    value = grid.GetOccupied(pos);
                     break;
             }
 

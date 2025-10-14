@@ -1,9 +1,11 @@
-using System.Collections.Generic;
-using UnityEngine;
-using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
+using Dalichrome.RandomGenerator.Utils;
+using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.Plastic.Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -15,13 +17,13 @@ namespace Dalichrome.RandomGenerator.Generators
         private class RoomInfo
         {
             public Room Room { get; }
-            public Tile Tile { get; }
+            public int2 Position { get; }
             public int RingCount { get; }
 
-            public RoomInfo(Room room, Tile tile, int ringCount)
+            public RoomInfo(Room room, int2 pos, int ringCount)
             {
                 Room = room;
-                Tile = tile;
+                Position = pos;
                 RingCount = ringCount;
             }
         }
@@ -49,7 +51,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
 
                 TileGrid.ClearPositiveNumbers();
-                List<Tile> ring = room.GetEdges();
+                List<int2> ring = room.EdgeList;
                 Dictionary<int, RoomInfo> roomInfos = new();
                 int ringValue = INITIAL_RING_VALUE;
 
@@ -57,28 +59,27 @@ namespace Dalichrome.RandomGenerator.Generators
                        ((roomInfos.Count <= 0 || ringValue < config.AdditionalUpperBound + INITIAL_RING_VALUE) && config.AdditionalConnections)) &&
                        ring.Count > 0)
                 {
-                    List<Tile> tempRing = new();
+                    List<int2> tempRing = new();
 
-                    foreach (Tile tile in ring)
+                    foreach (int2 pos in ring)
                     {
                         directions.Shuffle(random);
                         foreach (Direction direction in directions)
                         {
-                            Vector2Int point = tile.Position.GetPointInDirection(direction);
-                            Tile adjacentTile = TileGrid.GetTile(point);
+                            int2 point = pos.GetPointInDirection(direction);
 
-                            if (!adjacentTile.IsValid) continue;
+                            if (!TileGrid.IsRestricted(point)) continue;
 
-                            int adjValue = adjacentTile.Value;
+                            int adjValue = TileGrid.GetTileValue(point);
                             if (adjValue == 0)
                             {
-                                TileGrid.SetTileValue(adjacentTile, ringValue);
-                                tempRing.Add(adjacentTile);
+                                TileGrid.SetTileValue(point, ringValue);
+                                tempRing.Add(point);
                             }
                             else if (adjValue < 0 && adjValue != room.Value && !roomInfos.ContainsKey(adjValue) &&
                                 (!config.AdditionalConnections || (ringValue >= config.AdditionalLowerBound || roomInfos.Count == 0)))
                             {
-                                roomInfos.Add(adjacentTile.Value, new(room, adjacentTile, ringValue));
+                                roomInfos.Add(adjValue, new(room, point, ringValue));
                                 if (!config.AdditionalConnections) break;
                             }
                         }
@@ -103,11 +104,11 @@ namespace Dalichrome.RandomGenerator.Generators
 
         private void CreatePathBetweenRooms(RoomInfo info, bool consolidateRooms)
         {
-            List<Tile> path = new();
+            List<int2> path = new();
             List<Direction> directions = new() { Direction.Down, Direction.Up, Direction.Right, Direction.Left };
 
             Room room = info.Room;
-            Tile tile = info.Tile;
+            int2 pos = info.Position;
             int value = info.RingCount;
 
             while(value >= INITIAL_RING_VALUE)
@@ -116,40 +117,39 @@ namespace Dalichrome.RandomGenerator.Generators
                 directions.Shuffle(random);
                 foreach (Direction direction in directions)
                 {
-                    Vector2Int point = tile.Position.GetPointInDirection(direction);
-                    Tile adjacentTile = TileGrid.GetTile(point);
-                    if (!adjacentTile.IsValid) continue;
-                    else if (adjacentTile.Value == value)
+                    int2 curr = pos.GetPointInDirection(direction);
+                    if (!TileGrid.IsRestricted(curr)) continue;
+                    else if (TileGrid.GetTileValue(curr) == value)
                     {
-                        path.Add(adjacentTile);
-                        tile = adjacentTile;
+                        path.Add(curr);
+                        pos = curr;
                         break;
                     }
                 }
             }
 
-            foreach (Tile pathTile in path)
+            foreach (int2 pathPos in path)
             {
-                TileGrid.SetTileId(pathTile.Position, (int)config.HallwayTile);
+                TileGrid.SetTileId(pathPos, config.HallwayTile);
                 if (consolidateRooms)
                 {
-                    room.AddEdge(pathTile);
-                    TileGrid.SetTileValue(pathTile, room.Value);
+                    room.AddEdge(pathPos);
+                    TileGrid.SetTileValue(pathPos, room.Value);
                 }
             }
 
             if (consolidateRooms) 
             {
-                Room room2 = util.Rooms[info.Tile.Value];
+                Room room2 = util.Rooms[TileGrid.GetTileValue(pos)];
                 currentRooms.Remove(room2);
                 util.Rooms.Remove(room2.Value);
 
-                foreach (Tile roomTile in room2)
+                foreach (int2 roomPos in room2)
                 {
-                    TileGrid.SetTileValue(roomTile, room.Value);
+                    TileGrid.SetTileValue(roomPos, room.Value);
                 }
 
-                room.AddEdgeRange(room2.GetEdges());
+                room.AddEdgeRange(room2.EdgeList);
             }
         }
     }

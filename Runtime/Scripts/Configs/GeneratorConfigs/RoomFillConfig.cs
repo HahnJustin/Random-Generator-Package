@@ -39,5 +39,9 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
         [SerializeField] protected bool _invertOccupance = false;
+
+        public bool ConfigureFillTile => _occupance != OccupanceType.Contains_A;
+
+        [SerializeField, DefaultValue((int)TileDefaults.Wall_Cave), Condition("ConfigureFillTile", true)] public int FillTile { get { return 0; } set { } }
     }
 }
