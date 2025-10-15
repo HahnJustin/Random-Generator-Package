@@ -33,17 +33,17 @@ namespace Dalichrome.RandomGenerator
 
         protected TileGrid tileGrid;
 
-        protected bool SpawnTileGameObject(Core.Tile tile, LayerType layer)
+        protected bool SpawnTileGameObject(ITileColumn col, LayerType layer)
         {
-            int tileId = tile.GetIdInLayer(layer);
+            int tileId = col[TileLayerInfo.GetLayerZ((int)layer)];
 
             GameObject prefab = TileObjectInfo.GetGameObject(tileId);
             if (prefab == null) return false;
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            GameObject spawned = Instantiate(prefab, new Vector3(tile.Position.x + circle.x + gameObjectOffset.x,
-                                            tile.Position.y + circle.y + gameObjectOffset.y,
+            GameObject spawned = Instantiate(prefab, new Vector3(col.X + circle.x + gameObjectOffset.x,
+                                                                 col.Y + circle.y + gameObjectOffset.y,
                                             prefab.transform.position.z), Quaternion.identity, gameObjectParent);
             spawnedObjects.Add(spawned);
             return true;
@@ -60,23 +60,18 @@ namespace Dalichrome.RandomGenerator
 
             TileBase[] tileBaseArray = new TileBase[width * height];
 
-            for (int y = tileGrid.height - 1; y >= 0; y--)
+            foreach (ITileColumn col in tileGrid) 
             {
-                for (int x = 0; x < tileGrid.width; x++)
+                int tempIndex = col.X + (col.Y * tileGrid.width);
+                if (useGameObjects && SpawnTileGameObject(col, layer)) {
+                    tileBaseArray[tempIndex] = null;
+                }
+                else
                 {
-                    int tempIndex = x + (y * tileGrid.width);
-                    Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = TileObjectInfo.GetTileBase(tile.GetIdInLayer(layer));
-                    if (useGameObjects && SpawnTileGameObject(tile, layer)) {
-                        tileBaseArray[tempIndex] = null;
-                    }
-                    else
-                    {
-                        tileBaseArray[tempIndex] = tileBase;
-                    }
+                    TileBase tileBase = TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ((int)layer)]);
+                    tileBaseArray[tempIndex] = tileBase;
                 }
             }
-
             tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
         }
 
@@ -89,15 +84,12 @@ namespace Dalichrome.RandomGenerator
 
             TileBase[] tileBaseArray = new TileBase[width * height];
 
-            for (int y = tileGrid.height - 1; y >= 0; y--)
+            foreach (int2 pos in tileGrid.GetPositions())
             {
-                for (int x = 0; x < tileGrid.width; x++)
-                {
-                    int tempIndex = x + (y * tileGrid.width);
-                    Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = TileObjectInfo.GetNumberTileBase(tile.Value);
+                int tempIndex = pos.x + (pos.y * tileGrid.width);
+                    TileBase tileBase = TileObjectInfo.GetNumberTileBase(tileGrid.GetTileValue(pos));
                     tileBaseArray[tempIndex] = tileBase;
-                }
+                
             }
 
             numberTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);

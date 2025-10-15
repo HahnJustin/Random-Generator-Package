@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Random;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -94,12 +95,12 @@ namespace Dalichrome.RandomGenerator
                             continue;
                         }
 
-                        var tile = tileGrid.GetTile(tx, ty);
-                        if (useGameObjects && SpawnTileGameObject(tile, layer))
+                        ITileColumn col = tileGrid.GetColumn(tx, ty);
+                        if (useGameObjects && SpawnTileGameObject(col, layer))
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                TileObjectInfo.GetTileBase(tile.GetIdInLayer(layer));
+                                TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ((int)layer)]);
                     }
                 }
                 // push one bulk call --------------------------------------------------
@@ -124,15 +125,11 @@ namespace Dalichrome.RandomGenerator
 
             TileBase[] tileBaseArray = new TileBase[width * height];
 
-            for (int y = tileGrid.height - 1; y >= 0; y--)
+            foreach (int2 pos in tileGrid.GetPositions()) 
             {
-                for (int x = 0; x < tileGrid.width; x++)
-                {
-                    int tempIndex = x + (y * tileGrid.width);
-                    Core.Tile tile = tileGrid.GetTile(x, y);
-                    TileBase tileBase = TileObjectInfo.GetNumberTileBase(tile.Value);
-                    tileBaseArray[tempIndex] = tileBase;
-                }
+                int tempIndex = pos.x + (pos.y * tileGrid.width);
+                TileBase tileBase = TileObjectInfo.GetNumberTileBase(tileGrid.GetTileValue(pos));
+                tileBaseArray[tempIndex] = tileBase;
             }
 
             numberTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);

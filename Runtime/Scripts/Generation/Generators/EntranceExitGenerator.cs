@@ -21,8 +21,8 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override Generation Enact(Generation input)
         {
-            Vector2Int vector1;
-            Vector2Int vector2;
+            int2 vector1;
+            int2 vector2;
 
             //Creating points diagonally opposed
             if (config.Positioning == EEPositionType.Diagonal_Opposites)
@@ -30,13 +30,13 @@ namespace Dalichrome.RandomGenerator.Generators
                 int diagonality = random.NextInt(0, 2);
                 if (diagonality == 1)
                 {
-                    vector1 = Vector2Int.zero;
-                    vector2 = new Vector2Int(width - 1, height - 1);
+                    vector1 = int2.zero;
+                    vector2 = new int2(width - 1, height - 1);
                 }
                 else
                 {
-                    vector1 = new Vector2Int(width - 1, 0);
-                    vector2 = new Vector2Int(0, height - 1);
+                    vector1 = new int2(width - 1, 0);
+                    vector2 = new int2(0, height - 1);
                 }
             }
             else if (config.Positioning == EEPositionType.Any_Opposite)
@@ -45,30 +45,30 @@ namespace Dalichrome.RandomGenerator.Generators
                 float r = Mathf.Sqrt(Mathf.Pow(width,2) + Mathf.Pow(height,2));
                 float x = r * Mathf.Cos(a);
                 float y = r * Mathf.Sin(a);
-                Vector2 first = new (x,y);
-                Vector2 second = -first;
+                float2 first = new (x,y);
+                float2 second = -first;
 
-                first += new Vector2Int(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
-                second += new Vector2Int(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
+                first += new int2(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
+                second += new int2(Mathf.RoundToInt(width * 0.5f), Mathf.RoundToInt(height * 0.5f));
 
-                vector1 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(first.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(first.y, 0, height - 1)));
-                vector2 = new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(second.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(second.y, 0, height - 1)));
+                vector1 = new int2(Mathf.RoundToInt(Mathf.Clamp(first.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(first.y, 0, height - 1)));
+                vector2 = new int2(Mathf.RoundToInt(Mathf.Clamp(second.x, 0, width - 1)), Mathf.RoundToInt(Mathf.Clamp(second.y, 0, height - 1)));
             }
             else
             {
-                vector1 = new Vector2Int(random.NextInt(width), random.NextInt(height));
-                vector2 = new Vector2Int(random.NextInt(width), random.NextInt(height));
+                vector1 = new int2(random.NextInt(width), random.NextInt(height));
+                vector2 = new int2(random.NextInt(width), random.NextInt(height));
             }
 
             //Setting exit and entrance arbitrarily to one of the points
             int whichIsExit = random.NextInt(0, 2);
-            Vector2Int entranceBorder = whichIsExit == 1 ? vector1 : vector2;
-            Vector2Int exitBorder = whichIsExit == 1 ? vector2 : vector1;
+            int2 entranceBorder = whichIsExit == 1 ? vector1 : vector2;
+            int2 exitBorder = whichIsExit == 1 ? vector2 : vector1;
 
-            Vector2Int entrancePos;
-            Vector2Int entranceAir;
-            Vector2Int exitPos;
-            Vector2Int exitAir;
+            int2 entrancePos;
+            int2 entranceAir;
+            int2 exitPos;
+            int2 exitAir;
 
             if (config.Placeable == EEPlaceableType.One_Side_Wall)
             {
@@ -136,9 +136,9 @@ namespace Dalichrome.RandomGenerator.Generators
 
 
             //Couldn't find one of the given tiles
-            if (exitAir == Constants.OutsideGridVectorInt ||
-                entrancePos == Constants.OutsideGridVectorInt ||
-                exitPos == Constants.OutsideGridVectorInt)
+            if (math.all(exitAir == Constants.OutsideGridInt2) ||
+                math.all(entrancePos == Constants.OutsideGridInt2) ||
+                math.all(exitPos == Constants.OutsideGridInt2))
             {
                 return input;
             }
@@ -157,8 +157,8 @@ namespace Dalichrome.RandomGenerator.Generators
 
             //Create Path between entrance and air next to exit
             AStar astar = new();
-            List<Vector2Int> path = astar.FindPath(TileGrid, util, entrancePos, exitAir);
-            foreach (Vector2Int pos in path)
+            List<int2> path = astar.FindPath(TileGrid, util, entrancePos, exitAir);
+            foreach (int2 pos in path)
             {
                 if (config.DebugPath) {
                     TileGrid.SetTileId(pos, (int)TileDefaults.Debug_Path_Green);

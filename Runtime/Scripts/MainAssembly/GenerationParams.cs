@@ -59,9 +59,9 @@ namespace Dalichrome.RandomGenerator.Data
             return newParams;
         }
 
-        public Generation ToGeneration()
+        public Generation ToGeneration(int depth)
         {
-            Generation generation = new (width, height, seed);
+            Generation generation = new (width, height, depth, seed);
             return generation;
         }
     }

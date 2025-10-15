@@ -484,14 +484,14 @@ namespace Dalichrome.RandomGenerator
 
         private Generation CreateGeneration()
         {
-            Generation generationInput = generationParameters.ToGeneration();
+            Generation generationInput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
         }
 
         private Generation CreateGeneration(CancellationToken token)
         {
-            Generation generationInput = generationParameters.ToGeneration();
+            Generation generationInput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
             generationInput.Token = token;
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
@@ -559,7 +559,7 @@ namespace Dalichrome.RandomGenerator
                 seed = GetRandomSeed();
             }
 
-            Generation generationOutput = generationParameters.ToGeneration();
+            Generation generationOutput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
             generationOutput.Seed = seed;
             generationOutput.Token = token;
             generationOutput.SetLookupBundle(LookupBundleBuilder.GetNative()); // TODO - Have a feeling this is not thread safe? Even though the struct should be?

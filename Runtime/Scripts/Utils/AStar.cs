@@ -9,18 +9,18 @@ namespace Dalichrome.RandomGenerator.Utils
 {
     public class AStar
     {
-        private Vector2Int start;
-        private Vector2Int destination;
+        private int2 start;
+        private int2 destination;
         private TileGrid tileGrid;
         private OccupanceUtil occupanceUtil;
 
-        private Dictionary<Vector2Int, Vector2Int> cameFrom;
-        private Dictionary<Vector2Int, float> gScore;
-        private Dictionary<Vector2Int, float> fScore;
+        private Dictionary<int2, int2> cameFrom;
+        private Dictionary<int2, float> gScore;
+        private Dictionary<int2, float> fScore;
 
-        private List<Vector2Int> openSet;
+        private List<int2> openSet;
 
-        private class FComparer : IComparer<Vector2Int>
+        private class FComparer : IComparer<int2>
         {
             private readonly AStar astarInstance;
             public FComparer(AStar astarInstance)
@@ -28,7 +28,7 @@ namespace Dalichrome.RandomGenerator.Utils
                 this.astarInstance = astarInstance;
             }
 
-            public int Compare(Vector2Int location1, Vector2Int location2)
+            public int Compare(int2 location1, int2 location2)
             {
                 if (astarInstance.GetFScore(location1) == astarInstance.GetFScore(location2))
                     return 0;
@@ -38,21 +38,21 @@ namespace Dalichrome.RandomGenerator.Utils
             }
         }
 
-        private bool Search(Vector2Int position)
+        private bool Search(int2 position)
         {
 
             while (openSet.Count > 0)
             {
                 openSet.Sort(new FComparer(this));
                 position = openSet[0];
-                if (position == destination)
+                if (math.all(position == destination))
                 {
                     return true;
                 }
 
                 openSet.Remove(position);
-                List<Vector2Int> nextLocations = GetAdjacentLocations(position);
-                foreach (Vector2Int adjLocation in nextLocations)
+                List<int2> nextLocations = GetAdjacentLocations(position);
+                foreach (int2 adjLocation in nextLocations)
                 {
                     float traversalCost = GetTraversalCost(position, adjLocation);
                     float gTemp = GetGScore(position) + traversalCost;
@@ -71,23 +71,14 @@ namespace Dalichrome.RandomGenerator.Utils
             return false;
         }
 
-        private List<Vector2Int> GetAdjacentLocations(Vector2Int position)
+        private List<int2> GetAdjacentLocations(int2 position)
         {
-            List<Vector2Int> neighbors = new();
+            List<int2> neighbors = tileGrid.GetFourNeighborPositions(position);
 
-            neighbors.Add(position + Vector2Int.left);
-            neighbors.Add(position + Vector2Int.right);
-            neighbors.Add(position + Vector2Int.down);
-            neighbors.Add(position + Vector2Int.up);
-
-            List<Vector2Int> validNeighbors = new();
-            foreach (Vector2Int pos in neighbors)
+            List<int2> validNeighbors = new();
+            foreach (int2 pos in neighbors)
             {
-                if (pos.x < 0 || pos.x >= tileGrid.width || pos.y < 0 || pos.y >= tileGrid.height)
-                {
-                    continue;
-                }
-                else if (IsWalkable(pos.x, pos.y))
+                if (IsWalkable(pos.x, pos.y))
                 {
                     validNeighbors.Add(pos);
                 }
@@ -101,41 +92,41 @@ namespace Dalichrome.RandomGenerator.Utils
         }
 
         //Add custom configurable traversability types here
-        private float GetTraversalCost(Vector2Int from, Vector2Int to)
+        private float GetTraversalCost(int2 from, int2 to)
         {
             return 1f;
         }
 
-        private float GetHScore(Vector2Int position)
+        private float GetHScore(int2 position)
         {
-            return Vector2Int.Distance(position, start);
+            return math.distance((float2)position, (float2)start);
         }
 
-        private float GetGScore(Vector2Int position)
+        private float GetGScore(int2 position)
         {
             if (gScore.ContainsKey(position))
                 return gScore[position];
             return float.MaxValue;
         }
 
-        private float GetFScore(Vector2Int position)
+        private float GetFScore(int2 position)
         {
             if (fScore.ContainsKey(position))
                 return fScore[position];
             return float.MaxValue;
         }
 
-        private void SetGScore(Vector2Int position, float score)
+        private void SetGScore(int2 position, float score)
         {
             gScore[position] = score;
         }
 
-        private void SetFScore(Vector2Int position, float score)
+        private void SetFScore(int2 position, float score)
         {
             fScore[position] = score;
         }
 
-        public List<Vector2Int> FindPath(TileGrid tileGrid, OccupanceUtil occupanceUtil, Vector2Int start, Vector2Int end)
+        public List<int2> FindPath(TileGrid tileGrid, OccupanceUtil occupanceUtil, int2 start, int2 end)
         {
             this.tileGrid = tileGrid;
             this.occupanceUtil = occupanceUtil;
@@ -153,13 +144,13 @@ namespace Dalichrome.RandomGenerator.Utils
 
             cameFrom = new();
 
-            List<Vector2Int> path = new List<Vector2Int>();
+            List<int2> path = new List<int2>();
             bool success = Search(start);
 
             //Reverses Path
             if (success)
             {
-                Vector2Int position = destination;
+                int2 position = destination;
                 while (cameFrom.ContainsKey(position))
                 {
                     path.Add(position);

@@ -1,25 +1,25 @@
-#if ODIN_INSPECTOR
-using Sirenix.OdinInspector.Editor;
-using UnityEngine;
+#if ODIN_INSPECTOR && UNITY_EDITOR
 using System;
-using UnityEditor;
+using System.Linq;
+using System.Reflection;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Reflection;
+using Dalichrome.RandomGenerator.UserData;
+using Sirenix.OdinInspector.Editor;
+using UnityEditor;
+using UnityEngine;
 
 [DrawerPriority(0, 0, 0)]
-public sealed class SerialPairOdinDrawer
-         : OdinValueDrawer<SerialPair<int, int>>
+public sealed class SerialPairOdinDrawer : OdinValueDrawer<SerialPair<int, int>>
 {
-    public override bool CanDrawTypeFilter(Type t)
-        => t == typeof(SerialPair<int, int>);
+    public override bool CanDrawTypeFilter(Type t) => t == typeof(SerialPair<int, int>);
 
     protected override void DrawPropertyLayout(GUIContent label)
     {
         var attr = Property.GetAttribute<TilePairDisplayAttribute>();
         if (attr == null)
         {
-            CallNextDrawer(label);   // not ours
+            CallNextDrawer(label);
             return;
         }
 
@@ -27,32 +27,36 @@ public sealed class SerialPairOdinDrawer
 
         EditorGUILayout.BeginHorizontal();
 
-        var limitAttr = Property.GetAttribute<LimitTileLayerAttribute>();
-        if (limitAttr == null)
-        {
-            var mi = Property.Info.GetMemberInfo();
-            limitAttr = mi.GetCustomAttribute<LimitTileLayerAttribute>(true);
-        }
-        LayerType? layerFilter = limitAttr?.layer;
-
         // Key column
         if (attr.ShowKeyDropdown)
-            pair.Key = TileDropdownOdinUtility.DrawSelector(GUIContent.none, pair.Key,
-                                                 width: 120,
-                                                 limit: layerFilter);
+            pair.Key = DrawTilePopup(pair.Key, 120);
         else
             pair.Key = EditorGUILayout.IntField(pair.Key, GUILayout.Width(80));
 
         // Value column
         if (attr.ShowValueDropdown)
-            pair.Value = TileDropdownOdinUtility.DrawSelector(GUIContent.none, pair.Value,
-                                     width: 120,
-                                     limit: layerFilter);
+            pair.Value = DrawTilePopup(pair.Value, 120);
         else
             pair.Value = EditorGUILayout.IntField(pair.Value, GUILayout.Width(80));
 
         EditorGUILayout.EndHorizontal();
+
         ValueEntry.SmartValue = pair;
+    }
+
+    private static int DrawTilePopup(int currentId, float width)
+    {
+        var entry = GenericIdDropdownCache.GetOrBuild(typeof(TileObject), "TileObjects");
+        var items = entry.Items;
+
+        if (items.Count == 0)
+            return EditorGUILayout.IntField(currentId, GUILayout.Width(width));
+
+        int idx = Math.Max(0, items.FindIndex(i => i.id == currentId));
+        var names = items.Select(i => i.label).ToArray();
+
+        int newIdx = EditorGUILayout.Popup(idx, names, GUILayout.Width(width));
+        return items[newIdx].id;
     }
 }
 #endif

@@ -103,7 +103,7 @@ namespace Dalichrome.RandomGenerator
                     for (int x = 0; x < chunkSize; x++)
                     {
                         int gx = x + chunk.origin.x;
-                        int tileId = tile.GetIdInLayer(layer);
+                        int tileId = tileGrid.GetTileId(x, y, (int)layer);
 
                         if (useGameObjects)
                         {

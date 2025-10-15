@@ -1,10 +1,11 @@
+using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
-using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core {
     public static class ExtensionMethods
@@ -166,7 +167,7 @@ namespace Dalichrome.RandomGenerator.Core {
             }
         }
 
-        public static Vector2Int GetNearestPosition(this int[,] grid, Vector2Int position, int value)
+        public static int2 GetNearestPosition(this int[,] grid, int2 position, int value)
         {
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
@@ -190,14 +191,14 @@ namespace Dalichrome.RandomGenerator.Core {
 
                         if (nx >= 0 && nx < width && ny >= 0 && ny < height && grid[nx, ny] == value)
                         {
-                            return new Vector2Int(nx, ny);
+                            return new int2(nx, ny);
                         }
                     }
                 }
             }
 
             // Return a constant for "not found"
-            return Constants.OutsideGridVectorInt;
+            return Constants.OutsideGridInt2;
         }
 
         public static bool TryToEnum<TEnum>(this int value, out TEnum result) where TEnum : struct, Enum
