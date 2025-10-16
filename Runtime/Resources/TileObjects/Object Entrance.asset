@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 3200
   layer: 3000
+  tileKind: 2
   tileName: Object Entrance
   menuSprite: {fileID: 0}
   color: {r: 1, g: 0, b: 0, a: 1}

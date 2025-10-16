@@ -15,9 +15,10 @@ MonoBehaviour:
   id: 2000
   layerName: Default
   sortingLayerName: 
+  sortingOrder: 5
+  tieOrder: 0
+  occupyOnDefault: 1
   hasCollider: 0
   useCompositeCollider: 0
   tag: Untagged
-  sortingOrder: 4
-  tieOrder: 0
   material: {fileID: 0}

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 1550
   layer: 1000
+  tileKind: 3
   tileName: Ground Water
   menuSprite: {fileID: 0}
   color: {r: 0.1137255, g: 0.36078432, b: 0.62352943, a: 1}

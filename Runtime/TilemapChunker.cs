@@ -28,27 +28,13 @@ namespace Dalichrome.RandomGenerator
         private readonly List<Chunk> scratch = new(64);
         private BoundsInt chunkBounds;
 
-        private Dictionary<LayerType, TileBase[]> chunkLayerBuffers = new();
+        private Dictionary<int, TileBase[]> chunkLayerBuffers = new();
         private TileBase[] emptyChunkBuffer;
 
         private readonly Queue<Chunk> renderQueue = new();
         private readonly Queue<Chunk> derenderQueue = new();
         private readonly HashSet<Chunk> inRenderQ = new();
         private readonly HashSet<Chunk> inDerenderQ = new();
-
-        private static LayerType[] layers;
-
-        private void Awake()
-        {
-            if (layers == null)
-            {
-                var vals = (LayerType[])Enum.GetValues(typeof(LayerType));
-                var list = new List<LayerType>(vals.Length);
-                for (int i = 0; i < vals.Length; i++)
-                    if (vals[i] != LayerType.NA) list.Add(vals[i]);
-                layers = list.ToArray();
-            }
-        }
 
         private bool WithinDistanceOfMainChunk(Chunk a) =>
             Mathf.Abs(a.chunkX - mainChunk.chunkX) <= chunkDistance &&
@@ -89,11 +75,10 @@ namespace Dalichrome.RandomGenerator
         {
             if (chunk == null) return;
 
-            for (int i = 0; i < layers.Length; i++)
+            foreach( int layerId in TileLayerInfo.AllLayerIds)
             {
-                var layer = layers[i];
-                var tilemap = tilemapDict[layer];
-                var buf = chunkLayerBuffers[layer];
+                var tilemap = tilemapDict[layerId];
+                var buf = chunkLayerBuffers[layerId];
 
                 for (int y = 0; y < chunkSize; y++)
                 {
@@ -103,7 +88,7 @@ namespace Dalichrome.RandomGenerator
                     for (int x = 0; x < chunkSize; x++)
                     {
                         int gx = x + chunk.origin.x;
-                        int tileId = tileGrid.GetTileId(x, y, (int)layer);
+                        int tileId = tileGrid.GetTileId(x, y, layerId);
 
                         if (useGameObjects)
                         {
@@ -127,10 +112,9 @@ namespace Dalichrome.RandomGenerator
         {
             if (chunk == null) return;
 
-            for (int i = 0; i < layers.Length; i++)
+            foreach (int layerId in TileLayerInfo.AllLayerIds)
             {
-                var layer = layers[i];
-                Tilemap tilemap = tilemapDict[layer];
+                Tilemap tilemap = tilemapDict[layerId];
 
                 tilemap.SetTilesBlock(chunk.bounds, emptyChunkBuffer);
             }
@@ -251,18 +235,17 @@ namespace Dalichrome.RandomGenerator
             emptyChunkBuffer = new TileBase[chunkSize * chunkSize];
 
             //Create tilemaps for each layer
-            for (int i = 0; i < layers.Length; i++)
+            foreach (int layerId in TileLayerInfo.AllLayerIds)
             {
-                var layer = layers[i];
-                if (!chunkLayerBuffers.ContainsKey(layer))
+                if (!chunkLayerBuffers.ContainsKey(layerId))
                 {
                     TileBase[] tileBaseArray = new TileBase[chunkSize * chunkSize];
-                    chunkLayerBuffers.Add(layer, tileBaseArray);
+                    chunkLayerBuffers.Add(layerId, tileBaseArray);
                 }
 
-                if (!tilemapDict.ContainsKey(layer))
+                if (!tilemapDict.ContainsKey(layerId))
                 {
-                    CreateTileMap(layer);
+                    CreateTileMap(layerId);
                 }
             }
 

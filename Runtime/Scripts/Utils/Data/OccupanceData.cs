@@ -8,7 +8,7 @@ namespace Dalichrome.RandomGenerator.Utils
     public struct OccupanceData
     {
         public OccupanceType occupanceType;
-        public LayerType occupyLayer;
+        public int occupyLayer;
         public int tileA;
         public bool invert;
         public int outOfBoundsValue;
@@ -32,7 +32,7 @@ namespace Dalichrome.RandomGenerator.Utils
             switch (occupanceType)
             {
                 case OccupanceType.Layer_Not_NA:
-                    value = grid.GetNotEmptyAt(pos, (int)occupyLayer);
+                    value = grid.GetNotEmptyAt(pos, occupyLayer);
                     break;
                 case OccupanceType.Contains_A:
                     value = grid.ColumnContainsId(pos,tileA) ? 1 : 0;

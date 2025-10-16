@@ -7,7 +7,7 @@ using Unity.Collections;
 public struct CellularAutomataJob : IJobParallelFor
 {
     [ReadOnly] public NativeTileGrid readGrid;
-    public NativeTileGrid writeGrid;
+    [NativeDisableParallelForRestriction] public NativeTileGrid writeGrid;
 
     public OccupanceData occupance;
 

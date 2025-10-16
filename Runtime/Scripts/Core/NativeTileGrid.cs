@@ -1,11 +1,12 @@
+using Dalichrome.RandomGenerator.Random;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
-using Dalichrome.RandomGenerator.Random;
-using Unity.Collections;
-using Unity.Mathematics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -179,6 +180,7 @@ namespace Dalichrome.RandomGenerator.Core
             return newSet;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetLayerIndexFromTileId(int id)
         {
             if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
@@ -187,6 +189,7 @@ namespace Dalichrome.RandomGenerator.Core
             return -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetLayerIndexFromLayedId(int id)
         {
             if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
@@ -195,11 +198,13 @@ namespace Dalichrome.RandomGenerator.Core
             return -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetDefaultOccupanceFromLayerIndex(int layerIndex)
         {
             return bundle.layerIndexToDefaultOccupanceLookup[layerIndex];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetTileKindFromTileId(int id)
         {
             if (bundle.tileIdToTileKindLookup.TryGetValue(id, out int kind))
@@ -208,26 +213,31 @@ namespace Dalichrome.RandomGenerator.Core
             return -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetEmptyFromTileId(int id)
         {
             return GetTileKindFromTileId(id) == 1 ? 1 : 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetNotEmptyFromTileId(int id)
         {
             return GetTileKindFromTileId(id) == 1 ? 0 : 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetTileIdFromNativeArray(int3 pos)
         {
             return tiles[PositionToIndex(pos)];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetTileIdFromNativeArray(int2 pos2, int layerIndex)
         {
             return GetTileIdFromNativeArray(pos2.x, pos2.y, layerIndex);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetTileIdFromNativeArray(int x, int y, int z)
         {
             return tiles[PositionToIndex(x, y, z)];
@@ -286,7 +296,7 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (!Masked) return true;
 
-            return tileMask.CanModifyColumn(GetColumn(x, y));
+            return tileMask.CanModifyColumn(GetColumnNative(x, y));
         }
 
         // Set Tile Id
@@ -295,9 +305,10 @@ namespace Dalichrome.RandomGenerator.Core
             if (IsRestricted(x,y) || !CanModifyColumn(x,y)) return false;
 
             // Overwrite ID as zero if id is empty
-            if (GetEmptyFromTileId(id) == 1) id = 0;
-
-            tiles[PositionToIndexTileId(x,y,id)] = id;
+            if (GetEmptyFromTileId(id) == 1)
+                tiles[PositionToIndexTileId(x, y, id)] = 0;
+            else
+                tiles[PositionToIndexTileId(x, y, id)] = id;
             return true;
         }
 
@@ -307,13 +318,15 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Column Contains Id
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ColumnContainsId(int x, int y, int id)
         {
-            int tileId = GetTileIdFromNativeArray(x,y,GetLayerIndexFromTileId(id));
-            
-            return false;
+            int z = GetLayerIndexFromTileId(id);   // map tileId -> layer index
+            if (z < 0) return false;               // unknown id
+            return tiles[PositionToIndex(x, y, z)] == id;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ColumnContainsId(int2 position, int id)
         {
             return ColumnContainsId(position.x, position.y, id);
@@ -358,6 +371,12 @@ namespace Dalichrome.RandomGenerator.Core
             return new NativeTileColumn(new NativeSlice<int>(tiles, PositionToIndex(x, y), depth), x, y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public NativeTileColumn GetColumnNative(int x, int y)
+        {
+            return new NativeTileColumn(new NativeSlice<int>(tiles, PositionToIndex(x, y), depth), x, y);
+        }
+
         // Set Column
 
         public bool SetColumn(ITileColumn col)
@@ -392,24 +411,36 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Get Default Occupancy
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetOccupied(int x, int y)
         {
+            var col = GetColumnNative(x, y);
+
             bool forceUnoccupied = false;
-            int value = 0;
-            ITileColumn column = GetColumn(x, y);
-            for (int z = 0; z < column.Length; z++)
+
+            for (int z = 0; z < col.Length; z++)
             {
-                if (GetTileKindFromTileId(column[z]) == (int)TileKind.ForceOccupied)
+                if (GetDefaultOccupanceFromLayerIndex(z) == 0)
+                    continue;
+
+                int id = col[z];
+                if (id == 0)
+                    continue;
+
+                int kind = GetTileKindFromTileId(id);
+                if (kind == (int)TileKind.ForceOccupied)
                     return 1;
 
-                if(GetTileKindFromTileId(column[z]) == (int)TileKind.ForceUnoccupied)
+                if (kind == (int)TileKind.ForceUnoccupied)
+                {
                     forceUnoccupied = true;
+                    continue;
+                }
 
-                if (GetDefaultOccupanceFromLayerIndex(z) == 1 &&
-                    GetNotEmpty(column[z]) == 1)
-                    value = 1;
+                return forceUnoccupied ? 0 : 1;
             }
-            return forceUnoccupied ? 0 : value;
+
+            return 0;
         }
 
         public int GetOccupied(int2 pos)

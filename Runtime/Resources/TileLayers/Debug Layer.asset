@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Debug Layer
   m_EditorClassIdentifier: 
   id: 4000
-  layerName: Debug
+  layerName: Default
   sortingLayerName: 
+  sortingOrder: 8
+  tieOrder: 0
+  occupyOnDefault: 0
   hasCollider: 0
   useCompositeCollider: 0
   tag: Untagged
-  sortingOrder: 0
-  tieOrder: 0
   material: {fileID: 0}

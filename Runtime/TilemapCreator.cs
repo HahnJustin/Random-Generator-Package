@@ -12,7 +12,7 @@ namespace Dalichrome.RandomGenerator
     public class TilemapCreator : TilemapInteractor
     {
         [Header("Creator")]
-        [SerializeField] private List<SerialPair<LayerType, Tilemap>> tilemaps;
+        [SerializeField] private List<SerialPair<int, Tilemap>> tilemaps;
         [SerializeField] private bool instantiateMissingTilemaps = true;
 
         [Header("Coroutine Loading")]
@@ -28,20 +28,20 @@ namespace Dalichrome.RandomGenerator
         private void CreateDictionary()
         {
             tilemapDict.Clear();
-            foreach (SerialPair<LayerType, Tilemap> pair in tilemaps)
+            foreach (SerialPair<int, Tilemap> pair in tilemaps)
             {
                 tilemapDict[pair.Key] = pair.Value;
             }
         }
 
         public IEnumerator SetTilesCoroutine(
-                LayerType layer,
+                int layerId,
                 int tilesPerFrame = 2_000,   // how many tiles youÅfre OK pushing in one frame
                 int seed = 0)
         {
-            if (layer == LayerType.NA) yield break;
+            if (layerId == 0) yield break;
 
-            Tilemap tilemap = tilemapDict[layer];
+            Tilemap tilemap = tilemapDict[layerId];
             tilemap.ClearAllTiles();
 
             int width = tileGrid.width;
@@ -96,11 +96,11 @@ namespace Dalichrome.RandomGenerator
                         }
 
                         ITileColumn col = tileGrid.GetColumn(tx, ty);
-                        if (useGameObjects && SpawnTileGameObject(col, layer))
+                        if (useGameObjects && SpawnTileGameObject(col, layerId))
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ((int)layer)]);
+                                TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ(layerId)]);
                     }
                 }
                 // push one bulk call --------------------------------------------------
@@ -151,17 +151,17 @@ namespace Dalichrome.RandomGenerator
 
             int seed = UnityEngine.Random.Range(0,1000000);
             StopAllCoroutines();
-            foreach (LayerType layer in Enum.GetValues(typeof(LayerType)))
+            foreach (int layerId in TileLayerInfo.AllLayerIds)
             {
-                if (!tilemapDict.ContainsKey(layer) && instantiateMissingTilemaps)
+                if (!tilemapDict.ContainsKey(layerId) && instantiateMissingTilemaps)
                 {
-                    CreateTileMap(layer);
+                    CreateTileMap(layerId);
                 }
 
                 if(!coroutineLoading)
-                    SetTilesByLayer(layer);
+                    SetTilesByLayer(layerId);
                 else
-                    StartCoroutine(SetTilesCoroutine(layer, tilesPerFrame: tilesPerFrame, seed: seed));
+                    StartCoroutine(SetTilesCoroutine(layerId, tilesPerFrame: tilesPerFrame, seed: seed));
             }
 
             if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();

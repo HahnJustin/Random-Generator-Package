@@ -3,9 +3,8 @@ namespace Dalichrome.RandomGenerator.Configs
 {
     public enum OccupanceType
     {
+        Default,
         Layer_Not_NA,
-        Contains_A,
-        Wall_Obj_Not_NA,
-        Doors_WO_Not_NA
+        Contains_A
     }
 }

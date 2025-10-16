@@ -38,10 +38,10 @@ namespace Dalichrome.RandomGenerator.Configs
         [SerializeField] private bool _addSpawnsToMask = true;
 
         public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
-        [SerializeField] protected OccupanceType _occupance = OccupanceType.Wall_Obj_Not_NA;
+        [SerializeField] protected OccupanceType _occupance = OccupanceType.Default;
 
-        [Condition("Occupance", OccupanceType.Layer_Not_NA)] public LayerType OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
-        [Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected LayerType _occupyLayer = LayerType.Wall;
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA)] public int OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected int _occupyLayer = (int)LayerType.Wall;
 
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
         [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;

@@ -59,13 +59,6 @@ namespace Dalichrome.RandomGenerator.Utils
             {
                 value = tileGrid.ColumnContainsId(x, y, config.TileA) ? 1 : 0;
             }
-            // TODO make this behavior not strickly for doors
-            else if (config.Occupance == OccupanceType.Doors_WO_Not_NA)
-            {
-                if (tileGrid.ColumnContainsId(x, y, (int)TileDefaults.Object_Door)) value = 0;
-                else value = Mathf.Clamp(tileGrid.GetTileId(x, y, (int)LayerType.Wall) +
-                                         tileGrid.GetTileId(x, y, (int)LayerType.Object), 0, 1);
-            }
             else
             {
                 value = tileGrid.GetOccupied(x,y);

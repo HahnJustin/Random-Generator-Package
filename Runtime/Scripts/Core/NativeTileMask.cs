@@ -61,7 +61,7 @@ namespace Dalichrome.RandomGenerator.Core
             else return !IsIncludingTiles;
         }
 
-        public bool CanModifyColumn(ITileColumn column)
+        public bool CanModifyColumn(NativeTileColumn column)
         {
             if (!IsValid) return true;
 

@@ -28,14 +28,14 @@ namespace Dalichrome.RandomGenerator
 
         protected RandomGenerator randomGenerator;
 
-        protected Dictionary<LayerType, Tilemap> tilemapDict = new();
+        protected Dictionary<int, Tilemap> tilemapDict = new();
         protected Tilemap numberTilemap;
 
         protected TileGrid tileGrid;
 
-        protected bool SpawnTileGameObject(ITileColumn col, LayerType layer)
+        protected bool SpawnTileGameObject(ITileColumn col, int layerId)
         {
-            int tileId = col[TileLayerInfo.GetLayerZ((int)layer)];
+            int tileId = col[TileLayerInfo.GetLayerZ(layerId)];
 
             GameObject prefab = TileObjectInfo.GetGameObject(tileId);
             if (prefab == null) return false;
@@ -49,10 +49,10 @@ namespace Dalichrome.RandomGenerator
             return true;
         }
 
-        protected void SetTilesByLayer(LayerType layer)
+        protected void SetTilesByLayer(int layerId)
         {
-            if (layer == LayerType.NA) return;
-            Tilemap tilemap = tilemapDict[layer];
+            if (layerId == 0) return;
+            Tilemap tilemap = tilemapDict[layerId];
             tilemap.ClearAllTiles();
 
             int width = tileGrid.width;
@@ -63,12 +63,12 @@ namespace Dalichrome.RandomGenerator
             foreach (ITileColumn col in tileGrid) 
             {
                 int tempIndex = col.X + (col.Y * tileGrid.width);
-                if (useGameObjects && SpawnTileGameObject(col, layer)) {
+                if (useGameObjects && SpawnTileGameObject(col, layerId)) {
                     tileBaseArray[tempIndex] = null;
                 }
                 else
                 {
-                    TileBase tileBase = TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ((int)layer)]);
+                    TileBase tileBase = TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ(layerId)]);
                     tileBaseArray[tempIndex] = tileBase;
                 }
             }
@@ -95,26 +95,25 @@ namespace Dalichrome.RandomGenerator
             numberTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
         }
 
-        protected void CreateTileMap(LayerType layer)
+        protected void CreateTileMap(int layerId)
         {
-            if (layer == LayerType.NA) return;
+            if (layerId == 0) return;
             GameObject tilemapObject = Instantiate(TilemapPrefab, transform);
-            int sortingOrder = TileLayerInfo.GetSortingOrder((int)layer);
+            int sortingOrder = TileLayerInfo.GetSortingOrder(layerId);
             tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = sortingOrder;
-            tilemapObject.GetComponent<Renderer>().sortingLayerID = TileLayerInfo.GetSortingLayerID((int)layer);
+            tilemapObject.GetComponent<Renderer>().sortingLayerID = TileLayerInfo.GetSortingLayerID(layerId);
 
-            Material material = TileLayerInfo.GetMaterial((int)layer);
+            Material material = TileLayerInfo.GetMaterial(layerId);
             if(material != null)tilemapObject.GetComponent<Renderer>().material = material;
 
-            int number = TileLayerInfo.GetUnityLayerID((int)layer);
-            tilemapObject.layer = number;
+            tilemapObject.layer = TileLayerInfo.GetUnityLayerID(layerId);
 
-            tilemapObject.tag = TileLayerInfo.GetTag((int)layer);
+            tilemapObject.tag = TileLayerInfo.GetTag(layerId);
 
-            if (TileLayerInfo.GetHasCollider((int)layer))
+            if (TileLayerInfo.GetHasCollider(layerId))
             {
                 TilemapCollider2D tilemapCollider = tilemapObject.AddComponent<TilemapCollider2D>();
-                if (TileLayerInfo.GetUseCompositeCollider((int)layer))
+                if (TileLayerInfo.GetUseCompositeCollider(layerId))
                 {
                     CompositeCollider2D compColl = tilemapObject.AddComponent<CompositeCollider2D>();
 
@@ -131,7 +130,7 @@ namespace Dalichrome.RandomGenerator
             {
                 Debug.LogError("TilemapPrefab must have a Tilemap Component");
             }
-            tilemapDict[layer] = tilemap;
+            tilemapDict[layerId] = tilemap;
         }
 
         protected void CreateNumberTileMap()
@@ -158,14 +157,14 @@ namespace Dalichrome.RandomGenerator
 
             int seed = UnityEngine.Random.Range(0,1000000);
             StopAllCoroutines();
-            foreach (LayerType layer in Enum.GetValues(typeof(LayerType)))
+            foreach (int id in TileLayerInfo.AllLayerIds)
             {
-                if (!tilemapDict.ContainsKey(layer))
+                if (!tilemapDict.ContainsKey(id))
                 {
-                    CreateTileMap(layer);
+                    CreateTileMap(id);
                 }
 
-                SetTilesByLayer(layer);
+                SetTilesByLayer(id);
             }
 
             if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();
@@ -185,7 +184,7 @@ namespace Dalichrome.RandomGenerator
             this.randomGenerator = randomGenerator;
         }
 
-        public Dictionary<LayerType,Tilemap> GetTilemapDictionary()
+        public Dictionary<int,Tilemap> GetTilemapDictionary()
         {
             return tilemapDict;
         }
