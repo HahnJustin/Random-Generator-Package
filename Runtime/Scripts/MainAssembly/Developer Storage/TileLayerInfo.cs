@@ -220,5 +220,15 @@ namespace Dalichrome.RandomGenerator
         {
             return TryGet(layerId, out var tl) ? tl.material : null;
         }
+
+        public static Sprite GetMenuSprite(int layerId)
+        {
+            return TryGet(layerId, out var tl) ? tl.menuSprite : null;
+        }
+
+        public static string GetName(int layerId)
+        {
+            return TryGet(layerId, out var tl) ? tl.name : null;
+        }
     }
 }

@@ -132,7 +132,7 @@ MonoBehaviour:
         _borderOccupied: 1
         _occupance: 2
         _occupyLayer: 1500
-        _tileA: 1600
+        _tileA: 1400
         _invertOccupance: 0
 --- !u!114 &-6517725862149913408
 MonoBehaviour:

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60673c84059756542867c390bdfc1684, type: 3}
-  m_Name: Debug Layer
+  m_Name: Debug
   m_EditorClassIdentifier: 
   id: 4000
   layerName: Default
@@ -22,3 +22,4 @@ MonoBehaviour:
   useCompositeCollider: 0
   tag: Untagged
   material: {fileID: 0}
+  menuSprite: {fileID: 1313916107, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Core
@@ -84,12 +83,7 @@ namespace Dalichrome.RandomGenerator.Core
                : default;
 
             tileMask = allocateCollections
-                ? new NativeTileMask
-                {
-                    includeSet = new NativeParallelHashSet<int>(1, allocator),
-                    excludeSet = new NativeParallelHashSet<int>(1, allocator),
-                    IsValid = true
-                }
+                ? new NativeTileMask(allocator)
                 : default;
             masked = false;
 
@@ -131,12 +125,7 @@ namespace Dalichrome.RandomGenerator.Core
             grid.masked = other.masked;
             grid.tileMask = other.tileMask.IsValid
                 ? (NativeTileMask)other.tileMask.DeepClone()
-                : new NativeTileMask
-                {
-                    includeSet = new NativeParallelHashSet<int>(1, allocator),
-                    excludeSet = new NativeParallelHashSet<int>(1, allocator),
-                    IsValid = true
-                };
+                : new NativeTileMask(allocator);
 
             // Lookups - ReadOnly so no need to copy
             grid.bundle = other.bundle;
@@ -484,18 +473,13 @@ namespace Dalichrome.RandomGenerator.Core
             tileMask.Dispose();
 
             Allocator allocator = Allocator.Persistent;
-            tileMask = new NativeTileMask
-            {
-                includeSet = new NativeParallelHashSet<int>(1, allocator),
-                excludeSet = new NativeParallelHashSet<int>(1, allocator),
-                IsValid = true
-            };
+            tileMask = new NativeTileMask(allocator);
         }
 
         public void CreateMask(List<int> includeList, List<int> excludeList)
         {
             tileMask.Dispose();
-            tileMask = new(includeList, excludeList);
+            tileMask = new(includeList, excludeList, bundle);
         }
 
         public void ToggleMasked(bool on)

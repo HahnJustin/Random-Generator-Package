@@ -44,6 +44,10 @@ namespace Dalichrome.RandomGenerator.Nodes
                 }
                 return _config; 
             } 
+            set
+            {
+                _config = (TCfg)value;
+            }
         }     // for subclasses
 
         /// <summary>The concrete base-class you want to appear in the drop-down

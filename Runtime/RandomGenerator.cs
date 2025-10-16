@@ -125,12 +125,7 @@ namespace Dalichrome.RandomGenerator
             if (generateOnStart) Generate();
         }
 
-        private void OnApplicationQuit()
-        {
-            Dispose();
-        }
-
-        private void Dispose()
+        public void Dispose()
         {
             if (lastGeneration != null)
             {
@@ -138,9 +133,15 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private void GenerationCleanup(AbstractGridOperationData data)
+        public void GenerationCleanup(AbstractGridOperationData data)
         {
             data?.Dispose();
+            LookupBundleBuilder.DisposeCachedNativeBundle();
+        }
+
+        public static void GenerationCleanup()
+        {
+            LastGeneration?.Dispose();
             LookupBundleBuilder.DisposeCachedNativeBundle();
         }
 

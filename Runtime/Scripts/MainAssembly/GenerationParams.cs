@@ -44,7 +44,7 @@ namespace Dalichrome.RandomGenerator.Data
             get { return graph; }
             set { graph = value; }
         }
-        [SerializeReference] private GeneratorGraph graph = null;
+        [SerializeField] private GeneratorGraph graph = null;
 
         public object Clone()
         {

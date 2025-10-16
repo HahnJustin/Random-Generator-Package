@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60673c84059756542867c390bdfc1684, type: 3}
-  m_Name: Wall Layer
+  m_Name: Ground
   m_EditorClassIdentifier: 
-  id: 2000
+  id: 1000
   layerName: Default
   sortingLayerName: 
-  sortingOrder: 5
+  sortingOrder: 2
   tieOrder: 0
-  occupyOnDefault: 1
+  occupyOnDefault: 0
   hasCollider: 0
   useCompositeCollider: 0
   tag: Untagged
   material: {fileID: 0}
+  menuSprite: {fileID: 1995096398, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}

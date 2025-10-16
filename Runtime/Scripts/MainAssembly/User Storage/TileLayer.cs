@@ -43,5 +43,8 @@ namespace Dalichrome.RandomGenerator.UserData
 #if UNITY_EDITOR
         private static IEnumerable<string> AllTags => UnityEditorInternal.InternalEditorUtility.tags;
 #endif
+
+        [Header("UI Fields")]
+        [SerializeField] public Sprite menuSprite;
     }
 }

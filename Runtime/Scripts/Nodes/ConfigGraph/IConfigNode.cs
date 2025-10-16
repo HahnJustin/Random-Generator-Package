@@ -4,7 +4,7 @@ namespace Dalichrome.RandomGenerator.Nodes
 {
     public interface IConfigNode 
     {
-        public AbstractConfig Config { get; }
+        public AbstractConfig Config { get; set; }
 
         public int Priority { get; }
     }

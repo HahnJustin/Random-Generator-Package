@@ -1,6 +1,7 @@
 ﻿using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Generators;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -202,9 +203,77 @@ namespace Dalichrome.RandomGenerator.Nodes
                 .ToList();
         }
 
-        public GeneratorGraph Clone()
+        public GeneratorGraph Clone(bool duplicateConfigs = true)
         {
-            return Instantiate(this);
+            var newGraph = ScriptableObject.CreateInstance<GeneratorGraph>();
+            newGraph.name = (string.IsNullOrEmpty(name) ? nameof(GeneratorGraph) : name) + " [Runtime]";
+            newGraph.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor | HideFlags.HideAndDontSave;
+
+            var nodeMap = new Dictionary<Node, Node>(nodes?.Count ?? 0);
+
+            // 1) Clone nodes as new ScriptableObjects
+            foreach (var oldNode in nodes)
+            {
+                if (oldNode == null) continue;
+                var newNode = ScriptableObject.CreateInstance(oldNode.GetType()) as Node;
+                newNode.graph = newGraph;
+                newNode.name = oldNode.name;
+                newNode.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor | HideFlags.HideAndDontSave;
+
+                // copy serializable fields
+                var json = JsonUtility.ToJson(oldNode, false);
+                JsonUtility.FromJsonOverwrite(json, newNode);
+
+                // deep-copy config if needed (your configs are [Serializable] classes)
+                if (duplicateConfigs && newNode is IConfigNode nCfg && nCfg.Config != null)
+                {
+                    nCfg.Config = DeepCopyConfig(nCfg.Config); // your method
+                }
+
+                newGraph.nodes.Add(newNode); // IMPORTANT: add to the new graph's list
+                nodeMap[oldNode] = newNode;
+            }
+
+            // 2) Rebuild ports
+            foreach (var n in newGraph.nodes) n.UpdatePorts();
+
+            // 3) Reconnect edges (from outputs only)
+            foreach (var oldNode in nodes)
+            {
+                if (!nodeMap.TryGetValue(oldNode, out var src)) continue;
+
+                foreach (var oldPort in oldNode.Ports)
+                {
+                    if (!oldPort.IsOutput) continue;
+                    var newSrcPort = src.GetPort(oldPort.fieldName);
+                    if (newSrcPort == null) continue;
+
+                    foreach (var oldConn in oldPort.GetConnections())
+                    {
+                        if (!nodeMap.TryGetValue(oldConn.node, out var dst)) continue;
+                        var newDstPort = dst.GetPort(oldConn.fieldName);
+                        if (newDstPort == null) continue;
+                        if (!newSrcPort.IsConnectedTo(newDstPort)) newSrcPort.Connect(newDstPort);
+                    }
+                }
+            }
+
+            return newGraph;
+        }
+
+
+        private static AbstractConfig DeepCopyConfig(AbstractConfig source)
+        {
+            // Serialize full object graph (non-UnityEngine.Object fields get cloned)
+            string json = JsonUtility.ToJson(source, false);
+
+            // Create a new instance of the exact runtime type
+            var clone = (AbstractConfig)Activator.CreateInstance(source.GetType(), nonPublic: true);
+
+            // Overwrite with data from JSON
+            JsonUtility.FromJsonOverwrite(json, clone);
+
+            return clone;
         }
     }
 }
