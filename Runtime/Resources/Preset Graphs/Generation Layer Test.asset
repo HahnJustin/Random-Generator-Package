@@ -604,8 +604,8 @@ MonoBehaviour:
         _excludeList: 10270000
         _liveNeighboursRequired: 5
         _repetitions: 2
-        _fill: 100
-        _empty: 9996
+        _fill: 1500
+        _empty: 9995
         _placeProbability: 1
         _borderOccupied: 1
         _occupance: 1

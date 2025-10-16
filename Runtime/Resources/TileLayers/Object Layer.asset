@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 3000
   layerName: Default
   sortingLayerName: 
-  sortingOrder: 4
+  sortingOrder: 6
   tieOrder: 1
   occupyOnDefault: 1
   hasCollider: 0
