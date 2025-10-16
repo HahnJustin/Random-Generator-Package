@@ -67,7 +67,7 @@ TextureImporter:
   swizzle: 50462976
   cookieLightType: 0
   platformSettings:
-  - serializedVersion: 4
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -80,7 +80,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -93,24 +93,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CarpetRuleTile_0
+      name: SandyWallRuleTile_0
       rect:
         serializedVersion: 2
         x: 16
@@ -120,19 +107,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3eb450d4ad7aa4e4ba19f73beed2d0c9
-      internalID: 1731973892
+      spriteID: e1b69006ed9172b47b9df1b8e2b93857
+      internalID: -339379923
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_2
+      name: SandyWallRuleTile_2
       rect:
         serializedVersion: 2
         x: 48
@@ -142,19 +128,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 26c789de1ef0d68419777d2ea8f79a66
-      internalID: -802235012
+      spriteID: be4c575a63b0c5a4cbc1f8130f9d9349
+      internalID: 1534944789
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_4
+      name: SandyWallRuleTile_4
       rect:
         serializedVersion: 2
         x: 80
@@ -164,19 +149,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4ecd24196b3b2b84eb6e58ac3cb9c4e1
-      internalID: 1138362871
+      spriteID: 985a6dba3121ec44193a81efcc8d0669
+      internalID: 1397408511
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_5
+      name: SandyWallRuleTile_5
       rect:
         serializedVersion: 2
         x: 112
@@ -186,19 +170,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 788bd27c1cb5d8a42aa57d8fae876c5a
-      internalID: -929734822
+      spriteID: 964fdcc1d5971bc4991721046aa674af
+      internalID: -284378725
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_9
+      name: SandyWallRuleTile_9
       rect:
         serializedVersion: 2
         x: 176
@@ -208,41 +191,39 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: dd388dea3b6bd8844b6fb1bc7870008f
-      internalID: 1545755705
+      spriteID: 61f4f1f3170580f448bfef8f6a9d7ffb
+      internalID: 7465309
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_11
+      name: SandyWallRuleTile_10
       rect:
         serializedVersion: 2
-        x: 256
+        x: 224
         y: 80
         width: 16
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2c10c1a36d56c96479260ac93454ec0f
-      internalID: -2121271220
+      spriteID: 98b2dbc8e00da04409cb981e25b98f46
+      internalID: -445815119
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_18
+      name: SandyWallRuleTile_15
       rect:
         serializedVersion: 2
         x: 48
@@ -252,19 +233,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7abf00b5bc73e774bafd9fb10d40687d
-      internalID: 1102019151
+      spriteID: 4313ead8f88e30a479b79e778ebcaa62
+      internalID: -992606928
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_21
+      name: SandyWallRuleTile_18
       rect:
         serializedVersion: 2
         x: 128
@@ -274,19 +254,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 57f4f4cc7f7436240a0b9245458a6781
-      internalID: 2016074946
+      spriteID: bf1259226547dd04a9a797afc332d131
+      internalID: 968794047
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_22
+      name: SandyWallRuleTile_19
       rect:
         serializedVersion: 2
         x: 144
@@ -296,19 +275,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4b45d7e9353bcbb4f91161c7045b1749
-      internalID: 1482115396
+      spriteID: 2adbef74a80195a4c86d3bac18d48afc
+      internalID: -1736808499
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_23
+      name: SandyWallRuleTile_20
       rect:
         serializedVersion: 2
         x: 160
@@ -318,41 +296,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1a14d7852b7f1b946bfc0576e6d2d08c
-      internalID: 1992250511
+      spriteID: 6453affe1a08dc242a6608ecd5cb5603
+      internalID: -2041355376
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_25
-      rect:
-        serializedVersion: 2
-        x: 208
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 6e78ee57416ec9a48bdc7fc2dc410f3c
-      internalID: 2127631759
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_26
+      name: SandyWallRuleTile_23
       rect:
         serializedVersion: 2
         x: 224
@@ -362,19 +317,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 583686a1d1e1ea94e817533e857403e9
-      internalID: 849065954
+      spriteID: ccf2776f3ef5f77448cbc877b26aef89
+      internalID: -105547296
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_28
+      name: SandyWallRuleTile_25
       rect:
         serializedVersion: 2
         x: 256
@@ -384,129 +338,39 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1025fbd4a4e38554ca711885daee970d
-      internalID: -2052714010
+      spriteID: a440726169befbb40908dbae5686bebc
+      internalID: -693346399
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_30
+      name: SandyWallRuleTile_26
       rect:
         serializedVersion: 2
-        x: 320
+        x: 272
         y: 64
         width: 16
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 96b78bbb14dccd4448af6e7e3a1915a6
-      internalID: 852004515
+      spriteID: 14adba72244250e40a171e95cf58fd2d
+      internalID: 517411451
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_32
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1c9fa6cb3828a3349b76e0157c059f72
-      internalID: 795944900
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_34
-      rect:
-        serializedVersion: 2
-        x: 416
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: dd063e8e7b89e0e4a88cead14023ba2d
-      internalID: 1869846024
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_35
-      rect:
-        serializedVersion: 2
-        x: 432
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 40e728646f9160244bd6187c823defaa
-      internalID: 289802686
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_36
-      rect:
-        serializedVersion: 2
-        x: 448
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: da27398f4aa0479479bf4688ef928a39
-      internalID: 1005266808
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_39
+      name: SandyWallRuleTile_28
       rect:
         serializedVersion: 2
         x: 512
@@ -516,19 +380,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d31531a7049c9db4cb681c2eec99e551
-      internalID: 288595371
+      spriteID: 8cc2b92e9a7f4bd469ca96fdd1637084
+      internalID: -2055608510
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_41
+      name: SandyWallRuleTile_30
       rect:
         serializedVersion: 2
         x: 16
@@ -538,19 +401,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 26df36f95bdd6c442ba941e7d51e35cd
-      internalID: 1923101088
+      spriteID: 793d1650a5589534ab5bb82f73c3e3da
+      internalID: 1291137900
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_43
+      name: SandyWallRuleTile_32
       rect:
         serializedVersion: 2
         x: 48
@@ -560,19 +422,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 241336419ff4b444995fc9b4fcc13df1
-      internalID: 158885385
+      spriteID: e77843413e3511d4ca806cc90814c4ae
+      internalID: 437805833
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_44
+      name: SandyWallRuleTile_33
       rect:
         serializedVersion: 2
         x: 64
@@ -582,19 +443,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 016ece23d352b66429949461078ed083
-      internalID: 936064175
+      spriteID: c9b6ec515e308fa4a91ea32108f5465f
+      internalID: -2104048989
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_45
+      name: SandyWallRuleTile_34
       rect:
         serializedVersion: 2
         x: 80
@@ -604,19 +464,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2cebb65f88cb0cc499f1472cefdc427b
-      internalID: -2058528151
+      spriteID: a82caa5ea7ba2dd4294427a50a0b7190
+      internalID: 1424179106
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_47
+      name: SandyWallRuleTile_36
       rect:
         serializedVersion: 2
         x: 128
@@ -626,19 +485,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 253606ae3d28d5e4c84b9cafa9a06e9d
-      internalID: -424891761
+      spriteID: e7bbdb92a5beb9d4b9b554ade46c68aa
+      internalID: 1339963749
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_48
+      name: SandyWallRuleTile_37
       rect:
         serializedVersion: 2
         x: 160
@@ -648,19 +506,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 545670f54ebd97b4bbcbdb6d5370027f
-      internalID: 1761591271
+      spriteID: 1d5575daa1624b14bbdc2c7c71789456
+      internalID: 1848776695
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_51
+      name: SandyWallRuleTile_40
       rect:
         serializedVersion: 2
         x: 240
@@ -670,63 +527,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 30de205867378624cb35b05132b86b53
-      internalID: -626715250
+      spriteID: fb72dc2715e53034ebd316143ac27c78
+      internalID: 2078375639
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_54
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 48
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 37ce78e3b4117534f86ed783270dfa75
-      internalID: 1031432309
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_56
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 48
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: bcb300a61de656d45b31d10993cf8021
-      internalID: -567169746
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_63
+      name: SandyWallRuleTile_44
       rect:
         serializedVersion: 2
         x: 560
@@ -736,19 +548,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e7a22e545db979b4cb97af9eda3ba119
-      internalID: 850390786
+      spriteID: b3c4a77d442107545b0a02dbe9d38442
+      internalID: 532781276
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_68
+      name: SandyWallRuleTile_49
       rect:
         serializedVersion: 2
         x: 128
@@ -758,19 +569,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a2fdb50811d846944893a4c707e213e3
-      internalID: -1846017401
+      spriteID: 4acf6176c83aab74e9cc6db04ffbb574
+      internalID: -1162084646
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_69
+      name: SandyWallRuleTile_50
       rect:
         serializedVersion: 2
         x: 144
@@ -780,19 +590,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 96af2313f031aca45acfd1269b9ceed5
-      internalID: 1839804786
+      spriteID: 127d93059fbfdd243b69f179b7b5576f
+      internalID: 1089335536
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_70
+      name: SandyWallRuleTile_51
       rect:
         serializedVersion: 2
         x: 160
@@ -802,19 +611,39 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1c24a1a1e26c98648a0fda2da3336d2a
-      internalID: -926364711
+      spriteID: 0567c01de8720df4c82bc7141e542d88
+      internalID: 724862947
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_73
+      name: SandyWallRuleTile_53
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e797ec337deab894c83b7627f05128f2
+      internalID: -1479968334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SandyWallRuleTile_54
       rect:
         serializedVersion: 2
         x: 224
@@ -824,19 +653,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c32a9d6171a9cc94a9ba1865c79a83f8
-      internalID: 1854355837
+      spriteID: 978bddf2b32a2c3459823532513f895d
+      internalID: 1963951842
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_75
+      name: SandyWallRuleTile_56
       rect:
         serializedVersion: 2
         x: 256
@@ -846,151 +674,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f20c360026dd9824eb62310f27a68c1b
-      internalID: -619011355
+      spriteID: 0144bcfde9b1dad499e14b24c2befe34
+      internalID: -733532657
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_76
-      rect:
-        serializedVersion: 2
-        x: 272
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 3c45b271f0c8cd8489e31e0c9bde2471
-      internalID: 313510441
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_77
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 57722879a527f74498ad01c93a3d0cf8
-      internalID: 1569856333
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_79
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 55be1ae02c70c2c45a64ca3223d80ddc
-      internalID: 153968792
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_81
-      rect:
-        serializedVersion: 2
-        x: 416
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1351b15774908464498f77b2a5586487
-      internalID: -385590028
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_82
-      rect:
-        serializedVersion: 2
-        x: 432
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: aff24ffc756f37a48be60fdb2312c3e9
-      internalID: 688949111
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_83
-      rect:
-        serializedVersion: 2
-        x: 448
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: bb44b350275b11649ae0b7df81e70bad
-      internalID: 1820367384
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CarpetRuleTile_86
+      name: SandyWallRuleTile_59
       rect:
         serializedVersion: 2
         x: 512
@@ -1000,19 +695,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 498e5c2bdf902ec42a6b158a09398b63
-      internalID: -1060537269
+      spriteID: 3366800f3c9403943a5c51bd323fb2c2
+      internalID: 62506904
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_88
+      name: SandyWallRuleTile_61
       rect:
         serializedVersion: 2
         x: 16
@@ -1022,19 +716,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9be07c50e9fadfb46a291a673c213bdb
-      internalID: 14146310
+      spriteID: 3f71511fa1c064b4ca9864c868e7fbc9
+      internalID: -122814841
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_90
+      name: SandyWallRuleTile_63
       rect:
         serializedVersion: 2
         x: 48
@@ -1044,19 +737,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6dab8332de81480468e7056b3ee35de8
-      internalID: -197400514
+      spriteID: 3eb08a1023ce4a64cabcbf1acc482f72
+      internalID: 1432648117
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_92
+      name: SandyWallRuleTile_65
       rect:
         serializedVersion: 2
         x: 80
@@ -1066,19 +758,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 96290cf97b8791345b68a867de4c0f9d
-      internalID: -1867245714
+      spriteID: 5f77ea654649fa64494494f3f6569a14
+      internalID: 425540142
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_93
+      name: SandyWallRuleTile_66
       rect:
         serializedVersion: 2
         x: 112
@@ -1088,19 +779,18 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 45c00faa91dd37a47aa853dac9c4df56
-      internalID: -32734566
+      spriteID: 0dea1bf9fada63e4abf73775e59fcedb
+      internalID: -1699876949
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_97
+      name: SandyWallRuleTile_70
       rect:
         serializedVersion: 2
         x: 176
@@ -1110,129 +800,290 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7cb5de28fb6b01449a50a2eb86557e17
-      internalID: -629952591
+      spriteID: 98e914af95c01394c9c4313142ec77b4
+      internalID: 1231831044
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_98
+      name: SandyWallRuleTile_72
       rect:
         serializedVersion: 2
-        x: 224
+        x: 256
         y: 16
         width: 16
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8c63bb481b94434498f3193b006ad685
-      internalID: -882636964
+      spriteID: 6f76d93d7152984438a45b5345a004f8
+      internalID: -480139254
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_1
+      name: CaveRuleTile_0
       rect:
         serializedVersion: 2
-        x: 112
+        x: 432
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e330a1e4512cf14448677696677b4ea2
+      internalID: 1011672705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_1
+      rect:
+        serializedVersion: 2
+        x: 320
         y: 48
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d4373fed6b707f34f8917fbddaca185f
-      internalID: -2035507230
+      spriteID: 3b369e99412485a4bb055db449a5e6e7
+      internalID: 1447879800
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_3
+      name: CaveRuleTile_2
       rect:
         serializedVersion: 2
-        x: 144
-        y: 16
+        x: 432
+        y: 64
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2b876183cb8687141a7fc928b96235bc
-      internalID: -534341569
+      spriteID: 3c09a56f1e20ad244850c3fbaeb534b6
+      internalID: -186866904
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_6
+      name: CaveRuleTile_3
       rect:
         serializedVersion: 2
-        x: 176
+        x: 352
         y: 48
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b0191a5c94e7a0b4fb0ad61328c53045
-      internalID: -1847836555
+      spriteID: 2f781417f197d0740be94e993cc2ff0e
+      internalID: -2087649618
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: CarpetRuleTile_7
+      name: CaveRuleTile_4
       rect:
         serializedVersion: 2
-        x: 144
-        y: 80
+        x: 320
+        y: 32
         width: 16
         height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ce5de9716cc9ee04cafa20c5ac945bd2
-      internalID: 1123406884
+      spriteID: 8f8b6c001ee73d3498d2553ba2c8be73
+      internalID: -1303514090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_5
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 810fd8972f95de44e924ae26f135dc14
+      internalID: 1942868787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_6
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 988d5ef809530924e93f4392ca8dd88b
+      internalID: -1431879777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_7
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dfdbd1a6f79e40c49a1d4011fd37312a
+      internalID: 738391748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_8
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d6eb16a3931d244c878ceb3e4ddc05e
+      internalID: -653448176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_9
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21f71cd7c40ec9f4eb8a4da2075037c7
+      internalID: 235303136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_10
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01f0f551ac140354ba5c2dcc79e15671
+      internalID: 1360309170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CaveRuleTile_11
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 64
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 184dc3d2d5f6fe24b85f0acaef13208c
+      internalID: -1887182943
       vertices: []
       indices: 
       edges: []
       weights: []
     outline: []
-    customData: 
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
@@ -1242,114 +1093,94 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    spriteCustomMetadata:
-      entries: []
     nameFileIdTable:
-      CarpetRuleTile_0: 1731973892
-      CarpetRuleTile_1: -2035507230
-      CarpetRuleTile_10: 853160233
-      CarpetRuleTile_100: -1226168502
-      CarpetRuleTile_101: -260723155
-      CarpetRuleTile_102: -466980224
-      CarpetRuleTile_103: 1506154008
-      CarpetRuleTile_104: 226753610
-      CarpetRuleTile_11: -2121271220
-      CarpetRuleTile_12: -674781974
-      CarpetRuleTile_13: 18542851
-      CarpetRuleTile_14: -925322047
-      CarpetRuleTile_15: -1297942230
-      CarpetRuleTile_16: -776025095
-      CarpetRuleTile_17: 810845754
-      CarpetRuleTile_18: 1102019151
-      CarpetRuleTile_19: 2130250362
-      CarpetRuleTile_2: -802235012
-      CarpetRuleTile_20: 1517209030
-      CarpetRuleTile_21: 2016074946
-      CarpetRuleTile_22: 1482115396
-      CarpetRuleTile_23: 1992250511
-      CarpetRuleTile_24: -719192274
-      CarpetRuleTile_25: 2127631759
-      CarpetRuleTile_26: 849065954
-      CarpetRuleTile_27: -1757638524
-      CarpetRuleTile_28: -2052714010
-      CarpetRuleTile_29: -46237580
-      CarpetRuleTile_3: -534341569
-      CarpetRuleTile_30: 852004515
-      CarpetRuleTile_31: 1456694435
-      CarpetRuleTile_32: 795944900
-      CarpetRuleTile_33: 871232827
-      CarpetRuleTile_34: 1869846024
-      CarpetRuleTile_35: 289802686
-      CarpetRuleTile_36: 1005266808
-      CarpetRuleTile_37: 413218015
-      CarpetRuleTile_38: -313122664
-      CarpetRuleTile_39: 288595371
-      CarpetRuleTile_4: 1138362871
-      CarpetRuleTile_40: -27371492
-      CarpetRuleTile_41: 1923101088
-      CarpetRuleTile_42: -2023594060
-      CarpetRuleTile_43: 158885385
-      CarpetRuleTile_44: 936064175
-      CarpetRuleTile_45: -2058528151
-      CarpetRuleTile_46: 443190835
-      CarpetRuleTile_47: -424891761
-      CarpetRuleTile_48: 1761591271
-      CarpetRuleTile_49: 861800464
-      CarpetRuleTile_5: -929734822
-      CarpetRuleTile_50: 95401375
-      CarpetRuleTile_51: -626715250
-      CarpetRuleTile_52: 1470652763
-      CarpetRuleTile_53: -369757941
-      CarpetRuleTile_54: 1031432309
-      CarpetRuleTile_55: -586487875
-      CarpetRuleTile_56: -567169746
-      CarpetRuleTile_57: 1687532719
-      CarpetRuleTile_58: -1543649976
-      CarpetRuleTile_59: 1835477357
-      CarpetRuleTile_6: -1847836555
-      CarpetRuleTile_60: -1439220733
-      CarpetRuleTile_61: 648127873
-      CarpetRuleTile_62: -130815420
-      CarpetRuleTile_63: 850390786
-      CarpetRuleTile_64: 2075193274
-      CarpetRuleTile_65: -280065725
-      CarpetRuleTile_66: -985442135
-      CarpetRuleTile_67: 1303491469
-      CarpetRuleTile_68: -1846017401
-      CarpetRuleTile_69: 1839804786
-      CarpetRuleTile_7: 1123406884
-      CarpetRuleTile_70: -926364711
-      CarpetRuleTile_71: 107824412
-      CarpetRuleTile_72: 852493797
-      CarpetRuleTile_73: 1854355837
-      CarpetRuleTile_74: -1152604937
-      CarpetRuleTile_75: -619011355
-      CarpetRuleTile_76: 313510441
-      CarpetRuleTile_77: 1569856333
-      CarpetRuleTile_78: 1084806824
-      CarpetRuleTile_79: 153968792
-      CarpetRuleTile_8: -337456230
-      CarpetRuleTile_80: 270696089
-      CarpetRuleTile_81: -385590028
-      CarpetRuleTile_82: 688949111
-      CarpetRuleTile_83: 1820367384
-      CarpetRuleTile_84: 1628913326
-      CarpetRuleTile_85: 984203160
-      CarpetRuleTile_86: -1060537269
-      CarpetRuleTile_87: -2019743915
-      CarpetRuleTile_88: 14146310
-      CarpetRuleTile_89: -1579726141
-      CarpetRuleTile_9: 1545755705
-      CarpetRuleTile_90: -197400514
-      CarpetRuleTile_91: 409251152
-      CarpetRuleTile_92: -1867245714
-      CarpetRuleTile_93: -32734566
-      CarpetRuleTile_94: 2095880032
-      CarpetRuleTile_95: -1781494921
-      CarpetRuleTile_96: -31016293
-      CarpetRuleTile_97: -629952591
-      CarpetRuleTile_98: -882636964
-      CarpetRuleTile_99: 1332855875
+      CaveRuleTile_0: 1011672705
+      CaveRuleTile_1: 1447879800
+      CaveRuleTile_10: 1360309170
+      CaveRuleTile_11: -1887182943
+      CaveRuleTile_2: -186866904
+      CaveRuleTile_3: -2087649618
+      CaveRuleTile_4: -1303514090
+      CaveRuleTile_5: 1942868787
+      CaveRuleTile_6: -1431879777
+      CaveRuleTile_7: 738391748
+      CaveRuleTile_8: -653448176
+      CaveRuleTile_9: 235303136
+      SandyWallRuleTile_0: -339379923
+      SandyWallRuleTile_1: -1681485766
+      SandyWallRuleTile_10: -445815119
+      SandyWallRuleTile_11: 334577084
+      SandyWallRuleTile_12: 618969683
+      SandyWallRuleTile_13: 1871933067
+      SandyWallRuleTile_14: 549209717
+      SandyWallRuleTile_15: -992606928
+      SandyWallRuleTile_16: -305582960
+      SandyWallRuleTile_17: 379425742
+      SandyWallRuleTile_18: 968794047
+      SandyWallRuleTile_19: -1736808499
+      SandyWallRuleTile_2: 1534944789
+      SandyWallRuleTile_20: -2041355376
+      SandyWallRuleTile_21: 616524575
+      SandyWallRuleTile_22: -865366705
+      SandyWallRuleTile_23: -105547296
+      SandyWallRuleTile_24: 594486792
+      SandyWallRuleTile_25: -693346399
+      SandyWallRuleTile_26: 517411451
+      SandyWallRuleTile_27: 1153410320
+      SandyWallRuleTile_28: -2055608510
+      SandyWallRuleTile_29: -563076774
+      SandyWallRuleTile_3: 2060307807
+      SandyWallRuleTile_30: 1291137900
+      SandyWallRuleTile_31: -1289859898
+      SandyWallRuleTile_32: 437805833
+      SandyWallRuleTile_33: -2104048989
+      SandyWallRuleTile_34: 1424179106
+      SandyWallRuleTile_35: -1316951889
+      SandyWallRuleTile_36: 1339963749
+      SandyWallRuleTile_37: 1848776695
+      SandyWallRuleTile_38: -2012157733
+      SandyWallRuleTile_39: 411448172
+      SandyWallRuleTile_4: 1397408511
+      SandyWallRuleTile_40: 2078375639
+      SandyWallRuleTile_41: 1864290942
+      SandyWallRuleTile_42: 124900406
+      SandyWallRuleTile_43: 683259830
+      SandyWallRuleTile_44: 532781276
+      SandyWallRuleTile_45: 91757166
+      SandyWallRuleTile_46: 2016713446
+      SandyWallRuleTile_47: 223804101
+      SandyWallRuleTile_48: 1555643678
+      SandyWallRuleTile_49: -1162084646
+      SandyWallRuleTile_5: -284378725
+      SandyWallRuleTile_50: 1089335536
+      SandyWallRuleTile_51: 724862947
+      SandyWallRuleTile_52: -265491987
+      SandyWallRuleTile_53: -1479968334
+      SandyWallRuleTile_54: 1963951842
+      SandyWallRuleTile_55: 1164443036
+      SandyWallRuleTile_56: -733532657
+      SandyWallRuleTile_57: -983378270
+      SandyWallRuleTile_58: 313664698
+      SandyWallRuleTile_59: 62506904
+      SandyWallRuleTile_6: 362574408
+      SandyWallRuleTile_60: -324046945
+      SandyWallRuleTile_61: -122814841
+      SandyWallRuleTile_62: 820594162
+      SandyWallRuleTile_63: 1432648117
+      SandyWallRuleTile_64: 1917632655
+      SandyWallRuleTile_65: 425540142
+      SandyWallRuleTile_66: -1699876949
+      SandyWallRuleTile_67: -748328863
+      SandyWallRuleTile_68: -673751018
+      SandyWallRuleTile_69: 2067823790
+      SandyWallRuleTile_7: 61291856
+      SandyWallRuleTile_70: 1231831044
+      SandyWallRuleTile_71: 434153996
+      SandyWallRuleTile_72: -480139254
+      SandyWallRuleTile_73: -1598809771
+      SandyWallRuleTile_74: -896021261
+      SandyWallRuleTile_8: 1711533755
+      SandyWallRuleTile_9: 7465309
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

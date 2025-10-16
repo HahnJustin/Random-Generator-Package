@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc0a5d1699df5d045828651272d696a4, type: 3}
-  m_Name: Debug Path Yellow
+  m_Name: Decoration Grass Tall
   m_EditorClassIdentifier: 
-  id: 9630
-  layer: 4000
+  id: 3600
+  layer: 2500
   tileKind: 0
-  tileName: Debug Path Yellow
+  tileName: Decoration Grass Tall
   menuSprite: {fileID: 0}
-  color: {r: 0.9686275, g: 0.8235295, b: 0, a: 1}
+  color: {r: 0.56078434, g: 0.5921569, b: 0.2901961, a: 1}
   tileSpawn:
     spawnType: 1
-    sprite: {fileID: 1957914388, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
-    tileBase: {fileID: 11400000, guid: aad73e12c80c4db388eba5002b3fb674, type: 2}
+    sprite: {fileID: 0}
+    tileBase: {fileID: 11400000, guid: e102b2b1e79d2e445818699b9d753cd6, type: 2}
     gameObject: {fileID: 0}
   metaDataSpawnList: []

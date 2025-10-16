@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 9600
   layer: 4000
+  tileKind: 0
   tileName: Debug Path Blue
   menuSprite: {fileID: 0}
   color: {r: 0, g: 0.5137255, b: 1, a: 1}
   tileSpawn:
-    spawnType: 0
+    spawnType: 1
     sprite: {fileID: -910863397, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
-    tileBase: {fileID: 0}
+    tileBase: {fileID: 11400000, guid: a4e33f21a8a946a5a5a8321ebdfb8e42, type: 2}
     gameObject: {fileID: 0}
   metaDataSpawnList: []

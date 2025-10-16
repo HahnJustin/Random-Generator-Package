@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc0a5d1699df5d045828651272d696a4, type: 3}
-  m_Name: Object Grass Patch
+  m_Name: Carpet Carpet
   m_EditorClassIdentifier: 
-  id: 3500
-  layer: 3000
-  tileName: Object Grass Patch
-  menuSprite: {fileID: 0}
-  color: {r: 0.4784314, g: 0.5411765, b: 0.27450982, a: 1}
+  id: 1700
+  layer: 1500
+  tileKind: 0
+  tileName: Carpet
+  menuSprite: {fileID: 532781276, guid: 9301a7e1fb5ac764897a482eea9a180a, type: 3}
+  color: {r: 0.9056604, g: 0.1399251, b: 0.13243146, a: 1}
   tileSpawn:
     spawnType: 1
-    sprite: {fileID: 0}
-    tileBase: {fileID: 11400000, guid: 6218c9b9c5ab2d94bbb0372365195655, type: 2}
+    sprite: {fileID: -1185534207, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
+    tileBase: {fileID: 11400000, guid: d37a72d88e5b454ea84cc2e0d86cae1a, type: 2}
     gameObject: {fileID: 0}
   metaDataSpawnList: []
