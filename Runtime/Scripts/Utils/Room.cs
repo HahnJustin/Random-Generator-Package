@@ -12,8 +12,8 @@ namespace Dalichrome.RandomGenerator.Utils
 {
     public class Room : IComparable, IEnumerable<int2>
     {
-        private HashSet<int2> tiles = new();
-        private HashSet<int2> edges = new();
+        private readonly OrderedSet<int2> tiles = new();
+        private readonly OrderedSet<int2> edges = new();
 
         private int2 top = new (-1,-1);
         private int2 bottom = new(-1, -1);
@@ -37,25 +37,9 @@ namespace Dalichrome.RandomGenerator.Utils
             }
         }
 
-        public HashSet<int2> Tiles
-        {
-            get { return tiles; }
-        }
+        public IEnumerable<int2> Tiles => tiles;
 
-        public List<int2> TileList
-        {
-            get { return tiles.ToList(); }
-        }
-
-        public HashSet<int2> Edges
-        {
-            get { return edges; }
-        }
-
-        public List<int2> EdgeList
-        {
-            get { return edges.ToList(); }
-        }
+        public IEnumerable<int2> Edges => edges;
 
         public int Value { get; private set; }
 
@@ -85,26 +69,16 @@ namespace Dalichrome.RandomGenerator.Utils
             AddPosition(new int2(x, y));
         }
 
-        public void AddPosition(int2 pos)
-        {
-            if (tiles.Contains(pos))
-            {
-                return;
-            }
-            tiles.Add(pos);
-
-            FarEdgeHelper(pos);
+        public void AddPosition(int2 pos) 
+        { 
+            if (tiles.Add(pos)) FarEdgeHelper(pos); 
         }
 
         public void RemovePosition(int2 pos)
         {
-            if (!tiles.Contains(pos))
-            {
-                return;
-            }
             tiles.Remove(pos);
 
-            //TODO: Redo these here :o
+            //TODO: Recompute bounds
             FarEdgeHelper(pos);
         }
 
@@ -118,10 +92,7 @@ namespace Dalichrome.RandomGenerator.Utils
             return tiles.ElementAt(random.NextInt(tiles.Count));
         }
 
-        public bool ContainsPosition(int2 position)
-        {
-            return tiles.Contains(position);
-        }
+        public bool ContainsPosition(int2 position) => tiles.Contains(position);
 
         public bool ContainsPosition(int x, int y)
         {
@@ -138,7 +109,7 @@ namespace Dalichrome.RandomGenerator.Utils
             edges.Add(position);
         }
 
-        public void AddEdgeRange(List<int2> otherEdges)
+        public void AddEdgeRange(IEnumerable<int2> otherEdges)
         {
             foreach (int2 edge in otherEdges)
                 edges.Add(edge);

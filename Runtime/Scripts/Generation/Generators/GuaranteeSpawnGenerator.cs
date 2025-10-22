@@ -19,6 +19,7 @@ namespace Dalichrome.RandomGenerator.Generators
             this.config = config;
             util = new(config);
             AddUtil(util);
+            util.DoInitialization = false;
         }
 
         protected override Generation Enact(Generation input)
@@ -31,14 +32,13 @@ namespace Dalichrome.RandomGenerator.Generators
             // Using Entrance Distance
             if (config.UseEntranceDistance)
             {
+                int2 entrance = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileDefaults.Object_Entrance);
 
-                Vector2Int position = TileGrid.GetNearestPosition(TileGrid.Center, (int)TileDefaults.Object_Entrance);
-                Vector2Int entranceAir = TileGrid.GetNearestPosition(position, (int)TileDefaults.Wall_Object_NA);
-
-                if (position == Constants.OutsideGridVectorInt || entranceAir == Constants.OutsideGridVectorInt) return input;
+                if (math.all(entrance == Constants.OutsideGridInt2))
+                    return input;
 
                 Room room = new(1);
-                util.RoomCreate(TileGrid, entranceAir.x, entranceAir.y, room, true, -1);
+                util.RoomCreate(TileGrid, entrance.x, entrance.y, room, true, -1);
                 List<int2> positions = room.ToList();
                 positions.Shuffle(random);
 
@@ -51,7 +51,7 @@ namespace Dalichrome.RandomGenerator.Generators
             else
             {
                 List<int2> roomTilePositions = new ();
-                util.RoomList.ForEach(room => roomTilePositions.AddRange(room.TileList));
+                util.RoomList.ForEach(room => roomTilePositions.AddRange(room.Tiles));
                 roomTilePositions.Shuffle(random);
 
                 candidates = new(roomTilePositions.Count, Allocator.Persistent);

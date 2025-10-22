@@ -14,7 +14,7 @@ namespace Dalichrome.RandomGenerator.Core
         public readonly int height;
         public readonly int depth;
 
-        public Vector2Int Center { get { return new Vector2Int(Mathf.Clamp(width / 2, 0, width), Mathf.Clamp(height / 2, 0, height)); } }
+        public int2 Center { get { return new int2(Mathf.Clamp(width / 2, 0, width), Mathf.Clamp(height / 2, 0, height)); } }
 
         public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } }
 

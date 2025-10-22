@@ -343,15 +343,15 @@ namespace Dalichrome.RandomGenerator.Generators
                         //Room Floor 
                         if (gridValue <= MAZE_FLOOR_VALUE)
                         {
-                            TileGrid.SetTileId(x, y, (int)config.HallwayTile);
+                            TileGrid.SetTileId(x, y, config.HallwayTile);
                         }
                         //Room Wall
                         else if(gridValue >= MAZE_WALL_VALUE || gridValue == DOOR_VALUE)
                         {
-                            TileGrid.SetTileId(x, y, (int)config.WallTile);
-                            if(gridValue == DOOR_VALUE) TileGrid.SetTileId(x, y, (int)config.DoorTile);
+                            TileGrid.SetTileId(x, y, config.WallTile);
+                            if(gridValue == DOOR_VALUE) TileGrid.SetTileId(x, y, config.DoorTile);
                         }
-                        TileGrid.SetTileId(x, y, (int)config.FloorTile);
+                        TileGrid.SetTileId(x, y, config.FloorTile);
                         TileGrid.SetTileValue(x,y, gridValue);
                     }
                 }

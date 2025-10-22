@@ -44,7 +44,6 @@ namespace Dalichrome.RandomGenerator.Core
         Ground_NA = 9997,
         Object_NA = 9998,
         Debug_NA = 9999,
-        Wall_Object_NA = 10000,
         Debug_Technical = 10100,
         Debug_Technical2 = 10200,
     }

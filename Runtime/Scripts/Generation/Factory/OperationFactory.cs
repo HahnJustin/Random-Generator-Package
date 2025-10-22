@@ -29,6 +29,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 NystromDungeonConfig nyDunConfig => new NystromDungeonGenerator(nyDunConfig),
                 GuaranteeSpawnConfig guSpConfig => new GuaranteeSpawnGenerator(guSpConfig),
                 BorderConfig boConfig => new BorderGenerator(boConfig),
+                FillConfig fillConfig => new FillGenerator(fillConfig),
                 _ => throw new ArgumentException($"Unknown generator config: {config.GetType().Name}")
             };
         }

@@ -12,24 +12,25 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private readonly int depthProddableValue;
 
+        public bool DoInitialization { get; set; }
+
         public DistanceUtil(IDistanceConfig config) : base(config)
         {
             this.config = config;
             depthProddableValue = config.FillOccupied ? 1 : 0;
+            DoInitialization = true;
         }
 
         private void AddRingHelper(List<int2> newRing, int2 pos, int value)
         {
             if (IsOccupied(pos) == depthProddableValue)
             {
-                //TO DO FIX THIS WITH METADATA AAAAAA
-
-                //ITileColumn refreshed = tileGrid.GetTile(neighbor.x, neighbor.y);
-                //if (refreshed.Value == 0)
-                //{
-                //    tileGrid.SetTileValue(refreshed, value);
-                //   newRing.Add(refreshed);
-                //}
+                int val = tileGrid.GetTileValue(pos);
+                if (val == 0)
+                {
+                    tileGrid.SetTileValue(pos, value);
+                   newRing.Add(pos);
+                }
             }
         }
 

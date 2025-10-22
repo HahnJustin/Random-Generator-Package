@@ -66,9 +66,7 @@ namespace Dalichrome.RandomGenerator.Generators
             int2 exitBorder = whichIsExit == 1 ? vector2 : vector1;
 
             int2 entrancePos;
-            int2 entranceAir;
             int2 exitPos;
-            int2 exitAir;
 
             if (config.Placeable == EEPlaceableType.One_Side_Wall)
             {
@@ -115,29 +113,24 @@ namespace Dalichrome.RandomGenerator.Generators
                 }
 
                 entrancePos = grid.GetNearestPosition(entranceBorder, 1);
-                entranceAir = TileGrid.GetNearestPosition(entrancePos, (int)TileDefaults.Wall_Object_NA);
-
                 exitPos = grid.GetNearestPosition(exitBorder, 1);
-                exitAir = TileGrid.GetNearestPosition(exitPos, (int)TileDefaults.Wall_Object_NA);
 
-                Debug.Log("ent:" + entranceBorder + " " + entrancePos + " air: " + entranceAir);
-                Debug.Log("ext:" + exitBorder + " " + exitPos + " air: " + exitAir);
+                Debug.Log("ent:" + entranceBorder + " " + entrancePos);
+                Debug.Log("ext:" + exitBorder + " " + exitPos);
             }
             else
             {
-                // TODO this Wall Object NA thing is completely broken, so think hard and fix this
                 //Finding nearest air tile, then nearest wall then spawing entrance/exit
-                entranceAir = TileGrid.GetNearestPosition(entranceBorder, (int)TileDefaults.Wall_Object_NA);
-                exitAir = TileGrid.GetNearestPosition(exitBorder, (int)TileDefaults.Wall_Object_NA);
+                int2 entranceAir = util.GetNearestUnoccupiedPosition(entranceBorder);
+                int2 exitAir = util.GetNearestUnoccupiedPosition(exitBorder);
 
-                entrancePos = TileGrid.GetNearestPosition(entranceAir, (int)config.SpawnInTile);
-                exitPos = TileGrid.GetNearestPosition(exitAir, (int)config.SpawnInTile);
+                entrancePos = TileGrid.GetNearestPosition(entranceAir, config.SpawnInTile);
+                exitPos = TileGrid.GetNearestPosition(exitAir, config.SpawnInTile);
             }
 
 
             //Couldn't find one of the given tiles
-            if (math.all(exitAir == Constants.OutsideGridInt2) ||
-                math.all(entrancePos == Constants.OutsideGridInt2) ||
+            if (math.all(entrancePos == Constants.OutsideGridInt2) ||
                 math.all(exitPos == Constants.OutsideGridInt2))
             {
                 return input;
@@ -157,7 +150,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             //Create Path between entrance and air next to exit
             AStar astar = new();
-            List<int2> path = astar.FindPath(TileGrid, util, entrancePos, exitAir);
+            List<int2> path = astar.FindPath(TileGrid, util, entrancePos, exitPos);
             foreach (int2 pos in path)
             {
                 if (config.DebugPath) {

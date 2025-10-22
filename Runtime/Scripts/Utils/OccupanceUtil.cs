@@ -1,7 +1,8 @@
-using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using System;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -42,14 +43,9 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public int IsOccupied(int x, int y)
         {
-            if (!tileGrid.IsInBounds(x,y))
+            if (!tileGrid.IsInBounds(x,y) || !tileGrid.IsInRegion(x, y))
                 return OutOfBoundsOccupancy;
             
-            ITileColumn col = tileGrid.GetColumn(x, y);
-
-            if (!tileGrid.IsInRegion(x, y))
-                return OutOfBoundsOccupancy; 
-
             int value = 0;
             if (config.Occupance == OccupanceType.Layer_Not_NA)
             {
@@ -103,6 +99,47 @@ namespace Dalichrome.RandomGenerator.Utils
         public OccupanceData GetOccupanceData()
         {
             return new OccupanceData(config, OutOfBoundsOccupancy);
+        }
+
+        public int2 GetNearestUnoccupiedPosition(int2 pos)
+        {
+            return GetNearestUnoccupiedPosition(pos.x, pos.y);
+        }
+
+        public int2 GetNearestUnoccupiedPosition(int x, int y)
+        {
+            // Iterate through all distances from the center
+            for (int d = 1; d < Math.Max(height, width); d++)
+            {
+                // Check all positions at distance `d`
+                for (int dx = -d; dx <= d; dx++)
+                {
+                    int dy1 = d - Math.Abs(dx); // Top and bottom edges
+                    int dy2 = -dy1;
+
+                    // Top edge
+                    int x1 = x + dx;
+                    int y1 = y + dy1;
+
+                    if (tileGrid.IsInBounds(x1, y1) && IsOccupied(x, y) == 0)
+                    {
+                        return new int2(x1, y1);
+                    }
+
+                    // Bottom edge (avoid duplicate check for middle row)
+                    if (dy1 != dy2)
+                    {
+                        int x2 = x + dx;
+                        int y2 = y + dy2;
+
+                        if (tileGrid.IsInBounds(x2, y2) && IsOccupied(x2, y2) == 0)
+                        {
+                            return new int2(x2, y2);
+                        }
+                    }
+                }
+            }
+            return Constants.OutsideGridInt2;
         }
     }
 }

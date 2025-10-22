@@ -22,3 +22,4 @@ MonoBehaviour:
   useCompositeCollider: 0
   tag: Untagged
   material: {fileID: 0}
+  menuSprite: {fileID: 532781276, guid: 9301a7e1fb5ac764897a482eea9a180a, type: 3}

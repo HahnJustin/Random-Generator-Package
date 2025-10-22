@@ -18,6 +18,8 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public List<Room> RoomList { get { return rooms.Values.ToList(); } }
 
+        public bool DoInitialization { get; set; }
+
         public List<Room> LargestFirstRoomList
         {
             get
@@ -53,6 +55,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public RoomUtil(IRoomConfig config) : base(config)
         {
             this.config = config;
+            DoInitialization = true;
         }
 
         private bool EnqueueIfMatches(TileGrid grid, Queue<Tuple<int2, int>> queue, int x, int y, int number)
@@ -76,18 +79,14 @@ namespace Dalichrome.RandomGenerator.Utils
         {
             tileGrid.ClearNumbers();
             rooms = new();
-            for (int x = 0; x < tileGrid.width; x++)
-            {
-                for (int y = 0; y < tileGrid.height; y++)
+            foreach (int2 pos in tileGrid.GetPositions()) 
+            { 
+                if (tileGrid.IsInRegion(pos) && IsOccupied(pos) <= 0 && tileGrid.GetTileValue(pos) == 0)
                 {
-
-                    if (tileGrid.IsInRegion(x, y) && IsOccupied(x,y) <= 0 && tileGrid.GetTileValue(x,y) == 0)
-                    {
-                        Room newRoom = new(currentRoomNumber);
-                        RoomFill(tileGrid, x, y, newRoom, true);
-                        rooms.Add(newRoom.Value, newRoom);
-                        currentRoomNumber -= 1;
-                    }
+                    Room newRoom = new(currentRoomNumber);
+                    RoomFill(tileGrid, pos.x, pos.y, newRoom, true);
+                    rooms.Add(newRoom.Value, newRoom);
+                    currentRoomNumber -= 1;
                 }
             }
         }
@@ -108,42 +107,75 @@ namespace Dalichrome.RandomGenerator.Utils
             RoomFillHelper(grid, x, y, room, useNumbers);
         }
 
-        private void RoomFillHelper(TileGrid grid, int x, int y, Room room, bool useNumbers, bool decreaseNumbers = false, int number = -1)
+        private void RoomFillHelper(
+            TileGrid grid,
+            int x,
+            int y,
+            Room room,
+            bool useNumbers,
+            bool decreaseNumbers = false,
+            int number = -1)
         {
-            Queue<Tuple<int2, int>> queue = new Queue<Tuple<int2, int>>();
+            Queue<Tuple<int2, int>> queue = new();
             queue.Enqueue(new(new int2(x, y), number));
 
-            while (queue.Any())
+            // Local helper that only enqueues truly "open & unvisited" cells
+            bool TryEnqueueIfOpen(int nx, int ny, int nnum)
             {
-                Tuple<int2, int> tuple = queue.Dequeue();
+                // Out of bounds -> treat as blocked for edge detection
+                if (!grid.IsInBounds(nx, ny))
+                    return false;
+
+                // Outside region or occupied -> blocked
+                if (!grid.IsInRegion(nx, ny) || IsOccupied(nx, ny) >= 1)
+                    return false;
+
+                // When numbering, only expand into *unnumbered* (value == 0) cells
+                if (useNumbers && grid.GetTileValue(nx, ny) < 0)
+                    return false;
+
+                queue.Enqueue(new(new int2(nx, ny), nnum));
+                return true;
+            }
+
+            while (queue.Count > 0)
+            {
+                var tuple = queue.Dequeue();
                 int2 point = tuple.Item1;
                 int currentNum = tuple.Item2;
 
-                // Is Occupied
-                if (!grid.IsInRegion(point) || IsOccupied(point) >= 1 || (grid.GetTileValue(point) < 0 && useNumbers))
-                    continue;
-                if (room != null)
+                // Skip if not usable now (already numbered/visited or blocked)
+                if (!grid.IsInRegion(point) ||
+                    IsOccupied(point) >= 1 ||
+                    (useNumbers && grid.GetTileValue(point) < 0))
                 {
-                    room.AddPosition(point);
+                    continue;
                 }
 
+                // Record membership
+                room?.AddPosition(point);
+
+                // Mark visited
                 if (decreaseNumbers && useNumbers) tileGrid.SetTileValue(point, currentNum);
                 else if (useNumbers) tileGrid.SetTileValue(point, currentRoomNumber);
                 else Fill(point);
 
                 if (decreaseNumbers) currentNum -= 1;
 
-                bool leftOccupied = EnqueueIfMatches(grid, queue, point.x - 1, point.y, currentNum);
-                bool rightOccupied = EnqueueIfMatches(grid, queue, point.x + 1, point.y, currentNum);
-                bool downOccupied = EnqueueIfMatches(grid, queue, point.x, point.y - 1, currentNum);
-                bool upOccupied = EnqueueIfMatches(grid, queue, point.x, point.y + 1, currentNum);
+                // Enqueue neighbors only if open & unvisited; track if any sides are blocked for edge marking
+                bool leftOpen = TryEnqueueIfOpen(point.x - 1, point.y, currentNum);
+                bool rightOpen = TryEnqueueIfOpen(point.x + 1, point.y, currentNum);
+                bool downOpen = TryEnqueueIfOpen(point.x, point.y - 1, currentNum);
+                bool upOpen = TryEnqueueIfOpen(point.x, point.y + 1, currentNum);
 
-                if ((leftOccupied || rightOccupied || downOccupied || upOccupied) && room != null)
+                // If any side is not open, itfs an edge
+                if (room != null && (!leftOpen || !rightOpen || !downOpen || !upOpen))
                 {
                     room.AddEdge(point);
                 }
             }
         }
+
 
         private void RoomCreateRecurse(TileGrid grid, int x, int y, Room room, int firstNumber, bool lowerNumber = false, int number = -1)
         {

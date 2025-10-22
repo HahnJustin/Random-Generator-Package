@@ -6,6 +6,7 @@ namespace Dalichrome.RandomGenerator.Utils
 {
     public interface IInitializableUtil
     {
+        public bool DoInitialization { get; set; }
         public abstract void Initialize();
     }
 }

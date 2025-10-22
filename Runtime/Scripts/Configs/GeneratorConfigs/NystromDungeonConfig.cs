@@ -36,7 +36,7 @@ namespace Dalichrome.RandomGenerator.Configs
         [TileDisplay, SerializeField] private int _wallTile = (int)TileDefaults.Wall_Cobble;
 
         [TileDisplay] public int HallwayTile { get { return _hallwayTile; } set { _hallwayTile = value; } }
-        [TileDisplay, SerializeField] private int _hallwayTile = (int)TileDefaults.Wall_Object_NA;
+        [TileDisplay, SerializeField] private int _hallwayTile = (int)TileDefaults.Wall_NA;
 
         [TileDisplay] public int DoorTile { get { return _doorTile; } set { _doorTile = value; } }
         [TileDisplay, SerializeField] private int _doorTile = (int)TileDefaults.Object_Door;

@@ -405,31 +405,25 @@ namespace Dalichrome.RandomGenerator.Core
         {
             var col = GetColumnNative(x, y);
 
-            bool forceUnoccupied = false;
-
+            byte forceOccupied = 0;
+            byte value = 0;
             for (int z = 0; z < col.Length; z++)
             {
-                if (GetDefaultOccupanceFromLayerIndex(z) == 0)
-                    continue;
-
                 int id = col[z];
                 if (id == 0)
                     continue;
 
                 int kind = GetTileKindFromTileId(id);
                 if (kind == (int)TileKind.ForceOccupied)
-                    return 1;
+                    forceOccupied = 1;
 
                 if (kind == (int)TileKind.ForceUnoccupied)
-                {
-                    forceUnoccupied = true;
-                    continue;
-                }
+                    return 0;
 
-                return forceUnoccupied ? 0 : 1;
+                if (GetDefaultOccupanceFromLayerIndex(z) == 1)
+                    value = 1;
             }
-
-            return 0;
+            return forceOccupied == 1 ? 1 : value;
         }
 
         public int GetOccupied(int2 pos)
@@ -441,7 +435,7 @@ namespace Dalichrome.RandomGenerator.Core
         //Can still set the value for a masked tile
         public bool SetTileValue(int x, int y, int value)
         {
-            if (IsRestricted(x, y)) return false;
+            if (!IsInBounds(x, y) || !IsInRegion(x,y)) return false;
 
             values[PositionToValueIndex(x, y)] = value;
 
@@ -456,7 +450,7 @@ namespace Dalichrome.RandomGenerator.Core
         // Get Tile Value
         public int GetTileValue(int x, int y)
         {
-            if (IsRestricted(x, y)) return 0;
+            if (!IsInBounds(x, y)) return 0;
 
             return values[PositionToValueIndex(x, y)];
         }
@@ -522,7 +516,7 @@ namespace Dalichrome.RandomGenerator.Core
                     int x1 = x + dx;
                     int y1 = y + dy1;
 
-                    if (IsInBounds(x1, y1) && ColumnContainsId(x,y,id))
+                    if (IsInBounds(x1, y1) && ColumnContainsId(x1, y1, id))
                     {
                         return new int2(x1, y1);
                     }

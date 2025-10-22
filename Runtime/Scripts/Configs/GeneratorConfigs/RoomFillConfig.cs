@@ -42,6 +42,7 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public bool ConfigureFillTile => _occupance != OccupanceType.Contains_A;
 
-        [SerializeField, DefaultValue((int)TileDefaults.Wall_Cave), Condition("ConfigureFillTile", true)] public int FillTile { get { return 0; } set { } }
+        [SerializeField, Condition("ConfigureFillTile", true)] public int FillTile { get { return _fillTile; } set { _fillTile = value; } }
+        [SerializeField, Condition("ConfigureFillTile", true)] protected int _fillTile = (int)TileDefaults.Wall_Cave;
     }
 }

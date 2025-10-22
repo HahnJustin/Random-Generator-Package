@@ -66,5 +66,6 @@ public enum StringType
     Description_Splitter_PerlinMulti,
     Description_Splitter_UpscaleNoise,
     Description_Filter_Distance,
-    Tooltip_Layer_Button_Variable
+    Tooltip_Layer_Button_Variable,
+    Description_Generator_Fill
 }
