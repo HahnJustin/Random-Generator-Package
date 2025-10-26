@@ -8,5 +8,10 @@ namespace Dalichrome.RandomGenerator.Generators
         where C : AbstractGeneratorConfig
     {
         protected AbstractGenerator(C config) : base(config) {}
+
+        protected override Generation FailConditionDefault(Generation input)
+        {
+            return input;
+        }
     }
 }

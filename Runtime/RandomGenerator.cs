@@ -178,7 +178,7 @@ namespace Dalichrome.RandomGenerator
             GenerateAsync(combinationSource.Token);
         }
 
-        private async void GenerateAsync(CancellationToken token)
+        private async Task GenerateAsync(CancellationToken token)
         {
             if (CannotGenerate()) return;
             last = this;
@@ -215,8 +215,10 @@ namespace Dalichrome.RandomGenerator
                             if (data.Grid == null) Debug.Log("Data Grid is null");
                         }
                         events.RaiseConfigGenerated(current.Config, count / (float)generationParameters.Graph.GetNodeCount());
+                        var node = current;
+                        var input = data;
                         AbstractGridOperationData temp = null;
-                        await Task.Run(() => temp = current.Operate(data));
+                        temp = await Task.Run(() => node.Operate(input));
 
                         // Reverse Traversal Condition - Only happens for undone joiners
                         if (temp == null) forwards = false;

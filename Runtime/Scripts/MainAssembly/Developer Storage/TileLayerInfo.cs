@@ -27,6 +27,8 @@ namespace Dalichrome.RandomGenerator
 
         private static Dictionary<int, TileLayer> _byId; // layerId -> TileLayer
         private static int[] _allIds;                    // sorted ascending by layerId
+        private static int[] _zBySortingThenTieAsc;   // zÅfs ordered by (sortingOrder, tieOrder, id)
+        private static int[] _zBySortingThenTieDesc;  // reverse order
 
         // NEW: compact Z mapping
         private static Dictionary<int, int> _layerIdToZ; // layerId -> z (0..N-1)
@@ -43,6 +45,9 @@ namespace Dalichrome.RandomGenerator
                 _layerIdToZ = null;
                 _zToLayerId = null;
                 _zToDefaultLayerOccupance = null;
+                _zBySortingThenTieAsc = null;
+                _zBySortingThenTieDesc = null;
+
             }
         }
 
@@ -110,7 +115,48 @@ namespace Dalichrome.RandomGenerator
                 {
                     _zToDefaultLayerOccupance[z] = _byId[_zToLayerId[z]].occupyOnDefault ? 1 : 0;
                 }
+
+                // Ascending: smaller sortingOrder first; tie by tieOrder, then by id for stability
+                var asc = _byId.Values
+                    .OrderBy(tl => tl.sortingOrder)
+                    .ThenBy(tl => tl.tieOrder)
+                    .ThenBy(tl => tl.id);
+
+                var ascZ = new List<int>(_allIds.Length);
+                foreach (var tl in asc)
+                    ascZ.Add(_layerIdToZ[tl.id]);
+                _zBySortingThenTieAsc = ascZ.ToArray();
+
+                // Descending: higher sortingOrder first (typical Ågon topÅh first)
+                var desc = _byId.Values
+                    .OrderByDescending(tl => tl.sortingOrder)
+                    .ThenByDescending(tl => tl.tieOrder)
+                    .ThenBy(tl => tl.id);
+
+                var descZ = new List<int>(_allIds.Length);
+                foreach (var tl in desc)
+                    descZ.Add(_layerIdToZ[tl.id]);
+                _zBySortingThenTieDesc = descZ.ToArray();
             }
+        }
+
+        /// <summary>Snapshot of all TileObjects, ordered by id (project overrides applied).</summary>
+        /// <summary>
+        /// Read-only view of z indices ordered by ascending (sortingOrder, tieOrder, id).
+        /// Useful if you want Åglowest sorting order firstÅh.
+        /// </summary>
+        public static IReadOnlyList<int> ZBySortingThenTieAscending
+        {
+            get { EnsureBuilt(); return _zBySortingThenTieAsc; }
+        }
+
+        /// <summary>
+        /// Read-only view of z indices ordered by descending (sortingOrder, tieOrder, id).
+        /// Useful if you want Ågtop-most firstÅh (Unity typically draws higher sorting orders on top).
+        /// </summary>
+        public static IReadOnlyList<int> ZBySortingThenTieDescending
+        {
+            get { EnsureBuilt(); return _zBySortingThenTieDesc; }
         }
 
         // ---------- Compact Z / index API ----------
