@@ -10,127 +10,115 @@ using System.Linq;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
-    public class Room : IComparable, IEnumerable<Tile>
+    public class Room : IComparable, IEnumerable<int2>
     {
-        private List<Tile> tiles = new();
-        private List<Tile> edges = new();
+        private readonly OrderedSet<int2> tiles = new();
+        private readonly OrderedSet<int2> edges = new();
 
-        private Dictionary<Vector2Int, Tile> tileDictionary = new();
+        private int2 top = new (-1,-1);
+        private int2 bottom = new(-1, -1);
+        private int2 right = new(-1, -1);
+        private int2 left = new(-1, -1);
 
-        private Tile top;
-        private Tile bottom;
-        private Tile right;
-        private Tile left;
+        private int2 initial = new(-1, -1);
 
         public int Width
         {
             get
             {
-                BoundsInt bounds = GetBounds();
-                return bounds.xMax - bounds.x;
+                return Bounds.xMax - Bounds.x;
             }
         }
         public int Height
         {
             get
             {
-                BoundsInt bounds = GetBounds();
-                return bounds.yMax - bounds.y;
+                return Bounds.yMax - Bounds.y;
             }
         }
 
-        public List<int2> Int2TilesList
-        {
-            get { return tiles.Select(tile => tile.Int2).ToList(); }
-        }
+        public IEnumerable<int2> Tiles => tiles;
 
-
-        public List<int2> Int2EdgesList
-        {
-            get { return edges.Select(tile => tile.Int2).ToList(); }
-        }
+        public IEnumerable<int2> Edges => edges;
 
         public int Value { get; private set; }
 
         public int Count { get { return tiles.Count; } }
+
+        public int2 Minimum { get { return new int2(left.x, bottom.y); } }
+
+        public int2 Maximum { get { return new int2(right.x, top.y); } }
+
+        public BoundsInt Bounds { get { return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x - left.x, top.y - bottom.y, 1)); } } 
 
         public Room(int roomNumber)
         {
             Value = roomNumber;
         }
 
-        public void AddTile(Tile tile)
+        private void FarEdgeHelper(int2 pos)
         {
-            Vector2Int position = new (tile.x, tile.y);
-            if (tileDictionary.ContainsKey(position))
-            {
-                return;
-            }
-            tiles.Add(tile);
-            tileDictionary.Add(position, tile);
-
-            if (!top.IsValid || top.y < tile.y) top = tile;
-            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
-            if (!right.IsValid || right.x < tile.x) right = tile;
-            if (!left.IsValid || left.x > tile.x) left = tile;
+            if (math.all(top == initial) || top.y < pos.y) top = pos;
+            if (math.all(top == initial) || bottom.y > pos.y) bottom = pos;
+            if (math.all(top == initial) || right.x < pos.x) right = pos;
+            if (math.all(top == initial) || left.x > pos.x) left = pos;
         }
 
-        public void RemoveTile(Tile tile)
+        public void AddPosition(int x, int y)
         {
-            Vector2Int position = new (tile.x, tile.y);
-            if (!tileDictionary.ContainsKey(position))
-            {
-                return;
-            }
-            tiles.Remove(tile);
-            tileDictionary.Remove(position);
-
-            //TODO: Redo these here :o
-            if (!top.IsValid || top.y < tile.y) top = tile;
-            if (!bottom.IsValid || bottom.y > tile.y) bottom = tile;
-            if (!right.IsValid || right.x < tile.x) right = tile;
-            if (!left.IsValid || left.x > tile.x) left = tile;
+            AddPosition(new int2(x, y));
         }
 
-        //Could definitely have issue with using bounds related to rooms wrapping around a readGrid
-        public BoundsInt GetBounds()
-        {
-            return new(new Vector3Int(left.x, bottom.y, 0), new Vector3Int(right.x-left.x, top.y-bottom.y, 1));
+        public void AddPosition(int2 pos) 
+        { 
+            if (tiles.Add(pos)) FarEdgeHelper(pos); 
         }
 
-        public Tile GetFirstTile()
+        public void RemovePosition(int2 pos)
         {
-            return tiles[0];
+            tiles.Remove(pos);
+
+            //TODO: Recompute bounds
+            FarEdgeHelper(pos);
         }
 
-        public Tile GetRandomTile(AbstractRandom random)
+        public int2 GetFirstPosition()
         {
-            return tiles[random.NextInt(0, tiles.Count)];
+            return tiles.First();
         }
 
-        public bool ContainsTile(Tile tile)
+        public int2 GetRandomPosition(AbstractRandom random)
         {
-            return tileDictionary.ContainsKey(tile.Position);
+            return tiles.ElementAt(random.NextInt(tiles.Count));
         }
 
-        public void AddEdge(Tile tile)
+        public bool ContainsPosition(int2 position) => tiles.Contains(position);
+
+        public bool ContainsPosition(int x, int y)
         {
-            edges.Add(tile);
+            return tiles.Contains(new int2(x,y));
         }
 
-        public void AddEdgeRange(List<Tile> otherEdges)
+        public void AddEdge(int x, int y)
         {
-            edges.AddRange(otherEdges);
+            edges.Add(new int2(x,y));
         }
 
-        public List<Tile> GetEdges()
+        public void AddEdge(int2 position)
         {
-            return edges;
+            edges.Add(position);
         }
 
-        public void AddTileRange(List<Tile> otherTiles)
+        public void AddEdgeRange(IEnumerable<int2> otherEdges)
         {
-            tiles.AddRange(otherTiles);
+            foreach (int2 edge in otherEdges)
+                edges.Add(edge);
+        }
+
+        public void AddTileRange(List<int2> otherTiles)
+        {
+            foreach (int2 pos in otherTiles)
+                edges.Add(pos);
         }
 
         //Biggest First
@@ -142,7 +130,12 @@ namespace Dalichrome.RandomGenerator.Utils
             return 0;
         }
 
-        public IEnumerator<Tile> GetEnumerator()
+        public RegionBounds ToRegionBounds(TileGrid grid)
+        {
+            return new(Minimum, Maximum, tiles.ToList(), grid);
+        }
+
+        public IEnumerator<int2> GetEnumerator()
         {
             return tiles.GetEnumerator();
         }

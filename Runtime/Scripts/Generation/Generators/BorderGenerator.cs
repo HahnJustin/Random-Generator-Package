@@ -1,21 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class BorderGenerator : AbstractGenerator
+    public class BorderGenerator : AbstractGenerator<BorderConfig>
     {
-        protected new BorderConfig config;
+        public BorderGenerator(BorderConfig config) : base(config) { }
 
-        public BorderGenerator(BorderConfig config) : base(config)
-        {
-            this.config = config;
-        }
-
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             for (int x = 0; x < width; x++)
             {
@@ -28,7 +20,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }

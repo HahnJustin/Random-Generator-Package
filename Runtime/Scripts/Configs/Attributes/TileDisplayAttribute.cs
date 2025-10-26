@@ -1,14 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    [System.AttributeUsage(System.AttributeTargets.Property)]
-    public class TileDisplayAttribute : System.Attribute
-    {
-        public TileDisplayAttribute()
-        {
-        }
-    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public sealed class TileDisplayAttribute : PropertyAttribute { }
 }

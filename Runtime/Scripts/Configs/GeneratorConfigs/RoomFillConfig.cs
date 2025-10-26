@@ -1,0 +1,48 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using UnityEngine;
+using Dalichrome.RandomGenerator.Core;
+
+namespace Dalichrome.RandomGenerator.Configs
+{
+    [Serializable]
+    public class RoomFillConfig : AbstractGeneratorConfig, IRoomConfig
+    {
+        public RoomFillConfig()
+        {
+            _description = StringType.Description_Generator_RoomFill;
+        }
+
+        public override GeneratorType Type { get { return GeneratorType.Room_Fill; } }
+
+        public RoomFillType FillType { get { return _roomFill; } set { _roomFill = value; } }
+        [SerializeField] private RoomFillType _roomFill = RoomFillType.Size_Fill;
+        [Condition("FillType", RoomFillType.Fill_Until_X_Left)] public int RoomLimit { get { return _roomLimit; } set { _roomLimit = value; } }
+        [Condition("FillType", RoomFillType.Fill_Until_X_Left), SerializeField] private int _roomLimit = 1;
+
+        [Condition("FillType", RoomFillType.Size_Fill)] public int MinimumRoomSize { get { return _minimumRoomSize; } set { _minimumRoomSize = value; } }
+        [Condition("FillType", RoomFillType.Size_Fill), SerializeField] private int _minimumRoomSize = 10;
+
+        public bool DebugRooms { get { return _debugRooms; } set { _debugRooms = value; } }
+        [SerializeField] private bool _debugRooms = false;
+
+        public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
+        [SerializeField] protected OccupanceType _occupance = OccupanceType.Default;
+
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA)] public int OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected int _occupyLayer = (int)LayerType.Wall;
+
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
+
+        public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
+        [SerializeField] protected bool _invertOccupance = false;
+
+        public bool ConfigureFillTile => _occupance != OccupanceType.Contains_A;
+
+        [SerializeField, Condition("ConfigureFillTile", true)] public int FillTile { get { return _fillTile; } set { _fillTile = value; } }
+        [SerializeField, Condition("ConfigureFillTile", true)] protected int _fillTile = (int)TileDefaults.Wall_Cave;
+    }
+}

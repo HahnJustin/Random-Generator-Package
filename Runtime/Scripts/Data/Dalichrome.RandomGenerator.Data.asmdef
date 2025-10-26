@@ -1,0 +1,20 @@
+{
+    "name": "Dalichrome.RandomGenerator.Data",
+    "rootNamespace": "",
+    "references": [
+        "GUID:c967b8ba713466f409b733123b16bbc8",
+        "GUID:ce1cda39096c9b148912cf008a3a78fe",
+        "GUID:ac422043113dd38479a01a1904702f3b",
+        "GUID:95a48772ee34196408f85e258a2c53b5",
+        "GUID:d8b63aba1907145bea998dd612889d6b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

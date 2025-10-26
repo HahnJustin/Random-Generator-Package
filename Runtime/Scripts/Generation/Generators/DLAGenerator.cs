@@ -1,16 +1,15 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class DLAGenerator : OccupanceGenerator
+    public class DLAGenerator : AbstractGenerator<DLAConfig>
     {
-        protected new DLAConfig config;
+        private OccupanceUtil util;
 
         private class DLANode
         {
@@ -43,7 +42,8 @@ namespace Dalichrome.RandomGenerator.Generators
         public DLAGenerator(DLAConfig config) : base(config)
         {
             this.config = config;
-            //outOfBoundsOccupancy = 0;
+            util = new(config);
+            AddUtil(util);
         }
 
         private void ApplyGraphNodeTreeToGrid(List<DLANode> tree)
@@ -72,8 +72,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if (Mathf.Pow(x, 2) + Mathf.Pow(y, 2) <= Mathf.Pow(node.radius, 2) &&
                         finalPositon.x >= 0 && finalPositon.y >= 0 && finalPositon.x < width && finalPositon.y < height)
                     {
-                        Tile tile = TileGrid.GetTile(finalPositon);
-                        TileGrid.SetTileId(tile, (int)config.StickTo);
+                        TileGrid.SetTileId(finalPositon, (int)config.StickTo);
                     }
                 }
             }
@@ -89,7 +88,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 int x = Mathf.RoundToInt(node.position.x + node.radius * (float) Mathf.Cos(increment * i));
                 int y = Mathf.RoundToInt(node.position.y + node.radius * (float) Mathf.Sin(increment * i));
 
-                if (GetIfOccupiedTileNextToPosition(x, y))
+                if (util.GetIfOccupiedTileNextToPosition(x, y))
                 {
                     return true;
                 }
@@ -117,7 +116,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return false;
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // Setting all of the graphnode values
             float radius = config.Radius;
@@ -136,7 +135,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             for (int i = 0; i < config.MaxWalkers; i++)
             {
-                walkers.Add(new(TileGrid.GetRandomEdgePoint(random), radius));
+                walkers.Add(new(TileGrid.GetRandomEdgeVector2(random), radius));
                 radius *= config.Shrink;
             }
 
@@ -157,12 +156,12 @@ namespace Dalichrome.RandomGenerator.Generators
 
             while (walkers.Count < config.MaxWalkers && radius > 1)
             {
-                walkers.Add(new(TileGrid.GetRandomEdgePoint(random), radius));
+                walkers.Add(new(TileGrid.GetRandomEdgeVector2(random), radius));
                 radius *= config.Shrink;
             }
 
             ApplyGraphNodeTreeToGrid(tree);
-            return;
+            return input;
         }
     }
 }

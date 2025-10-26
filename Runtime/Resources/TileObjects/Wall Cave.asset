@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc0a5d1699df5d045828651272d696a4, type: 3}
+  m_Name: Wall Cave
+  m_EditorClassIdentifier: 
+  id: 100
+  layer: 2000
+  tileName: Wall Cave
+  menuSprite: {fileID: 0}
+  color: {r: 0.40000004, g: 0.22352943, b: 0.19215688, a: 1}
+  tileSpawn:
+    spawnType: 1
+    sprite: {fileID: 101242483, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
+    tileBase: {fileID: 11400000, guid: f739705da2795184f8124514229b738c, type: 2}
+    gameObject: {fileID: 0}
+  metaDataSpawnList: []

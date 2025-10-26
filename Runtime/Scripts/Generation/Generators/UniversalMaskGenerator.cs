@@ -1,40 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class UniversalMaskGenerator : AbstractGenerator
+    public class UniversalMaskGenerator : AbstractGenerator<UniversalMaskConfig>
     {
-        protected new UniversalMaskConfig config;
+        public UniversalMaskGenerator(UniversalMaskConfig config) : base(config) { }
 
-        public UniversalMaskGenerator(UniversalMaskConfig config) : base(config)
+        protected override Generation Enact(Generation input)
         {
-            this.config = config;
-        }
-
-        protected override void Enact()
-        {
-            for (int x = 0; x < width; x++)
+            foreach (int2 pos in TileGrid.GetPositions())
             {
-                for (int y = 0; y < height; y++)
+                foreach (int type in config.AddToUniversalMaskTiles)
                 {
-                    Tile tile = TileGrid.GetTile(x, y);
-
-                    foreach (TileType type in config.AddToUniversalMaskTiles)
+                    if (TileGrid.ColumnContainsId(pos, type))
                     {
-                        if (tile.ContainsId((int)type))
-                        {
-                            TileGrid.AddExcludedPosition(tile.Position);
-                            break;
-                        }
+                        TileGrid.AddExcludedPosition(pos);
+                        break;
                     }
-                }
+                }     
             }
-            return;
+            return input;
         }
     }
 }

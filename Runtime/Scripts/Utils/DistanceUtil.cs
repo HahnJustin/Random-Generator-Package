@@ -2,6 +2,7 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -11,21 +12,24 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private readonly int depthProddableValue;
 
+        public bool DoInitialization { get; set; }
+
         public DistanceUtil(IDistanceConfig config) : base(config)
         {
             this.config = config;
             depthProddableValue = config.FillOccupied ? 1 : 0;
+            DoInitialization = true;
         }
 
-        private void AddRingHelper(List<Tile> newRing, Tile neighbor, int value)
+        private void AddRingHelper(List<int2> newRing, int2 pos, int value)
         {
-            if (neighbor.IsValid && IsOccupied(neighbor) == depthProddableValue)
+            if (IsOccupied(pos) == depthProddableValue)
             {
-                Tile refreshed = tileGrid.GetTile(neighbor.x, neighbor.y);
-                if (refreshed.Value == 0)
+                int val = tileGrid.GetTileValue(pos);
+                if (val == 0)
                 {
-                    tileGrid.SetTileValue(refreshed, value);
-                    newRing.Add(refreshed);
+                    tileGrid.SetTileValue(pos, value);
+                   newRing.Add(pos);
                 }
             }
         }
@@ -49,9 +53,9 @@ namespace Dalichrome.RandomGenerator.Utils
                    IsOccupied(x - movement, y + movement) == occupiedVal; //Check up left
         }
 
-        public new bool GetIfOccupiedTileNextToPosition(Tile tile, int movement = 1)
+        public new bool GetIfOccupiedTileNextToPosition(int2 pos, int movement = 1)
         {
-            return GetIfOccupiedTileNextToPosition(tile.x, tile.y, movement);
+            return GetIfOccupiedTileNextToPosition(pos.x, pos.y, movement);
         }
 
         public new bool GetIfOccupiedTileNextToPosition(int x, int y, int movement = 1)
@@ -59,9 +63,9 @@ namespace Dalichrome.RandomGenerator.Utils
             return GetIfTileNextToPositionHelper(x,y, 1, movement);
         }
 
-        public new bool GetIfUnoccupiedTileNextToPosition(Tile tile, int movement = 1)
+        public new bool GetIfUnoccupiedTileNextToPosition(int2 pos, int movement = 1)
         {
-            return GetIfUnoccupiedTileNextToPosition(tile.x, tile.y, movement);
+            return GetIfUnoccupiedTileNextToPosition(pos.x, pos.y, movement);
         }
 
         public new bool GetIfUnoccupiedTileNextToPosition(int x, int y, int movement = 1)
@@ -74,41 +78,41 @@ namespace Dalichrome.RandomGenerator.Utils
             tileGrid.ClearNumbers();
 
             int value = 1;
-            List<Tile> ring = new();
-            foreach (Tile tile in tileGrid)
+            List<int2> ring = new();
+            foreach (ITileColumn tile in tileGrid)
             {
                 //need to have get unoccupiedTileNext func
-                if(IsOccupied(tile) == depthProddableValue && ((GetIfOccupiedTileNextToPosition(tile) && !config.FillOccupied) ||
-                                                                GetIfUnoccupiedTileNextToPosition(tile) && config.FillOccupied))
+                if(IsOccupied(tile.Int2) == depthProddableValue && ((GetIfOccupiedTileNextToPosition(tile.Int2) && !config.FillOccupied) ||
+                                                              GetIfUnoccupiedTileNextToPosition(tile.Int2) && config.FillOccupied))
                 {
-                    tileGrid.SetTileValue(tile, value);
-                    ring.Add(tile);
+                    tileGrid.SetTileValue(tile.Int2, value);
+                    ring.Add(tile.Int2);
                 }
-                else if (IsOccupied(tile) != depthProddableValue)
+                else if (IsOccupied(tile.Int2) != depthProddableValue)
                 {
-                    tileGrid.SetTileValue(tile, -1);
+                    tileGrid.SetTileValue(tile.Int2, -1);
                 }
             }
             
             
             while (ring.Count > 0)
             {
-                List<Tile> newRing = new();
+                List<int2> newRing = new();
                 value += 1;
-                foreach (Tile tile in ring)
+                foreach (int2 pos in ring)
                 {
                     if (config.Distance == DistanceType.Cardinal)
                     {
-                        foreach (Tile neighbor in tileGrid.GetFourNeighborTiles(tile))
+                        foreach (int2 pos2 in tileGrid.GetFourNeighborPositions(pos))
                         {
-                            AddRingHelper(newRing, neighbor, value);
+                            AddRingHelper(newRing, pos2, value);
                         }
                     }
                     else
                     {
-                        foreach (Tile neighbor in tileGrid.GetEightNeighborTiles(tile))
+                        foreach (int2 pos2 in tileGrid.GetEightNeighborPositions(pos))
                         {
-                            AddRingHelper(newRing, neighbor, value);
+                            AddRingHelper(newRing, pos2, value);
                         }
                     }
                 }

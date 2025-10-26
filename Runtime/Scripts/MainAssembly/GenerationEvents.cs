@@ -1,0 +1,30 @@
+using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Data;
+
+namespace Dalichrome.RandomGenerator
+{
+    public delegate void GenerationStartHandler(GenerationParams genParams);
+    public delegate void ConfigGeneratedHandler(AbstractConfig config, float amount);
+    public delegate void GenerationEndHandler(Generation output);
+    public delegate void GenerationCancelHandler();
+    public delegate void GenerationErrorHandler(string errorMessage);
+    public delegate void UngeneratedChangeCheckHandler(bool ungeneratedChanges);
+
+    public class GenerationEvents
+    {
+        public event GenerationStartHandler OnGenerationStart;
+        public event ConfigGeneratedHandler OnConfigGenerated;
+        public event GenerationEndHandler OnGenerationEnd;
+        public event GenerationCancelHandler OnGenerationCancel;
+        public event GenerationErrorHandler OnGenerationError;
+        public event UngeneratedChangeCheckHandler OnUngeneratedCheck;
+
+        public void RaiseGenerationEnd(Generation output) => OnGenerationEnd?.Invoke(output);
+        public void RaiseConfigGenerated(AbstractConfig config, float amount) => OnConfigGenerated?.Invoke(config, amount);
+        public void RaiseGenerationStart(GenerationParams genParams) => OnGenerationStart?.Invoke(genParams);
+        public void RaiseGenerationCancel() => OnGenerationCancel?.Invoke();
+        public void RaiseGenerationError(string errorMessage) => OnGenerationError?.Invoke(errorMessage);
+
+        public void RaiseUngeneratedChangesCheck(bool ungeneratedChanges) => OnUngeneratedCheck?.Invoke(ungeneratedChanges);
+    }
+}

@@ -1,13 +1,13 @@
 using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator.Generators;
+using Dalichrome.RandomGenerator.Utils;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
 
 public struct CellularAutomataJob : IJobParallelFor
 {
-    [ReadOnly] public TileGridData readGrid;
-    public TileGridData writeGrid;
+    [ReadOnly] public NativeTileGrid readGrid;
+    [NativeDisableParallelForRestriction] public NativeTileGrid writeGrid;
 
     public OccupanceData occupance;
 

@@ -9,12 +9,12 @@ public struct GuaranteeSpawnJob : IJob
 {
     /* inputs */
     [ReadOnly] public NativeArray<int2> candidateTiles;
-    [ReadOnly] public TileGridData inputGrid;
+    [ReadOnly] public NativeTileGrid inputGrid;
     [ReadOnly] public NativeArray<int2> tilePairs;   // (id, weight)
     public uint seed;
 
     /* outputs */
-    [NativeDisableParallelForRestriction] public TileGridData outputGrid;
+    [NativeDisableParallelForRestriction] public NativeTileGrid outputGrid;
     public NativeList<int2> outputExcludes;
 
     public int maxSpawns;
@@ -35,9 +35,8 @@ public struct GuaranteeSpawnJob : IJob
         for (int i = 0; i < candidateTiles.Length && placed < maxSpawns; ++i)
         {
             int2 pos = candidateTiles[i];
-            Tile tile = inputGrid.GetTile(pos);
 
-            if ((useEntranceDistance && tile.Value > -minDistance) ||
+            if ((useEntranceDistance && inputGrid.GetTileValue(pos) > -minDistance) ||
                 inputGrid.IsExcluding(pos))
                 continue;
 

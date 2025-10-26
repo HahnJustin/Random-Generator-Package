@@ -1,0 +1,56 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using UnityEngine;
+using UnityEngine.UIElements;
+using Dalichrome.RandomGenerator.Core;
+
+namespace Dalichrome.RandomGenerator.Configs
+{
+    [Serializable]
+    public class EntranceExitConfig : AbstractGeneratorConfig, IOccupanceConfig, IUniversalMaskConfig
+    {
+        public EntranceExitConfig()
+        {
+            _description = StringType.Description_Generator_EntranceExit;
+        }
+
+        public override GeneratorType Type { get { return GeneratorType.Entrance_Exit; } }
+
+        public EEPositionType Positioning { get { return _position; } set { _position = value; } }
+        [SerializeField] protected EEPositionType _position = EEPositionType.Any_Opposite;
+
+        public EEPlaceableType Placeable { get { return _placeable; } set { _placeable = value; } }
+        [SerializeField] protected EEPlaceableType _placeable = EEPlaceableType.One_Side_Wall;
+
+        [TileDisplay] public int SpawnInTile { get { return _spawnInTile; } set { _spawnInTile = value; } }
+        [TileDisplay, SerializeField] private int _spawnInTile = (int)TileDefaults.Wall_Cave;
+
+        [Hidden] public bool ShowUniversalMask { get { return _addEntranceExitToMask || (_addPathToMask && _createPath); } }
+
+        public bool AddEntranceExitToMask { get { return _addEntranceExitToMask; } set { _addEntranceExitToMask = value; } }
+        [SerializeField] private bool _addEntranceExitToMask = true;
+
+         public bool CreatePath { get { return _createPath; } set { _createPath = value; } }
+        [SerializeField] public bool _createPath = false;
+
+        [Condition("CreatePath", true)]public bool DebugPath { get { return _debugPath; } set { _debugPath = value; } }
+        [Condition("CreatePath", true), SerializeField] private bool _debugPath = false;
+
+        [Condition("CreatePath", true)] public bool AddPathToMask { get { return _addPathToMask; } set { _addPathToMask = value; } }
+        [Condition("CreatePath", true), SerializeField] private bool _addPathToMask = true;
+
+        public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
+        [SerializeField] protected OccupanceType _occupance = OccupanceType.Default;
+
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA)] public int OccupyLayer { get { return _occupyLayer; } set { _occupyLayer = value; } }
+        [LayerDisplay, Condition("Occupance", OccupanceType.Layer_Not_NA), SerializeField] protected int _occupyLayer = (int)LayerType.Wall;
+
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A)] public int TileA { get { return _tileA; } set { _tileA = value; } }
+        [TileDisplay, Condition("Occupance", OccupanceType.Contains_A), SerializeField] protected int _tileA = (int)TileDefaults.Wall_Cave;
+
+        public bool InvertOccupance { get { return _invertOccupance; } set { _invertOccupance = value; } }
+        [SerializeField] protected bool _invertOccupance = false;
+    }
+}

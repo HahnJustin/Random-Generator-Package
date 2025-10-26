@@ -1,9 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Random;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -30,18 +31,13 @@ namespace Dalichrome.RandomGenerator.Utils
         public int FirstMazeFloorValue { get { return _mazeFloorValue; } set { _mazeFloorValue = value; } }
         private int _mazeFloorValue = 5;
 
-        private List<Direction> allDirections = new()
+        private static readonly Direction[] CARDINAL = new[]
         {
-            Direction.Right,
-            Direction.Down,
-            Direction.Left,
-            Direction.Up
+            Direction.Right, Direction.Down, Direction.Left, Direction.Up
         };
 
         private class MazeCell
         {
-            public Tile tile;
-
             public int X { get { return x; } }
             private int x = 0;
 
@@ -50,13 +46,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
             public bool visited = false;
 
-            public MazeCell(Tile tile)
-            {
-                this.tile = tile;
-                visited = false;
-            }
-
-            public MazeCell(Vector2Int position)
+            public MazeCell(int2 position)
             {
                 x = position.x;
                 y = position.y;
@@ -69,18 +59,10 @@ namespace Dalichrome.RandomGenerator.Utils
             this.config = config;
         }
 
-        private MazeCell CreateMazeCell(Tile tile)
+        private MazeCell CreateMazeCell(int2 pos)
         {
-            MazeCell maze = new(tile);
-            cellGrid[tile.x, tile.y] = maze;
-            cells.Add(maze);
-            return maze;
-        }
-
-        private MazeCell CreateMazeCell(Vector2Int position)
-        {
-            MazeCell maze = new(position);
-            cellGrid[position.x, position.y] = maze;
+            MazeCell maze = new(pos);
+            cellGrid[pos.x, pos.y] = maze;
             cells.Add(maze);
             return maze;
         }
@@ -93,13 +75,17 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private MazeCell GetRandomCellNextToPosition(AbstractRandom random, int x, int y)
         {
-            allDirections.Shuffle(random);
-            Vector2Int position = new(x, y);
-            foreach (Direction direction in allDirections)
-            {
-                Vector2Int DirectedPoint = GetPointInDirection(position, direction, 2);
+            // make a local copy and shuffle it; do NOT touch the canonical array
+            Direction[] dirs = (Direction[])CARDINAL.Clone();
+            dirs.Shuffle(random);  // your Fisher–Yates over arrays
 
-                //Is occupied works here only due to use of debug technical tiles
+            var position = new Vector2Int(x, y);
+            foreach (var direction in dirs)
+            {
+                var DirectedPoint = position.GetPointInDirection(direction, 2);
+
+                if (!tileGrid.IsInBounds(DirectedPoint.x, DirectedPoint.y)) continue;
+
                 if (IsOccupied(DirectedPoint) == 0 &&
                     cellGrid[DirectedPoint.x, DirectedPoint.y] != null &&
                     !cellGrid[DirectedPoint.x, DirectedPoint.y].visited)
@@ -107,7 +93,6 @@ namespace Dalichrome.RandomGenerator.Utils
                     return cellGrid[DirectedPoint.x, DirectedPoint.y];
                 }
             }
-
             return null;
         }
 
@@ -118,16 +103,15 @@ namespace Dalichrome.RandomGenerator.Utils
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Tile tile = tileGrid.GetTile(x, y);
-                    if (tile.ContainsId((int)TileType.Debug_Technical))
+                    if (tileGrid.ColumnContainsId(x, y, (int)TileDefaults.Debug_Technical))
                     {
-                        tileGrid.SetTileId(tile, (int)TileType.Debug_NA);
-                        tileGrid.SetTileId(tile, (int)config.WallTile);
+                        tileGrid.SetTileId(x, y , (int)TileDefaults.Debug_NA);
+                        tileGrid.SetTileId(x, y, (int)config.WallTile);
                     }
-                    else if (tile.ContainsId((int)TileType.Debug_Technical2))
+                    else if (tileGrid.ColumnContainsId(x, y, (int)TileDefaults.Debug_Technical2))
                     {
-                        tileGrid.SetTileId(tile, (int)TileType.Debug_NA);
-                        tileGrid.SetTileId(tile, (int)config.HallwayTile);
+                        tileGrid.SetTileId(x, y, (int)TileDefaults.Debug_NA);
+                        tileGrid.SetTileId(x, y, (int)config.HallwayTile);
                     }
                 }
             }
@@ -142,17 +126,16 @@ namespace Dalichrome.RandomGenerator.Utils
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Tile tile = tileGrid.GetTile(x, y);
-                    if (!room.ContainsTile(tile)) continue;
+                    if (!room.ContainsPosition(x,y)) continue;
 
                     if (x % 2 == 1 && y % 2 == 1)
                     {
-                        cellGrid[x, y] = CreateMazeCell(tile);
-                        tileGrid.SetTileId(tile, (int)TileType.Debug_Technical2);
+                        cellGrid[x, y] = CreateMazeCell(new int2(x,y));
+                        tileGrid.SetTileId(x, y, (int) TileDefaults.Debug_Technical2);
                     }
                     else
                     {
-                        tileGrid.SetTileId(tile, (int)TileType.Debug_Technical);
+                        tileGrid.SetTileId(x, y, (int) TileDefaults.Debug_Technical);
                     }
                 }
             }
@@ -160,20 +143,35 @@ namespace Dalichrome.RandomGenerator.Utils
 
         private void InitializeMazeCellsInRoomGrid(int[,] grid, BoundsInt bounds)
         {
-            cellGrid = new MazeCell[width, height];
-            cells = new();
-            foreach (Vector2Int pos in bounds.allPositionsWithin)
-            {   
-                if (grid[pos.x, pos.y] != RoomValue ) continue;
+            // Use the actual grid size for safety (not tileGrid.width/height),
+            // and clamp the bounds to the grid extents.
+            int gx = grid.GetLength(0);
+            int gy = grid.GetLength(1);
 
-                if (pos.x % 2 == 1 && pos.y % 2 == 1)
+            cellGrid = new MazeCell[gx, gy];
+            cells = new();
+
+            int x0 = math.max(bounds.x, 0);
+            int x1 = math.min(bounds.xMax, gx);  // BoundsInt.xMax is exclusive
+            int y0 = math.max(bounds.y, 0);
+            int y1 = math.min(bounds.yMax, gy);  // BoundsInt.yMax is exclusive
+
+            for (int x = x0; x < x1; x++)
+            {
+                for (int y = y0; y < y1; y++)
                 {
-                    cellGrid[pos.x, pos.y] = CreateMazeCell(pos);
-                    grid[pos.x, pos.y] = FirstMazeFloorValue;
-                }
-                else
-                {
-                    grid[pos.x, pos.y] = FirstMazeWallValue;
+                    // Only touch cells that belong to this room
+                    if (grid[x, y] != RoomValue) continue;
+
+                    if ((x & 1) == 1 && (y & 1) == 1)
+                    {
+                        cellGrid[x, y] = CreateMazeCell(new int2(x, y));
+                        grid[x, y] = FirstMazeFloorValue;   // e.g., -3 for Nystrom
+                    }
+                    else
+                    {
+                        grid[x, y] = FirstMazeWallValue;    // e.g.,  3 for Nystrom
+                    }
                 }
             }
         }
@@ -184,9 +182,9 @@ namespace Dalichrome.RandomGenerator.Utils
 
             Vector2Int floor = default;
             int wallAmount = 0;
-            foreach (Direction direction in allDirections)
+            foreach (var direction in CARDINAL)
             {
-                Vector2Int neighbor = GetPointInDirection((Vector2Int)pos, direction);
+                Vector2Int neighbor = ((Vector2Int)pos).GetPointInDirection(direction);
                 if (!grid.InBounds(neighbor)) 
                 {
                     wallAmount += 1;
@@ -209,7 +207,7 @@ namespace Dalichrome.RandomGenerator.Utils
         public void CreateMazeInRoomGrid(int[,] grid, Room room, AbstractRandom random)
         {
             cells = new();
-            InitializeMazeCellsInRoomGrid(grid, room.GetBounds());
+            InitializeMazeCellsInRoomGrid(grid, room.Bounds);
 
             if (cells.Count <= 0) return;
 
@@ -326,9 +324,9 @@ namespace Dalichrome.RandomGenerator.Utils
                         break;
                     }
 
-                    Tile betweenTile = tileGrid.GetTile((currentCell.X + neighborCell.X) / 2,
-                                                        (currentCell.Y + neighborCell.Y) / 2);
-                    tileGrid.SetTileValue(betweenTile, (int)TileType.Debug_Technical2);
+                    tileGrid.SetTileId((currentCell.X + neighborCell.X) / 2,
+                                          (currentCell.Y + neighborCell.Y) / 2,
+                                          (int)TileDefaults.Debug_Technical2);
                     currentCell = neighborCell;
                     break;
                 }

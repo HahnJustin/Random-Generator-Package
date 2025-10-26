@@ -1,35 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Data;
 using Unity.Jobs;
-using Unity.Collections;
-using System.Threading.Tasks;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class CellularAutomataGenerator : OccupanceGenerator
+    public class CellularAutomataGenerator : AbstractGenerator<CellularAutomataConfig>
     {
-        protected new CellularAutomataConfig config;
+        private OccupanceUtil util;
 
         public CellularAutomataGenerator(CellularAutomataConfig config) : base(config)
         {
             this.config = config;
-            OutOfBoundsOccupancy = this.config.BorderOccupied ? 1 : 0;
+            util = new(config) { OutOfBoundsOccupancy = config.BorderOccupied ? 1 : 0 };
+            AddUtil(util);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // DeepClone readGrid twice: one as input, one as writeGrid
-            TileGridData inputGrid = TileGrid.CloneGridData();
-            TileGridData outputGrid = TileGrid.CloneGridData();
+            NativeTileGrid inputGrid = TileGrid.CloneNativeGrid();
+            NativeTileGrid outputGrid = TileGrid.CloneNativeGrid();
 
             AddDisposable(inputGrid);
             AddDisposable(outputGrid);
 
             uint baseSeed = random.NextUInt();
-            OccupanceData occupance = GetOccupanceData();
+            OccupanceData occupance = util.GetOccupanceData();
 
             for (int rep = 0; rep < config.Repetitions; rep++)
             {
@@ -54,10 +52,11 @@ namespace Dalichrome.RandomGenerator.Generators
             }
 
             // Copy the final state back to the TileGrid's data struct
-            TileGrid.OverrideGridData(inputGrid);
+            TileGrid.OverrideSubGrid(inputGrid);
             outputGrid.Dispose();
 
             ClearDisposables();
+            return input;
         }
     }
 }

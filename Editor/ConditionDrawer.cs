@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && !ODIN_INSPECTOR
 using UnityEditor;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;

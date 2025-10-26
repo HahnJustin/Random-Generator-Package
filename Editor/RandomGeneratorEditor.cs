@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using Dalichrome.RandomGenerator;
+using Dalichrome.RandomGenerator.Data;
+using Dalichrome.RandomGenerator.Nodes;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-[CustomEditor(typeof(GenerationManager))]
+[CustomEditor(typeof(RandomGenerator))]
 public class RandomGeneratorEditor : Editor
 {
     private GenerationParamsObject genParamObj;
@@ -13,7 +15,7 @@ public class RandomGeneratorEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        GenerationManager genMan = (GenerationManager)target;
+        RandomGenerator genMan = (RandomGenerator)target;
         DrawDefaultInspector();
         // Draw fields for the serializable class
         /*
@@ -76,6 +78,12 @@ public class RandomGeneratorEditor : Editor
             genMan.SetParams((GenerationParams)asset.GenerationParams.Clone());
             textAsset = null;
 
+        }
+
+        // TODO: Remove this later
+        if (GUILayout.Button("Generate Graph"))
+        {
+            genMan.GenerateAsync();
         }
     }
 }

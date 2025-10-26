@@ -4,16 +4,15 @@ using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Data;
 using System.Linq;
-using Dalichrome.RandomGenerator.Random;
-using System.Threading.Tasks;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
 
-    public class NystromDungeonGenerator: RoomGenerator
+    public class NystromDungeonGenerator: AbstractGenerator<NystromDungeonConfig>
     {
-        protected new NystromDungeonConfig config;
         private readonly MazeUtil util;
 
         private Dictionary<int,DungeonRoom> dungeonRoomDict;
@@ -127,7 +126,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 //readGrid.SetNeighbors(x,y, neighborFunc);
                 foreach (Direction direction in eightDirections)
                 {
-                    Vector2Int nextTo = GetPointInDirection(point, direction);
+                    Vector2Int nextTo = point.GetPointInDirection(direction);
                     if (!grid.InBounds(nextTo)) continue;
 
                     if (grid[nextTo.x, nextTo.y] == MAZE_WALL_VALUE)
@@ -144,21 +143,21 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int[,] occupanceGrid = util.GetOccupanceGrid();
 
-            foreach (Room room in RoomList)
+            foreach (Room room in util.RoomList)
             {
-                BoundsInt bounds = room.GetBounds();
+                BoundsInt bounds = room.Bounds;
                 if (room.Height <= Mathf.Max(ROOM_HEIGHT_MIN, config.RoomMinSize) &&
                     room.Width <= Mathf.Max(ROOM_WIDTH_MIN, config.RoomMinSize)) continue;
 
 
                 //Fill room being worked on to ROOM_VALUE (Should be negative)
-                foreach (Tile tile in room)
+                foreach (int2 pos in room)
                 {
-                    occupanceGrid[tile.x, tile.y] = ROOM_VALUE;
+                    occupanceGrid[pos.x, pos.y] = ROOM_VALUE;
                 }
 
                 int value = ORIGINAL_VALUE;
@@ -264,7 +263,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         KeyValuePair<int, int> ids = new(0,0);
                         foreach (Direction direction in cardinalDirections)
                         {
-                            Vector2Int neighbor = GetPointInDirection(wallTile, direction);
+                            Vector2Int neighbor = wallTile.GetPointInDirection(direction);
                             if (!occupanceGrid.InBounds(neighbor)) continue;
 
                             int neighborValue = occupanceGrid[neighbor.x, neighbor.y];
@@ -299,7 +298,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
                     foreach (Direction direction in cardinalDirections)
                     {
-                        Vector2Int neighbor = GetPointInDirection(connector, direction);
+                        Vector2Int neighbor = connector.GetPointInDirection(direction);
                         if (!occupanceGrid.InBounds(neighbor)) continue;
 
                         int connectingId = occupanceGrid[neighbor.x, neighbor.y];
@@ -327,7 +326,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 Debug.Log("Connectors Left:" + connectors.Count);
                 foreach (Vector2Int position in connectors)
                 {
-                    TileGrid.SetTileId(position, (int)TileType.Debug_Circle_Red);
+                    TileGrid.SetTileId(position, (int)TileDefaults.Debug_Circle_Red);
                 }
 
                 //must redefine pruning to consider all values of 'maze' rooms
@@ -344,21 +343,21 @@ namespace Dalichrome.RandomGenerator.Generators
                         //Room Floor 
                         if (gridValue <= MAZE_FLOOR_VALUE)
                         {
-                            TileGrid.SetTileId(x, y, (int)config.HallwayTile);
+                            TileGrid.SetTileId(x, y, config.HallwayTile);
                         }
                         //Room Wall
                         else if(gridValue >= MAZE_WALL_VALUE || gridValue == DOOR_VALUE)
                         {
-                            TileGrid.SetTileId(x, y, (int)config.WallTile);
-                            if(gridValue == DOOR_VALUE) TileGrid.SetTileId(x, y, (int)config.DoorTile);
+                            TileGrid.SetTileId(x, y, config.WallTile);
+                            if(gridValue == DOOR_VALUE) TileGrid.SetTileId(x, y, config.DoorTile);
                         }
-                        TileGrid.SetTileId(x, y, (int)config.FloorTile);
+                        TileGrid.SetTileId(x, y, config.FloorTile);
                         TileGrid.SetTileValue(x,y, gridValue);
                     }
                 }
             }
 
-            return;
+            return input;
         }
     }
 }

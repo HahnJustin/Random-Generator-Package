@@ -2,91 +2,105 @@ using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
     public class AStar
     {
-        private Vector2Int start;
-        private Vector2Int destination;
+        private int2 start;
+        private int2 destination;
         private TileGrid tileGrid;
         private OccupanceUtil occupanceUtil;
 
-        private Dictionary<Vector2Int, Vector2Int> cameFrom;
-        private Dictionary<Vector2Int, float> gScore;
-        private Dictionary<Vector2Int, float> fScore;
+        private Dictionary<int2, int2> cameFrom;
+        private Dictionary<int2, float> gScore;
+        private Dictionary<int2, float> fScore;
 
-        private List<Vector2Int> openSet;
+        private List<int2> openSet;
+        private HashSet<int2> closedSet;
+        private OpenHeap open;
 
-        private class FComparer : IComparer<Vector2Int>
+        // Tiny PQ for int2 with external fScore
+        private class OpenHeap
         {
-            private readonly AStar astarInstance;
-            public FComparer(AStar astarInstance)
+            private readonly List<int2> data = new();
+            private readonly AStar astar;
+
+            public OpenHeap(AStar a) { astar = a; }
+            public int Count => data.Count;
+
+            private float F(int2 p) => astar.GetFScore(p);
+
+            public void Push(int2 v)
             {
-                this.astarInstance = astarInstance;
+                data.Add(v);
+                int i = data.Count - 1;
+                while (i > 0)
+                {
+                    int parent = (i - 1) >> 1;
+                    if (F(data[i]) >= F(data[parent])) break;
+                    (data[i], data[parent]) = (data[parent], data[i]);
+                    i = parent;
+                }
             }
 
-            public int Compare(Vector2Int location1, Vector2Int location2)
+            public int2 Pop()
             {
-                if (astarInstance.GetFScore(location1) == astarInstance.GetFScore(location2))
-                    return 0;
-                if (astarInstance.GetFScore(location1) < astarInstance.GetFScore(location2))
-                    return -1;
-                return 1;
+                var root = data[0];
+                var last = data[^1];
+                data.RemoveAt(data.Count - 1);
+                if (data.Count == 0) return root;
+                data[0] = last;
+                int i = 0;
+                while (true)
+                {
+                    int left = (i << 1) + 1, right = left + 1, smallest = i;
+                    if (left < data.Count && F(data[left]) < F(data[smallest])) smallest = left;
+                    if (right < data.Count && F(data[right]) < F(data[smallest])) smallest = right;
+                    if (smallest == i) break;
+                    (data[i], data[smallest]) = (data[smallest], data[i]);
+                    i = smallest;
+                }
+                return root;
             }
         }
 
-        private bool Search(Vector2Int position)
+        private bool Search(int2 position)
         {
-
-            while (openSet.Count > 0)
+            while (open.Count > 0)
             {
-                openSet.Sort(new FComparer(this));
-                position = openSet[0];
-                if (position == destination)
-                {
-                    return true;
-                }
+                position = open.Pop();
+                if (closedSet.Contains(position)) continue; // skip stale duplicates
+                if (math.all(position == destination)) return true;
 
-                openSet.Remove(position);
-                List<Vector2Int> nextLocations = GetAdjacentLocations(position);
-                foreach (Vector2Int adjLocation in nextLocations)
+                closedSet.Add(position);
+                foreach (var adj in GetAdjacentLocations(position))
                 {
-                    float traversalCost = GetTraversalCost(position, adjLocation);
-                    float gTemp = GetGScore(position) + traversalCost;
-                    if (gTemp < GetGScore(adjLocation))
+                    if (closedSet.Contains(adj)) continue;
+
+                    float gTemp = GetGScore(position) + 1f;
+                    if (gTemp < GetGScore(adj))
                     {
-                        SetGScore(adjLocation, gTemp);
-                        SetFScore(adjLocation, gTemp + GetHScore(adjLocation));
-                        cameFrom[adjLocation] = position;
-                        if (!openSet.Contains(adjLocation))
-                        {
-                            openSet.Add(adjLocation);
-                        }
+                        SetGScore(adj, gTemp);
+                        SetFScore(adj, gTemp + GetHScore(adj));
+                        cameFrom[adj] = position;
+                        open.Push(adj);
                     }
                 }
             }
             return false;
         }
 
-        private List<Vector2Int> GetAdjacentLocations(Vector2Int position)
+        private List<int2> GetAdjacentLocations(int2 position)
         {
-            List<Vector2Int> neighbors = new();
+            List<int2> neighbors = tileGrid.GetFourNeighborPositions(position);
 
-            neighbors.Add(position + Vector2Int.left);
-            neighbors.Add(position + Vector2Int.right);
-            neighbors.Add(position + Vector2Int.down);
-            neighbors.Add(position + Vector2Int.up);
-
-            List<Vector2Int> validNeighbors = new();
-            foreach (Vector2Int pos in neighbors)
+            List<int2> validNeighbors = new();
+            foreach (int2 pos in neighbors)
             {
-                if (pos.x < 0 || pos.x >= tileGrid.width || pos.y < 0 || pos.y >= tileGrid.height)
-                {
-                    continue;
-                }
-                else if (IsWalkable(tileGrid.GetTile(pos)))
+                if (IsWalkable(pos.x, pos.y))
                 {
                     validNeighbors.Add(pos);
                 }
@@ -94,47 +108,47 @@ namespace Dalichrome.RandomGenerator.Utils
             return validNeighbors;
         }
 
-        private bool IsWalkable(Tile tile)
+        private bool IsWalkable(int x, int y)
         {
-            return occupanceUtil.IsOccupied(tile) == 0;
+            return occupanceUtil.IsOccupied(x, y) == 0;
         }
 
         //Add custom configurable traversability types here
-        private float GetTraversalCost(Vector2Int from, Vector2Int to)
+        private float GetTraversalCost(int2 from, int2 to)
         {
             return 1f;
         }
 
-        private float GetHScore(Vector2Int position)
+        private float GetHScore(int2 position)
         {
-            return Vector2Int.Distance(position, start);
+            return math.distance((float2)position, (float2)destination);
         }
 
-        private float GetGScore(Vector2Int position)
+        private float GetGScore(int2 position)
         {
             if (gScore.ContainsKey(position))
                 return gScore[position];
             return float.MaxValue;
         }
 
-        private float GetFScore(Vector2Int position)
+        private float GetFScore(int2 position)
         {
             if (fScore.ContainsKey(position))
                 return fScore[position];
             return float.MaxValue;
         }
 
-        private void SetGScore(Vector2Int position, float score)
+        private void SetGScore(int2 position, float score)
         {
             gScore[position] = score;
         }
 
-        private void SetFScore(Vector2Int position, float score)
+        private void SetFScore(int2 position, float score)
         {
             fScore[position] = score;
         }
 
-        public List<Vector2Int> FindPath(TileGrid tileGrid, OccupanceUtil occupanceUtil, Vector2Int start, Vector2Int end)
+        public List<int2> FindPath(TileGrid tileGrid, OccupanceUtil occupanceUtil, int2 start, int2 end)
         {
             this.tileGrid = tileGrid;
             this.occupanceUtil = occupanceUtil;
@@ -142,23 +156,23 @@ namespace Dalichrome.RandomGenerator.Utils
             destination = end;
 
             gScore = new();
-            gScore[start] = 0;
+            gScore[start] = 0f;
 
             fScore = new();
-            fScore[start] = GetHScore(destination);
+            fScore[start] = GetHScore(start);
 
-            openSet = new();
-            openSet.Add(start);
-
+            closedSet = new HashSet<int2>();
+            open = new OpenHeap(this);
+            open.Push(start);
             cameFrom = new();
 
-            List<Vector2Int> path = new List<Vector2Int>();
+            List<int2> path = new List<int2>();
             bool success = Search(start);
 
             //Reverses Path
             if (success)
             {
-                Vector2Int position = destination;
+                int2 position = destination;
                 while (cameFrom.ContainsKey(position))
                 {
                     path.Add(position);

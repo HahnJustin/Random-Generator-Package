@@ -1,22 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Data;
 using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class UpscaledNoiseGenerator : AbstractGenerator
+    public class UpscaledNoiseGenerator : AbstractGenerator<UpscaledNoiseConfig>
     {
-        protected new UpscaledNoiseConfig config;
-
         private int SCALE_AMOUNT = 2;
-
-        public UpscaledNoiseGenerator(UpscaledNoiseConfig config) : base(config)
-        {
-            this.config = config;
-        }
-
+        public UpscaledNoiseGenerator(UpscaledNoiseConfig config) : base(config) { }
+        
         private int Mod(int x, int m)
         {
             return (x % m + m) % m;
@@ -37,7 +29,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return grid[x, y];
         }
 
-        private int GetIfOccupiedTileNextToPosition(int[,] grid, int x, int y)
+        private int GetOccupiedNeighborCount(int[,] grid, int x, int y)
         {
             int movement = 1;
             int neighbors = 0;
@@ -53,7 +45,7 @@ namespace Dalichrome.RandomGenerator.Generators
             return neighbors;
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int currentWidth = Mathf.Clamp(Mathf.FloorToInt(width * config.BaseNoiseRatio), 1, width);
             int currentHeight = Mathf.Clamp(Mathf.FloorToInt(height * config.BaseNoiseRatio), 1, height);
@@ -94,7 +86,7 @@ namespace Dalichrome.RandomGenerator.Generators
                         int baseY = Mathf.FloorToInt(y / (float)SCALE_AMOUNT);
                         int parentValue = baseGrid[baseX, baseY];
                         if (random.NextFloat() < 
-                           (0.5f + (parentValue + GetIfOccupiedTileNextToPosition(baseGrid, baseX, baseY) - 4.5f) * config.LastGridImpact))
+                           (0.5f + (parentValue + GetOccupiedNeighborCount(baseGrid, baseX, baseY) - 4.5f) * config.LastGridImpact))
                         {
                             nextGrid[x, y] = 1;
                         }
@@ -116,7 +108,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     if(baseGrid[x,y] == 1) TileGrid.SetTileId(x, y, (int)config.FillTile);
                 }
             }
-            return;
+            return input;
         }
     }
 }

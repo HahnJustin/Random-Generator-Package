@@ -1,13 +1,13 @@
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class RandomWalkGenerator : AbstractGenerator
+    public class RandomWalkGenerator : AbstractGenerator<RandomWalkConfig>
     {
-        protected new RandomWalkConfig config;
+        public RandomWalkGenerator(RandomWalkConfig config) : base(config) { }
 
         public class Walker
         {
@@ -52,12 +52,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
-        public RandomWalkGenerator(RandomWalkConfig config) : base(config)
-        {
-            this.config = config;
-        }
-
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             Walker.TileGrid = TileGrid;
 
@@ -71,7 +66,7 @@ namespace Dalichrome.RandomGenerator.Generators
             Walker drunkGuy = new(intOrigin.x, intOrigin.y);
             TileGrid.SetTileId(intOrigin, (int)config.Path);
 
-            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Green);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileDefaults.Debug_Star_Green);
 
             for (int step = 0; step < config.Steps; step++)
             {
@@ -81,9 +76,9 @@ namespace Dalichrome.RandomGenerator.Generators
                 CancelCheck();
             }
 
-            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileType.Debug_Star_Red);
+            if (config.DebugEnds) TileGrid.SetTileId(drunkGuy.GetPosition(), (int)TileDefaults.Debug_Star_Red);
 
-            return;
+            return input;
         }
     }
 }

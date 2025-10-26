@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Utils;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class DevelopmentGenerator : OccupanceGenerator
+    public class DevelopmentGenerator : AbstractGenerator<DevelopmentConfig>
     {
-        protected new DevelopmentConfig config;
+        private OccupanceUtil util;
 
         private class DLANode
         {
@@ -42,7 +43,8 @@ namespace Dalichrome.RandomGenerator.Generators
         public DevelopmentGenerator(DevelopmentConfig config) : base(config)
         {
             this.config = config;
-            //outOfBoundsOccupancy = 0;
+            util = new(config);
+            AddUtil(util);
         }
 
         private void ApplyGraphNodeTreeToGrid(List<DLANode> tree)
@@ -87,7 +89,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 int x = (int)Math.Round(node.position.x + node.radius * Math.Cos(increment * i * Math.PI / 180.0));
                 int y = (int)Math.Round(node.position.y + node.radius * Math.Sin(increment * i * Math.PI / 180.0));
 
-                if (GetIfOccupiedTileNextToPosition(x, y))
+                if (util.GetIfOccupiedTileNextToPosition(x, y))
                 {
                     return true;
                 }
@@ -125,7 +127,7 @@ namespace Dalichrome.RandomGenerator.Generators
             else return new Vector2Int(random.NextInt(0, width), 0);
         }
 
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             // Setting all of the graphnode values
             float radius = config.Radius;
@@ -170,7 +172,7 @@ namespace Dalichrome.RandomGenerator.Generators
             }
 
             ApplyGraphNodeTreeToGrid(tree);
-            return;
+            return input;
         }
     }
 }

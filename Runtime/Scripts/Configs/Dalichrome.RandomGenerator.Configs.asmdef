@@ -1,0 +1,16 @@
+{
+    "name": "Dalichrome.RandomGenerator.Configs",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ac422043113dd38479a01a1904702f3b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,40 +1,28 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class CopyGenerator : AbstractGenerator
+    public class CopyGenerator : AbstractGenerator<CopyConfig>
     {
-        protected new CopyConfig config;
+        public CopyGenerator(CopyConfig config) : base(config) { }
 
-        public CopyGenerator(CopyConfig config) : base(config)
+        protected override Generation Enact(Generation input)
         {
-            this.config = config;
-        }
-
-        protected override void Enact()
-        {
-            for (int x = 0; x < width; x++)
+            foreach (int2 pos in TileGrid.GetPositions()) 
             {
-                for (int y = 0; y < height; y++)
-                {
-                    Tile tile = TileGrid.GetTile(x, y);
 
-                    foreach (SerialPair<int, int> pair in config.FromTo)
+                foreach (SerialPair<int, int> pair in config.FromTo)
+                {
+                    if (TileGrid.ColumnContainsId(pos, pair.Key))
                     {
-                        if (tile.ContainsId(pair.Key))
-                        {
-                            TileGrid.SetTileId(tile, pair.Value);
-                        }
+                        TileGrid.SetTileId(pos, pair.Value);
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }

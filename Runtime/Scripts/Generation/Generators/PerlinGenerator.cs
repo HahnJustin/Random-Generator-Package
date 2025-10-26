@@ -1,23 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
-using System.Threading.Tasks;
+using Dalichrome.RandomGenerator.Data;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
-    public class PerlinGenerator : AbstractGenerator
+    public class PerlinGenerator : AbstractGenerator<PerlinConfig>
     {
+        public PerlinGenerator(PerlinConfig config) : base(config) { }
 
-        protected new PerlinConfig config;
-
-        public PerlinGenerator(PerlinConfig config) : base(config)
-        {
-            this.config = config;
-        }
-
-        protected override void Enact()
+        protected override Generation Enact(Generation input)
         {
             int newNoise = random.NextInt(100000);
 
@@ -32,8 +25,6 @@ namespace Dalichrome.RandomGenerator.Generators
                     float xCoord = xOrg + x / width * config.Scale;
                     float yCoord = yOrg + y / height * config.Scale;
                     float sample = Mathf.PerlinNoise(xCoord + newNoise, yCoord + newNoise);
-
-                    Tile tile = TileGrid.GetTile(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
 
                     if (config.OvalFade)
                     {
@@ -51,11 +42,13 @@ namespace Dalichrome.RandomGenerator.Generators
                         float separation = config.Cutoff / (float)config.Tiles.Count;
                         float roughIndex = sample / separation;
                         int index = Mathf.Clamp(Mathf.RoundToInt(roughIndex), 0, config.Tiles.Count-1);
-                        TileGrid.SetTileId(tile, (int)config.Tiles[index]);
+
+                        int2 pos = new(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
+                        TileGrid.SetTileId(pos, (int)config.Tiles[index]);
                     }
                 }
             }
-            return;
+            return input;
         }
     }
 }
