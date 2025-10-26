@@ -5,5 +5,7 @@ namespace Dalichrome.RandomGenerator.Generators
         public bool Done { get; }
 
         public void ParallelDispose();
+
+        public void ForceDispose();
     }
 }

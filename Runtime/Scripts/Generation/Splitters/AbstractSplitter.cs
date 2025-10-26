@@ -47,5 +47,10 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             resultSplits.ParallelDispose();
         }
+
+        public void ForceDispose()
+        {
+            resultSplits.Dispose();
+        }
     }
 }

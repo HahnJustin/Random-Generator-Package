@@ -1,5 +1,66 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7605997982197167824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b38d7d81df3fc44ca1e9006f3c17d95, type: 3}
+  m_Name: Generator Config
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -600, y: -168}
+  ports:
+    keys:
+    - Input
+    - Output
+    values:
+    - _fieldName: Input
+      _node: {fileID: -7605997982197167824}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Output
+        node: {fileID: 4194706540378351992}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+    - _fieldName: Output
+      _node: {fileID: -7605997982197167824}
+      _typeQualifiedName: Dalichrome.RandomGenerator.Nodes.TileRegion, Dalichrome.Randomgenerator.Nodes,
+        Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: Input
+        node: {fileID: -3936364024740490169}
+        reroutePoints: []
+      _direction: 1
+      _connectionType: 1
+      _typeConstraint: 2
+      _dynamic: 0
+  _enabled: 1
+  _displayName: 
+  _customName: 0
+  _priority: 0
+  _config:
+    rid: 2581392223051710530
+  references:
+    version: 2
+    RefIds:
+    - rid: 2581392223051710530
+      type: {class: FillConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
+      data:
+        _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 0c270000
+        _tiles: 14050000
 --- !u!114 &-7375063041419141049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,7 +120,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _density: 1
         _repetitions: 1
         _tiles: 540b0000
@@ -118,7 +179,7 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Output
-        node: {fileID: 4194706540378351992}
+        node: {fileID: -7605997982197167824}
         reroutePoints: []
       _direction: 0
       _connectionType: 1
@@ -152,7 +213,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _density: 0.5
         _repetitions: 1
         _tiles: 64000000
@@ -216,7 +277,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _liveNeighboursRequired: 5
         _repetitions: 2
         _fill: 100
@@ -283,6 +344,10 @@ MonoBehaviour:
       type: {class: RoomSplitterConfig, ns: Dalichrome.RandomGenerator.Configs, asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 
         _minimumRoomSize: 1
         _maximumRoomSize: 2147483647
         _occupance: 2
@@ -299,7 +364,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7744813fa4d254e48895159f32607bb7, type: 3}
-  m_Name: Generation Flow Stack Test
+  m_Name: Room Splitter Test
   m_EditorClassIdentifier: 
   nodes:
   - {fileID: 4194706540378351992}
@@ -311,6 +376,7 @@ MonoBehaviour:
   - {fileID: -835619539594842424}
   - {fileID: 7146697687814360198}
   - {fileID: -7375063041419141049}
+  - {fileID: -7605997982197167824}
 --- !u!114 &3470442837570602064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -370,7 +436,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _border: 100
         _depth: 5
 --- !u!114 &4194706540378351992
@@ -386,7 +452,7 @@ MonoBehaviour:
   m_Name: Start
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: -440, y: -168}
+  position: {x: -872, y: -168}
   ports:
     keys:
     - Output
@@ -397,7 +463,7 @@ MonoBehaviour:
         Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: Input
-        node: {fileID: -3936364024740490169}
+        node: {fileID: -7605997982197167824}
         reroutePoints: []
       _direction: 1
       _connectionType: 1

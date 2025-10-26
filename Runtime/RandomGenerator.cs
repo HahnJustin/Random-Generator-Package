@@ -271,17 +271,20 @@ namespace Dalichrome.RandomGenerator
                 }
             }
 
-            // Dispose used splitters since they store native data structs
-            foreach (ISplitter splitter in usedSplitters) splitter.ParallelDispose();
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log($"[GridOpData #{data._id}] final data");
 #endif
 
             if (!data.Valid || data.Grid == null)
             {
+                foreach (var splitter in usedSplitters) splitter.ForceDispose();
                 events.RaiseGenerationError("Generator returned a null generation - Check if some chokepoint filter may be failing");
+                GenerationCleanup(data);
+                return;
             }
+
+            // Dispose used splitters since they store native data structs
+            foreach (ISplitter splitter in usedSplitters) splitter.ParallelDispose();
 
             watch.Stop();
             FinalizeGeneration((Generation)data, watch.ElapsedMilliseconds);
@@ -373,13 +376,15 @@ namespace Dalichrome.RandomGenerator
                 yield return new WaitForEndOfFrame();
             }
 
-            foreach (var splitter in usedSplitters) splitter.ParallelDispose();
-
             if (!data.Valid || data.Grid == null)
             {
-                events.RaiseGenerationError("Generator returned a null generation");
+                foreach (var splitter in usedSplitters) splitter.ForceDispose();
+                events.RaiseGenerationError("Generator returned a null generation - Check if some chokepoint filter may be failing");
+                GenerationCleanup(data);
                 yield break;
             }
+
+            foreach (var splitter in usedSplitters) splitter.ParallelDispose();
 
             watch.Stop();
             FinalizeGeneration((Generation) data, watch.ElapsedMilliseconds);
