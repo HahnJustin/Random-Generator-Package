@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 2910
   layer: 3000
+  tileKind: 0
   tileName: Object Palm Tree Large
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: 838997794, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
   color: {r: 0.52156866, g: 0.5647059, b: 0.28235295, a: 1}
   tileSpawn:
     spawnType: 1

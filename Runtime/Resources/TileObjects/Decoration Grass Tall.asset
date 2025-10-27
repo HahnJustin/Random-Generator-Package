@@ -16,7 +16,7 @@ MonoBehaviour:
   layer: 2500
   tileKind: 0
   tileName: Decoration Grass Tall
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: 21300000, guid: e8d33f0bd8e22ae4b98815a24d7237c3, type: 3}
   color: {r: 0.56078434, g: 0.5921569, b: 0.2901961, a: 1}
   tileSpawn:
     spawnType: 1

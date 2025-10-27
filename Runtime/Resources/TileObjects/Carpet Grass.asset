@@ -16,7 +16,7 @@ MonoBehaviour:
   layer: 1500
   tileKind: 0
   tileName: Ground Grass
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: -1275174494, guid: eec662b70954f204abebcdbb6dcd8aeb, type: 3}
   color: {r: 0.34509805, g: 0.44705886, b: 0.21568629, a: 1}
   tileSpawn:
     spawnType: 1

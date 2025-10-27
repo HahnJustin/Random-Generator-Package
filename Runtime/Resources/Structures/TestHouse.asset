@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75274ead64a373242b9e8b583c9bc98c, type: 3}
+  m_Name: TestHouse
+  m_EditorClassIdentifier: 
+  width: 6
+  height: 6
+  expectedLayerIds: e8030000dc050000d0070000c4090000b80b0000a00f0000
+  expectedPaletteIds: 05000000060000000700000008000000a406000009000000dc050000220000003400000019000000b8240000cc240000c2240000d6240000ac26000080250000942500008a2500009e250000f023000004240000fa2300000e24000074270000d8270000482600000a0000000c000000ac0d0000100e0000400600007805000014050000180600000e060000170000002d0000001c0c0000480d0000800c0000e40c00008c0a0000280a0000540b00005e0b0000b80b0000f00a000064000000c8000000fa00000013010000
+  layers:
+  - layerId: 1000
+    visible: 1
+    locked: 0
+    tiles: 400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000400600004006000040060000
+  - layerId: 1500
+    visible: 1
+    locked: 0
+    tiles: ffffffffffffffffffffffffffffffffffffffffffffffffffffffff08000000ffffffffffffffffffffffffffffffffffffffffffffffffa4060000a4060000ffffffffffffffffffffffffffffffffa4060000a4060000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+  - layerId: 2000
+    visible: 1
+    locked: 0
+    tiles: fa000000fa000000fa000000fa000000fa000000fa000000fa000000fffffffffffffffffffffffffffffffffa000000fa000000fffffffffffffffffffffffffffffffffa000000fa000000fffffffffffffffffffffffffffffffffa000000fa000000fffffffffffffffffffffffffffffffffa000000fa000000fa000000fa000000fa000000fa000000fa000000
+  - layerId: 2500
+    visible: 1
+    locked: 0
+    tiles: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+  - layerId: 3000
+    visible: 1
+    locked: 0
+    tiles: ffffffffffffffff480d0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff480d0000ffffffffffffffff
+  - layerId: 4000
+    visible: 1
+    locked: 0
+    tiles: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff

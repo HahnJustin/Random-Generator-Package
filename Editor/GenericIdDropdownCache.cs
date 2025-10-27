@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditor.PackageManager; // PackageInfo
 using UnityEngine;
 
 internal static class GenericIdDropdownCache
