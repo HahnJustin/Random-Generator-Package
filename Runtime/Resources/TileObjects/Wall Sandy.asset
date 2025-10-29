@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 275
   layer: 2000
+  tileKind: 0
   tileName: Wall Sandy
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: 532781276, guid: 6455bbd483be77143ad23d85e20dd645, type: 3}
   color: {r: 0.7830189, g: 0.5541834, b: 0.32133323, a: 1}
   tileSpawn:
     spawnType: 1

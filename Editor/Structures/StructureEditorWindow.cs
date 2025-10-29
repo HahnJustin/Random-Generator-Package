@@ -4,17 +4,17 @@
 // Editor window: registry-driven, uses TileObject sprites, shows layer names,
 // ignores layerId==0, tileObject id==0, and TileObjects with tileKind==Empty.
 // Auto-switches to a tile's configured layer when that tile is selected.
-// Tiles palette is a grid with search + tooltips. Double-click Structure opens this.
+// Tiles palette is a grid with search + tooltips. Double-click StructureObject opens this.
 // Grid is clipped so it won't overdraw the sidebar. Auto-rebinds registries on open.
 
 #if UNITY_EDITOR
+using Dalichrome.RandomGenerator.UserData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using Dalichrome.RandomGenerator.UserData;
 
 public class StructureEditorWindow : EditorWindow
 {
@@ -23,7 +23,7 @@ public class StructureEditorWindow : EditorWindow
     private const float GridCellBase = 32f;
     private const float LeftPaneWidth = 440f; // narrower to avoid horizontal scroll
 
-    [SerializeField] private Structure asset;
+    [SerializeField] private StructureObject asset;
 
     // View
     private Vector2 pan; private float zoom = 1f;
@@ -64,6 +64,21 @@ public class StructureEditorWindow : EditorWindow
     private readonly Dictionary<int, int> tileIdToLayerId = new();
     private readonly Dictionary<int, string> tileIdToName = new();
 
+    // ---- Mask tile (synthetic palette entry) ----
+    private const int MaskTileId = -1;
+    private const string MaskTileName = "Inherit (Structure Mask)";
+    private const string MaskSpriteFile = "StructureMask.png";
+    private static Sprite s_maskSprite;
+    private static bool s_maskTried;
+    private static string s_scriptFolder; // cached script folder to avoid repeated scans
+
+    // --- Hover cache (perf) ---
+    private Vector2Int _hoverCell = new Vector2Int(int.MinValue, int.MinValue);
+    private string[] _hoverLines = Array.Empty<string>();
+    private float _hoverBoxW = 0f, _hoverBoxH = 0f;
+    private int _hoverActiveLayerIndex = -1; // so we refresh when active layer changes
+    private readonly GUIContent _scratchContent = new GUIContent(); // reuse to avoid allocs
+
     [MenuItem("Random Generator/Structure Painter")]
     public static void Open()
     {
@@ -71,7 +86,7 @@ public class StructureEditorWindow : EditorWindow
         EnsureGoodInitialSize(w);
         w.Show();
     }
-    public static void Open(Structure a)
+    public static void Open(StructureObject a)
     {
         var w = GetWindow<StructureEditorWindow>("Structure Painter");
         EnsureGoodInitialSize(w);
@@ -89,7 +104,7 @@ public class StructureEditorWindow : EditorWindow
     [OnOpenAsset]
     public static bool OnOpenAsset(int instanceID, int line)
     {
-        var obj = EditorUtility.InstanceIDToObject(instanceID) as Structure;
+        var obj = EditorUtility.InstanceIDToObject(instanceID) as StructureObject;
         if (obj != null) { Open(obj); return true; }
         return false;
     }
@@ -137,9 +152,24 @@ public class StructureEditorWindow : EditorWindow
             tileIdToName[id] = nm;
             list.Add(new PaletteItem { id = id, name = nm, sprite = s, color = to.color, layerId = to.layer, layerName = ln });
         }
+
+        // Add synthetic -1 mask (always available; “layerName” says any layer)
+        s_maskSprite = EnsureMaskSprite();
+        list.Insert(0, new PaletteItem
+        {
+            id = MaskTileId,
+            name = MaskTileName,
+            sprite = s_maskSprite,
+            color = new Color(0.2f, 0.2f, 0.2f, 1f), // fallback if sprite missing
+            layerId = -1,
+            layerName = "Any Layer"
+        });
+
 #endif
-        palette = list.OrderBy(p => p.layerName, StringComparer.OrdinalIgnoreCase)
-                      .ThenBy(p => p.name, StringComparer.OrdinalIgnoreCase).ToArray();
+        palette = list.OrderBy(p => p.id == MaskTileId ? -1 : 0)
+                    .ThenBy(p => p.layerName, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(p => p.name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
         currentPaletteIds = palette.Select(p => p.id).ToArray();
 
         if (asset != null)
@@ -168,6 +198,42 @@ public class StructureEditorWindow : EditorWindow
         activeLayerIndex = Mathf.Clamp(activeLayerIndex, 0, Mathf.Max(0, currentLayerIds.Length - 1));
     }
 
+    // *** FIX: no CreateInstance() here. No recursion. Cached lookup. ***
+    private static Sprite EnsureMaskSprite()
+    {
+#if UNITY_EDITOR
+        if (s_maskSprite != null || s_maskTried) return s_maskSprite;
+
+        // Try to resolve the folder containing this script once
+        if (string.IsNullOrEmpty(s_scriptFolder))
+        {
+            // Find the MonoScript that defines this window
+            var guids = AssetDatabase.FindAssets("t:MonoScript StructureEditorWindow");
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var ms = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+                if (ms != null && ms.GetClass() == typeof(StructureEditorWindow))
+                {
+                    s_scriptFolder = System.IO.Path.GetDirectoryName(path)?.Replace("\\", "/");
+                    break;
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(s_scriptFolder))
+        {
+            var maskPath = (s_scriptFolder + "/" + MaskSpriteFile).Replace("\\", "/");
+            s_maskSprite = AssetDatabase.LoadAssetAtPath<Sprite>(maskPath);
+        }
+
+        s_maskTried = true;
+        return s_maskSprite;
+#else
+        return null;
+#endif
+    }
+
     private void OnGUI()
     {
         if (Event.current.type == EventType.MouseMove) Repaint();
@@ -187,7 +253,7 @@ public class StructureEditorWindow : EditorWindow
         {
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("Structure", EditorStyles.boldLabel);
-            asset = (Structure)EditorGUILayout.ObjectField(asset, typeof(Structure), false);
+            asset = (StructureObject)EditorGUILayout.ObjectField(asset, typeof(StructureObject), false);
             if (asset == null)
             {
                 EditorGUILayout.HelpBox("Assign or create a Structure to begin.", MessageType.Info);
@@ -196,7 +262,7 @@ public class StructureEditorWindow : EditorWindow
                     var path = EditorUtility.SaveFilePanelInProject("Create Structure", "NewStructure", "asset", "Choose save location");
                     if (!string.IsNullOrEmpty(path))
                     {
-                        asset = CreateInstance<Structure>();
+                        asset = CreateInstance<StructureObject>();
                         AssetDatabase.CreateAsset(asset, path);
                         AssetDatabase.SaveAssets();
                         Selection.activeObject = asset;
@@ -210,11 +276,11 @@ public class StructureEditorWindow : EditorWindow
 
             leftScroll = EditorGUILayout.BeginScrollView(
                 leftScroll,
-                false,                      
-                false,                      
-                GUIStyle.none,              
-                GUI.skin.verticalScrollbar, 
-                GUIStyle.none,              
+                false,                       // horizontal: off (already narrow)
+                false,                       // vertical: native scrollbar
+                GUIStyle.none,
+                GUI.skin.verticalScrollbar,
+                GUIStyle.none,
                 GUILayout.Width(LeftPaneWidth),
                 GUILayout.ExpandHeight(true)
             );
@@ -276,7 +342,7 @@ public class StructureEditorWindow : EditorWindow
             for (int i = 0; i < currentLayerIds.Length; i++)
             {
                 int lid = currentLayerIds[i]; string lname = (i < currentLayerNames.Length ? currentLayerNames[i] : $"Layer {lid}");
-                var L = (asset.Layers as List<Structure.LayerData>)?.Find(x => x.layerId == lid);
+                var L = (asset.Layers as List<StructureObject.LayerData>)?.Find(x => x.layerId == lid);
                 bool vis = L?.visible ?? true;
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -335,6 +401,62 @@ public class StructureEditorWindow : EditorWindow
         }
     }
 
+    private void RebuildHoverCacheIfNeeded(int hx, int hy, Rect localRect)
+    {
+        if (asset == null) return;
+
+        // If cell or active layer changed, refresh cache
+        if (_hoverCell.x == hx && _hoverCell.y == hy && _hoverActiveLayerIndex == activeLayerIndex)
+            return;
+
+        _hoverCell = new Vector2Int(hx, hy);
+        _hoverActiveLayerIndex = activeLayerIndex;
+
+        // Build lines without per-frame GC
+        var linesList = new List<string>(1 + currentLayerIds.Length);
+        linesList.Add($"Cell: ({hx},{hy})");
+
+        for (int i = 0; i < currentLayerIds.Length; i++)
+        {
+            int lid = currentLayerIds[i];
+            int id = asset.GetTileByLayerId(lid, hx, hy);
+            string lname = (i < currentLayerNames.Length ? currentLayerNames[i] : $"Layer {lid}");
+
+            if (id > 0)
+            {
+                string tname = tileIdToName.TryGetValue(id, out var nm) ? nm : id.ToString();
+                linesList.Add($"{lname}: {id} ({tname})");
+            }
+            else if (id == MaskTileId)
+            {
+                linesList.Add($"{lname}: {MaskTileId} ({MaskTileName})");
+            }
+            else
+            {
+                linesList.Add($"{lname}: -");
+            }
+        }
+
+        _hoverLines = linesList.ToArray();
+
+        // Measure text once
+        var style = EditorStyles.whiteMiniLabel;
+        float w = 0f;
+        for (int i = 0; i < _hoverLines.Length; i++)
+        {
+            _scratchContent.text = _hoverLines[i];
+            var size = style.CalcSize(_scratchContent);
+            if (size.x > w) w = size.x;
+        }
+
+        float lineH = EditorGUIUtility.singleLineHeight;
+        float h = lineH * _hoverLines.Length + 8f;
+
+        _hoverBoxW = w + 16f;
+        _hoverBoxH = h;
+    }
+
+
     private void DrawPaletteGrid()
     {
         // Filter
@@ -342,8 +464,9 @@ public class StructureEditorWindow : EditorWindow
         if (filterByActiveLayer && activeLayerIndex >= 0 && activeLayerIndex < currentLayerIds.Length)
         {
             int lid = currentLayerIds[activeLayerIndex];
-            items = items.Where(p => p.layerId == lid);
+            items = items.Where(p => p.id == MaskTileId || p.layerId == lid);
         }
+
         if (!string.IsNullOrWhiteSpace(paletteSearch))
         {
             var s = paletteSearch.Trim();
@@ -375,14 +498,13 @@ public class StructureEditorWindow : EditorWindow
                 var bg = new Color(0, 0, 0, 0.08f);
                 EditorGUI.DrawRect(rct, bg);
 
-                // Larger selection outline
                 if (sel)
                 {
                     var big = rct; big.xMin -= 2; big.yMin -= 2; big.xMax += 2; big.yMax += 2;
                     Handles.DrawSolidRectangleWithOutline(big, Color.clear, new Color(0.2f, 0.6f, 1f, 0.9f));
                 }
 
-                var content = new GUIContent("", $"{p.name} \nID: { p.id } \nLayer: { p.layerName}");
+                var content = new GUIContent("", $"{p.name} \nID: {p.id} \nLayer: {p.layerName}");
                 if (GUI.Button(rct, content, GUIStyle.none))
                 {
                     paintTileId = p.id;
@@ -449,32 +571,70 @@ public class StructureEditorWindow : EditorWindow
 
         EditorGUI.DrawRect(gridRect, EditorGUIUtility.isProSkin ? new Color(0.09f, 0.09f, 0.09f) : Color.white);
 
+        // *** PERF: compute visible cell bounds and draw only that region ***
+        int minX = 0, minY = 0, maxX = asset.width - 1, maxY = asset.height - 1;
+        if (cell > 0.0001f)
+        {
+            float visX0 = Mathf.Max(localRect.xMin, gridRect.xMin);
+            float visY0 = Mathf.Max(localRect.yMin, gridRect.yMin);
+            float visX1 = Mathf.Min(localRect.xMax, gridRect.xMax);
+            float visY1 = Mathf.Min(localRect.yMax, gridRect.yMax);
+
+            if (visX1 > visX0 && visY1 > visY0)
+            {
+                minX = Mathf.Clamp(Mathf.FloorToInt((visX0 - gridOrigin.x) / cell), 0, asset.width - 1);
+                maxX = Mathf.Clamp(Mathf.CeilToInt((visX1 - gridOrigin.x) / cell), 0, asset.width) - 1;
+                minY = Mathf.Clamp(Mathf.FloorToInt((visY0 - gridOrigin.y) / cell), 0, asset.height - 1);
+                maxY = Mathf.Clamp(Mathf.CeilToInt((visY1 - gridOrigin.y) / cell), 0, asset.height) - 1;
+            }
+        }
+
         Handles.BeginGUI();
         Color line = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 0.06f) : new Color(0, 0, 0, 0.08f);
         Handles.color = line;
-        for (int x = 0; x <= asset.width; x++)
-        { float px = gridOrigin.x + x * cell; Handles.DrawLine(new Vector3(px, gridOrigin.y), new Vector3(px, gridOrigin.y + gridH)); }
-        for (int y = 0; y <= asset.height; y++)
-        { float py = gridOrigin.y + y * cell; Handles.DrawLine(new Vector3(gridOrigin.x, py), new Vector3(gridOrigin.x + gridW, py)); }
 
-        // Draw by layer order with visibility
+        // Grid lines (only in visible bounds)
+        for (int x = minX; x <= maxX + 1; x++)
+        {
+            float px = gridOrigin.x + x * cell; Handles.DrawLine(new Vector3(px, gridOrigin.y + minY * cell), new Vector3(px, gridOrigin.y + (maxY + 1) * cell));
+        }
+        for (int y = minY; y <= maxY + 1; y++)
+        {
+            float py = gridOrigin.y + y * cell; Handles.DrawLine(new Vector3(gridOrigin.x + minX * cell, py), new Vector3(gridOrigin.x + (maxX + 1) * cell, py));
+        }
+
+        // Draw by layer order with visibility (only visible cells)
         for (int li = 0; li < currentLayerIds.Length; li++)
         {
             int lid = currentLayerIds[li];
-            var L = (asset.Layers as List<Structure.LayerData>)?.Find(x => x.layerId == lid);
+            var L = (asset.Layers as List<StructureObject.LayerData>)?.Find(x => x.layerId == lid);
             if (L != null && !L.visible) continue;
             float alpha = (li == activeLayerIndex) ? 1f : Mathf.Clamp(otherLayersOpacity, 0.1f, 1f);
-            for (int y = 0; y < asset.height; y++)
-                for (int x = 0; x < asset.width; x++)
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                float rowY = gridOrigin.y + y * cell;
+                for (int x = minX; x <= maxX; x++)
                 {
                     int id = asset.GetTileByLayerId(lid, x, y);
-                    if (id < 0) continue;
-                    var cellRect = new Rect(gridOrigin.x + x * cell, gridOrigin.y + y * cell, cell, cell); // flush tiles: no ±1 inset
+                    if (id == 0) continue; // Empty
+
+                    var cellRect = new Rect(gridOrigin.x + x * cell, rowY, cell, cell);
+
+                    // StructureObject Mask 
+                    if (id == MaskTileId)
+                    {
+                        if (s_maskSprite != null) DrawSprite(cellRect, s_maskSprite, alpha);
+                        else EditorGUI.DrawRect(cellRect, new Color(1f, 0f, 1f, 0.25f)); // fallback only when no sprite
+                        continue;
+                    }
+
                     if (spriteByTileId.TryGetValue(id, out var sp) && sp != null)
                         DrawSprite(cellRect, sp, alpha);
                     else
                         DrawColor(cellRect, colorByTileId.TryGetValue(id, out var c) ? c : Color.gray, alpha);
                 }
+            }
         }
 
         // Hover highlight + invalid-placement X
@@ -500,42 +660,29 @@ public class StructureEditorWindow : EditorWindow
         }
         Handles.EndGUI();
 
-        // Hover inspector: per-layer tile IDs & names under cursor (bottom-right)
-        if (onGrid)
+        // Hover inspector (repaint-only; cached for perf)
+        if (onGrid && Event.current.type == EventType.Repaint)
         {
-            var lines = new List<string>();
-            lines.Add($"Cell: ({hx},{hy})");
-            for (int i = 0; i < currentLayerIds.Length; i++)
-            {
-                int lid = currentLayerIds[i];
-                int id = asset.GetTileByLayerId(lid, hx, hy);
-                string lname = (i < currentLayerNames.Length ? currentLayerNames[i] : $"Layer {lid}");
-                if (id >= 0)
-                {
-                    string tname = tileIdToName.TryGetValue(id, out var nm) ? nm : id.ToString();
-                    lines.Add($"{lname}: {id} ({tname})");
-                }
-                else
-                {
-                    lines.Add($"{lname}: -");
-                }
-            }
-            // Measure simple box
-            float w = 0f; foreach (var s in lines) w = Mathf.Max(w, GUI.skin.label.CalcSize(new GUIContent(s)).x);
-            float lineH = EditorGUIUtility.singleLineHeight;
-            float h = lineH * lines.Count + 8f;
+            RebuildHoverCacheIfNeeded(hx, hy, localRect);
 
-            float boxW = w + 16f, boxH = h;
-            // Clamp to keep the box fully visible within the canvas with small margins
+            float boxW = _hoverBoxW;
+            float boxH = _hoverBoxH;
             float ix = Mathf.Clamp(localRect.width - (boxW + 8f), 4f, Mathf.Max(4f, localRect.width - boxW - 4f));
             float iy = Mathf.Clamp(localRect.height - (boxH + 8f), 4f, Mathf.Max(4f, localRect.height - boxH - 4f));
             var infoRect = new Rect(ix, iy, boxW, boxH);
 
-            // Background
             EditorGUI.DrawRect(infoRect, new Color(0f, 0f, 0f, 0.65f));
-            // Text
+
+            var style = EditorStyles.whiteMiniLabel;
+            float lineH = EditorGUIUtility.singleLineHeight;
             var r = new Rect(infoRect.x + 8f, infoRect.y + 4f, infoRect.width - 12f, lineH);
-            foreach (var s in lines) { GUI.Label(r, s, EditorStyles.whiteMiniLabel); r.y += lineH; }
+
+            for (int i = 0; i < _hoverLines.Length; i++)
+            {
+                _scratchContent.text = _hoverLines[i];
+                GUI.Label(r, _scratchContent, style);
+                r.y += lineH;
+            }
         }
 
         HandlePainting(localRect, gridOrigin, cell);
@@ -555,15 +702,12 @@ public class StructureEditorWindow : EditorWindow
         if (paintTileId > 0 && tileIdToLayerId.TryGetValue(paintTileId, out var reqLayer))
             invalidPlacement = (reqLayer != activeLayerId);
 
-        // Change cursor to indicate invalid placement by drawing a red X (already handled in DrawCanvas)
-        // Suppress painting for invalid placements (except Picker and Erase which always operate on the active layer)
-
         if (e.type == EventType.MouseDown && e.button == 0)
         {
             isDraggingPaint = true; lastMousePos = e.mousePosition; GUI.FocusControl(null);
             Undo.RecordObject(asset, "Paint Structure");
             if (tool == ToolMode.Picker) paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
-            else if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, -1);
+            else if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
             else if (!invalidPlacement) ApplyToolAt(activeLayerId, cx, cy);
             asset.EnsureTileArrays(); EditorUtility.SetDirty(asset); Repaint(); e.Use();
         }
@@ -571,7 +715,7 @@ public class StructureEditorWindow : EditorWindow
         {
             if ((e.mousePosition - lastMousePos).sqrMagnitude > 0.5f)
             {
-                if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, -1);
+                if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
                 else if (tool == ToolMode.Picker) paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
                 else if (!invalidPlacement) ApplyToolAt(activeLayerId, cx, cy);
                 EditorUtility.SetDirty(asset); Repaint(); lastMousePos = e.mousePosition;
@@ -587,10 +731,10 @@ public class StructureEditorWindow : EditorWindow
         switch (tool)
         {
             case ToolMode.Brush:
-                if (paintTileId > 0) asset.SetTileByLayerId(layerId, x, y, paintTileId);
+                asset.SetTileByLayerId(layerId, x, y, paintTileId);
                 break;
             case ToolMode.Erase:
-                asset.SetTileByLayerId(layerId, x, y, -1);
+                asset.SetTileByLayerId(layerId, x, y, 0);
                 break;
             case ToolMode.Fill:
                 int target = asset.GetTileByLayerId(layerId, x, y);
@@ -675,12 +819,12 @@ public class StructureEditorWindow : EditorWindow
         {
             int layerId = L.layerId;
             if (L.tiles == null) continue;
-            for (int i = 0; i<L.tiles.Length; i++)
+            for (int i = 0; i < L.tiles.Length; i++)
             {
                 int id = L.tiles[i];
                 if (id <= 0) continue; // keep 0/empty
-               if (!tileIdToLayerId.TryGetValue(id, out var reqLayer) || reqLayer != layerId)
-                   L.tiles[i] = -1;
+                if (!tileIdToLayerId.TryGetValue(id, out var reqLayer) || reqLayer != layerId)
+                    L.tiles[i] = -1;
             }
         }
     }

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 200
   layer: 2000
+  tileKind: 0
   tileName: Wall Cave Light
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: 532781276, guid: 14e7b742940c5954f8e99a909214f2f9, type: 3}
   color: {r: 0.56078434, g: 0.3372549, b: 0.23137257, a: 1}
   tileSpawn:
     spawnType: 1

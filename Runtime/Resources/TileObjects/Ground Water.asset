@@ -16,7 +16,7 @@ MonoBehaviour:
   layer: 1000
   tileKind: 3
   tileName: Ground Water
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: -465823683, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
   color: {r: 0.1137255, g: 0.36078432, b: 0.62352943, a: 1}
   tileSpawn:
     spawnType: 1

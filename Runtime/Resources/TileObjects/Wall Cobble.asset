@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 250
   layer: 2000
+  tileKind: 0
   tileName: Wall Cobble
-  menuSprite: {fileID: 0}
+  menuSprite: {fileID: -1128381752, guid: fc664cae5069fee41bc2621ba6bfbbc9, type: 3}
   color: {r: 0.60784316, g: 0.6784314, b: 0.7176471, a: 1}
   tileSpawn:
     spawnType: 1

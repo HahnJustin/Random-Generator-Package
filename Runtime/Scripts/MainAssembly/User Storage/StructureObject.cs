@@ -16,7 +16,7 @@ namespace Dalichrome.RandomGenerator.UserData
     /// - Layers are ordered; earlier indices render below later ones
     /// </summary>
     [CreateAssetMenu(fileName = "NewStructure", menuName = "RandomGenerator/UserData/Structure", order = 1000)]
-    public class Structure : ScriptableObject
+    public class StructureObject : ScriptableObject
     {
         [Min(1)] public int width = 16;
         [Min(1)] public int height = 16;
@@ -179,7 +179,7 @@ namespace Dalichrome.RandomGenerator.UserData
             foreach (var L in layers)
             {
                 var na = new int[newW * newH];
-                for (int i = 0; i < na.Length; i++) na[i] = -1;
+                for (int i = 0; i < na.Length; i++) na[i] = 0;
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++)
                     {
@@ -201,7 +201,7 @@ namespace Dalichrome.RandomGenerator.UserData
             foreach (var L in layers)
             {
                 var na = new int[newW * newH];
-                for (int i = 0; i < na.Length; i++) na[i] = -1;
+                for (int i = 0; i < na.Length; i++) na[i] = 0;
                 for (int y = 0; y < newH; y++)
                     for (int x = 0; x < newW; x++)
                     {
