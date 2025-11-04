@@ -1,7 +1,4 @@
-// File: StructureEditor.cs
-// Place under an Editor assembly folder (e.g., /Editor). One file contains the asset, editor window, and custom inspector.
-// Namespace aligned with your Dalichrome.RandomGenerator ecosystem.
-
+// File: StructureObject.cs
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -12,7 +9,8 @@ namespace Dalichrome.RandomGenerator.UserData
     /// <summary>
     /// A paintable, multi-layer tile structure asset. Stores tile IDs per layer in a compact 1D array.
     /// - Origin at bottom-left (x increases right, y increases up)
-    /// - Tile ID of -1 means "empty" / no tile
+    /// - Tile ID of 0 means "empty" / no tile
+    /// - Tile ID of -1 is reserved for "mask/inherit" (special editor meaning)
     /// - Layers are ordered; earlier indices render below later ones
     /// </summary>
     [CreateAssetMenu(fileName = "NewStructure", menuName = "RandomGenerator/UserData/Structure", order = 1000)]
@@ -28,10 +26,10 @@ namespace Dalichrome.RandomGenerator.UserData
         [Serializable]
         public class LayerData
         {
-            public int layerId;               // matches TileLayer.id
-            public bool visible = true;       // editor-only convenience
-            public bool locked = false;      // editor-only convenience
-            [HideInInspector] public int[] tiles; // len = width*height; -1 = empty
+            public int layerId;                // matches TileLayer.id
+            public bool visible = true;        // editor-only convenience
+            public bool locked = false;        // editor-only convenience
+            [HideInInspector] public int[] tiles; // len = width*height; 0 == empty
         }
 
         [SerializeField] private List<LayerData> layers = new();
@@ -43,7 +41,7 @@ namespace Dalichrome.RandomGenerator.UserData
         private int Idx(int x, int y) => y * width + x;
         private int2 IndexToPos(int index) => new int2(index % width, index / width);
 
-        private int PositionToTileGridIndex(int x, int y, int z) => TileLayerInfo.LayerCount * (y * width + x) + z;
+        private int PositionToTileGridIndex(int x, int y, int z) => TileLayerRegistry.LayerCount * (y * width + x) + z;
 
         public void InitializeIfEmpty(int[] layerIds, int[] paletteIds)
         {
@@ -52,7 +50,7 @@ namespace Dalichrome.RandomGenerator.UserData
                 expectedLayerIds = (int[])layerIds.Clone();
                 expectedPaletteIds = (int[])paletteIds.Clone();
                 foreach (var lid in layerIds)
-                    layers.Add(new LayerData { layerId = lid, tiles = NewBlank() });
+                    layers.Add(new LayerData { layerId = lid, tiles = NewBlank() }); // 0-filled
             }
             else
             {
@@ -73,7 +71,7 @@ namespace Dalichrome.RandomGenerator.UserData
             {
                 if (L.tiles == null || L.tiles.Length != len)
                 {
-                    var na = NewBlank();
+                    var na = NewBlank(); // 0-filled
                     if (L.tiles != null)
                     {
                         int min = Mathf.Min(len, L.tiles.Length);
@@ -87,15 +85,15 @@ namespace Dalichrome.RandomGenerator.UserData
         private int[] NewBlank()
         {
             var a = new int[width * height];
-            for (int i = 0; i < a.Length; i++) a[i] = -1;
+            // default(int) = 0, so no loop needed
             return a;
         }
 
         public int GetTileByLayerId(int layerId, int x, int y)
         {
             var L = layers.Find(l => l.layerId == layerId);
-            if (L == null || L.tiles == null) return -1;
-            if ((uint)x >= (uint)width || (uint)y >= (uint)height) return -1;
+            if (L == null || L.tiles == null) return 0;
+            if ((uint)x >= (uint)width || (uint)y >= (uint)height) return 0;
             return L.tiles[Idx(x, y)];
         }
 
@@ -113,8 +111,7 @@ namespace Dalichrome.RandomGenerator.UserData
             newW = Mathf.Max(1, newW); newH = Mathf.Max(1, newH);
             foreach (var L in layers)
             {
-                var na = new int[newW * newH];
-                for (int i = 0; i < na.Length; i++) na[i] = -1;
+                var na = new int[newW * newH]; // 0-filled
                 if (L.tiles != null)
                 {
                     int copyW = Mathf.Min(width, newW);
@@ -141,12 +138,12 @@ namespace Dalichrome.RandomGenerator.UserData
             {
                 if (byId.TryGetValue(lid, out var L))
                 {
-                    if (L.tiles == null || L.tiles.Length != width * height) L.tiles = NewBlank();
+                    if (L.tiles == null || L.tiles.Length != width * height) L.tiles = NewBlank(); // 0-filled
                     rebuilt.Add(L);
                 }
                 else
                 {
-                    rebuilt.Add(new LayerData { layerId = lid, tiles = NewBlank() });
+                    rebuilt.Add(new LayerData { layerId = lid, tiles = NewBlank() }); // 0-filled
                 }
             }
             layers = rebuilt;
@@ -157,7 +154,17 @@ namespace Dalichrome.RandomGenerator.UserData
         {
             var L = layers.Find(l => l.layerId == layerId);
             if (L?.tiles == null) return;
-            for (int i = 0; i < L.tiles.Length; i++) L.tiles[i] = -1;
+            Array.Fill(L.tiles, 0);
+        }
+
+        /// <summary>Sets ALL tiles in ALL layers to the given value (usually 0).</summary>
+        public void SetAllTiles(int value)
+        {
+            foreach (var L in layers)
+            {
+                if (L.tiles == null) continue;
+                Array.Fill(L.tiles, value);
+            }
         }
 
         // --- Border growth/shrink utilities ---
@@ -171,20 +178,18 @@ namespace Dalichrome.RandomGenerator.UserData
         public void RemoveRowsTop(int n) { if (n <= 0 || n >= height) return; Trim(0, 0, 0, n); }
         public void RemoveRowsBottom(int n) { if (n <= 0 || n >= height) return; Trim(0, 0, n, 0); }
 
-        // Internal: grow with offsets (left/right add columns, down/up add rows)
         private void GrowShrink(int left, int right, int down, int up)
         {
             int newW = Mathf.Max(1, width + left + right);
             int newH = Mathf.Max(1, height + down + up);
             foreach (var L in layers)
             {
-                var na = new int[newW * newH];
-                for (int i = 0; i < na.Length; i++) na[i] = 0;
+                var na = new int[newW * newH]; // 0-filled
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++)
                     {
-                        int nx = x + left; // shift right by left
-                        int ny = y + down; // shift up by down
+                        int nx = x + left;
+                        int ny = y + down;
                         if ((uint)nx >= (uint)newW || (uint)ny >= (uint)newH) continue;
                         na[ny * newW + nx] = L.tiles[Idx(x, y)];
                     }
@@ -193,15 +198,13 @@ namespace Dalichrome.RandomGenerator.UserData
             width = newW; height = newH;
         }
 
-        // Internal: trim from each border
         private void Trim(int left, int right, int down, int up)
         {
             int newW = Mathf.Max(1, width - left - right);
             int newH = Mathf.Max(1, height - down - up);
             foreach (var L in layers)
             {
-                var na = new int[newW * newH];
-                for (int i = 0; i < na.Length; i++) na[i] = 0;
+                var na = new int[newW * newH]; // 0-filled
                 for (int y = 0; y < newH; y++)
                     for (int x = 0; x < newW; x++)
                     {
@@ -221,14 +224,14 @@ namespace Dalichrome.RandomGenerator.UserData
                 for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++)
                     {
-                        if (L.tiles[Idx(x, y)] >= 0)
+                        if (L.tiles[Idx(x, y)] != 0)
                         { minX = Math.Min(minX, x); minY = Math.Min(minY, y); maxX = Math.Max(maxX, x); maxY = Math.Max(maxY, y); }
                     }
             }
             if (maxX < minX || maxY < minY)
             {
                 Resize(1, 1, Vector2Int.zero);
-                foreach (var L in layers) if (L.tiles != null) for (int i = 0; i < L.tiles.Length; i++) L.tiles[i] = -1;
+                foreach (var L in layers) if (L.tiles != null) Array.Fill(L.tiles, 0);
                 return;
             }
             Trim(minX, width - maxX - 1, minY, height - maxY - 1);
@@ -236,13 +239,13 @@ namespace Dalichrome.RandomGenerator.UserData
 
         public int[] ConvertToIntArray()
         {
-            int depth = TileLayerInfo.LayerCount;        // uses the registry's layer count/z-order
+            int depth = TileLayerRegistry.LayerCount;
             int lenXY = width * height;
             var array = new int[lenXY * depth];
 
             foreach (LayerData data in layers)
             {
-                int z = TileLayerInfo.GetLayerZ(data.layerId);
+                int z = TileLayerRegistry.GetLayerZ(data.layerId);
                 if (z < 0) continue;
                 int index = 0;
                 int max = Math.Min(data.tiles.Length, lenXY);

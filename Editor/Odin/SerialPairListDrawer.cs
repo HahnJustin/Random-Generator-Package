@@ -117,8 +117,8 @@ public sealed class SerialPairListDrawer : OdinValueDrawer<List<SerialPair<int, 
         var legacy = property.GetAttribute<LimitTileLayerAttribute>();
         if (legacy != null)
         {
-            // TODO: map your legacy enum to an int layer id (via TileLayerInfo or a table)
-            // return TileLayerInfo.ResolveLayerId(legacy.layer);
+            // TODO: map your legacy enum to an int layer id (via TileLayerRegistry or a table)
+            // return TileLayerRegistry.ResolveLayerId(legacy.layer);
             return null;
         }
 

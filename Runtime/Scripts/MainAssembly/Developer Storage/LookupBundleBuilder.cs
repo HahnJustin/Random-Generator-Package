@@ -33,10 +33,10 @@ namespace Dalichrome.RandomGenerator
 
             currentNativeBundle = new NativeLookupBundle
             {
-                tileIdToLayerIndexLookup = ToNative(TileObjectInfo.TileIdToLayerZ),
-                layerIdToLayerIndexLookup = ToNative(TileLayerInfo.LayerIdToZ),
-                tileIdToTileKindLookup = ToNative(TileObjectInfo.TileKindByTileIdInt),
-                layerIndexToDefaultOccupanceLookup = ToNative(TileLayerInfo.ZToDefaultOccupance),
+                tileIdToLayerIndexLookup = ToNative(TileObjectRegistry.TileIdToLayerZ),
+                layerIdToLayerIndexLookup = ToNative(TileLayerRegistry.LayerIdToZ),
+                tileIdToTileKindLookup = ToNative(TileObjectRegistry.TileKindByTileIdInt),
+                layerIndexToDefaultOccupanceLookup = ToNative(TileLayerRegistry.ZToDefaultOccupance),
                 valid = 1
             };
             return currentNativeBundle;
@@ -48,10 +48,10 @@ namespace Dalichrome.RandomGenerator
 
             currentSerialBundle = new SerialLookupBundle
             {
-                tileIdToLayerIndexLookup = TileObjectInfo.TileIdToLayerZ,
-                layerIdToLayerIndexLookup = TileLayerInfo.LayerIdToZ,
-                tileIdToTileKindLookup = TileObjectInfo.TileKindByTileIdInt,
-                layerIndexToDefaultOccupanceLookup = TileLayerInfo.ZToDefaultOccupance,
+                tileIdToLayerIndexLookup = TileObjectRegistry.TileIdToLayerZ,
+                layerIdToLayerIndexLookup = TileLayerRegistry.LayerIdToZ,
+                tileIdToTileKindLookup = TileObjectRegistry.TileKindByTileIdInt,
+                layerIndexToDefaultOccupanceLookup = TileLayerRegistry.ZToDefaultOccupance,
                 valid = 1
             };
             return currentSerialBundle;

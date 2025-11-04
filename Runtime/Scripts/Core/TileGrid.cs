@@ -104,6 +104,21 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTileId(position.x, position.y, id);
         }
 
+        // Force Tile Type
+        public bool SetTileIdBypassLayer(int3 position, int id)
+        {
+            return subgrid.SetTileIdBypassLayer(position, id);
+        }
+
+        public bool SetTileIdBypassLayer(int2 position, int z, int id)
+        {
+            return subgrid.SetTileIdBypassLayer(position.x, position.y, z, id);
+        }
+
+        public bool SetTileIdBypassLayer(int x, int y, int z, int id)
+        {
+            return subgrid.SetTileIdBypassLayer(x, y, z, id);
+        }
 
         // Contains Type
         public bool ColumnContainsId(int x, int y, int id)

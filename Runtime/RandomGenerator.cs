@@ -117,7 +117,7 @@ namespace Dalichrome.RandomGenerator
             ThreadSafeRandom.InitState();
 
             // Change this later - probably remove this with metadata changes
-            TileObjectInfo.SetNumberSpriteDatabase(numberSpriteDatabase);
+            TileObjectRegistry.SetNumberSpriteDatabase(numberSpriteDatabase);
         }
 
         private void Start()
@@ -492,14 +492,14 @@ namespace Dalichrome.RandomGenerator
 
         private Generation CreateGeneration()
         {
-            Generation generationInput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
+            Generation generationInput = generationParameters.ToGeneration(TileLayerRegistry.LayerCount);
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
         }
 
         private Generation CreateGeneration(CancellationToken token)
         {
-            Generation generationInput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
+            Generation generationInput = generationParameters.ToGeneration(TileLayerRegistry.LayerCount);
             generationInput.Token = token;
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
             return generationInput;
@@ -567,7 +567,7 @@ namespace Dalichrome.RandomGenerator
                 seed = GetRandomSeed();
             }
 
-            Generation generationOutput = generationParameters.ToGeneration(TileLayerInfo.LayerCount);
+            Generation generationOutput = generationParameters.ToGeneration(TileLayerRegistry.LayerCount);
             generationOutput.Seed = seed;
             generationOutput.Token = token;
             generationOutput.SetLookupBundle(LookupBundleBuilder.GetNative()); // TODO - Have a feeling this is not thread safe? Even though the struct should be?

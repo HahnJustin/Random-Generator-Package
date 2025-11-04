@@ -15,7 +15,7 @@ namespace Dalichrome.RandomGenerator
     /// Project assets override package defaults on duplicate IDs.
     /// Also provides compact Z indices (0..N-1) for active layers.
     /// </summary>
-    public static class TileLayerInfo
+    public static class TileLayerRegistry
     {
         public const string ResourcesPath = "TileLayers";
 
@@ -51,7 +51,7 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        static TileLayerInfo()
+        static TileLayerRegistry()
         {
 #if UNITY_EDITOR
             AbstractUserData.AnyChanged += _ => Invalidate();

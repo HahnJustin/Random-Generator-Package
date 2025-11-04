@@ -306,6 +306,21 @@ namespace Dalichrome.RandomGenerator.Core
             return SetTileId(position.x, position.y, id);
         }
 
+        // Set Tile Id Bypass Layer
+
+        public bool SetTileIdBypassLayer(int x, int y, int z, int id)
+        {
+            if (IsRestricted(x, y) || !CanModifyColumn(x, y)) return false;
+
+            tiles[PositionToIndex(x, y, z)] = id;
+            return true;
+        }
+
+        public bool SetTileIdBypassLayer(int3 pos, int id)
+        {
+            return SetTileIdBypassLayer(pos.x, pos.y, pos.z, id);
+        }
+
         // Column Contains Id
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ColumnContainsId(int x, int y, int id)
@@ -746,7 +761,17 @@ namespace Dalichrome.RandomGenerator.Core
 
         public IEnumerable<int2> GetRegionPositions()
         {
-            return regionPositions;
+            var na = regionPositions.ToNativeArray(Allocator.Temp);
+            try
+            {
+                var list = new List<int2>(na.Length);
+                for (int i = 0; i < na.Length; i++) list.Add(na[i]);
+                return list;
+            }
+            finally
+            {
+                na.Dispose();
+            }
         }
 
         public IEnumerable<ITileColumn> GetRegionColumns()

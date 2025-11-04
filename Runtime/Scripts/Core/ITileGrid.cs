@@ -25,6 +25,11 @@ namespace Dalichrome.RandomGenerator.Core
         public abstract bool SetTileId(int x, int y, int id);
         public abstract bool SetTileId(int2 position, int id);
 
+        // Set Tile Id Bypass Layer Funcs
+        public abstract bool SetTileIdBypassLayer(int3 position, int value);
+
+        public abstract bool SetTileIdBypassLayer(int x, int y, int z, int value);
+
         // Set All Ids At Pos Funcs
         public abstract bool CopyColumn(int2 replacer, int2 replaced);
 
@@ -53,7 +58,6 @@ namespace Dalichrome.RandomGenerator.Core
         // Set Tile Value Funcs
         public abstract bool SetTileValue(int x, int y, int value);
         public abstract bool SetTileValue(int2 position, int value);
-
 
         // Get Tile Value Funcs
         public abstract int GetTileValue(int x, int y);

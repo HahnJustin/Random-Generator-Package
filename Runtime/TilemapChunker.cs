@@ -75,7 +75,7 @@ namespace Dalichrome.RandomGenerator
         {
             if (chunk == null) return;
 
-            foreach( int layerId in TileLayerInfo.AllLayerIds)
+            foreach( int layerId in TileLayerRegistry.AllLayerIds)
             {
                 var tilemap = tilemapDict[layerId];
                 var buf = chunkLayerBuffers[layerId];
@@ -92,7 +92,7 @@ namespace Dalichrome.RandomGenerator
 
                         if (useGameObjects)
                         {
-                            var prefab = TileObjectInfo.GetGameObject(tileId);
+                            var prefab = TileObjectRegistry.GetGameObject(tileId);
                             if (SpawnTileGameObject(new int2(gx, gy) , prefab, chunk))
                             {
                                 buf[rowBase + x] = null;
@@ -100,7 +100,7 @@ namespace Dalichrome.RandomGenerator
                             }
                         }
 
-                        buf[rowBase + x] = TileObjectInfo.GetTileBase(tileId);
+                        buf[rowBase + x] = TileObjectRegistry.GetTileBase(tileId);
                     }
                 }
 
@@ -112,7 +112,7 @@ namespace Dalichrome.RandomGenerator
         {
             if (chunk == null) return;
 
-            foreach (int layerId in TileLayerInfo.AllLayerIds)
+            foreach (int layerId in TileLayerRegistry.AllLayerIds)
             {
                 Tilemap tilemap = tilemapDict[layerId];
 
@@ -235,7 +235,7 @@ namespace Dalichrome.RandomGenerator
             emptyChunkBuffer = new TileBase[chunkSize * chunkSize];
 
             //Create tilemaps for each layer
-            foreach (int layerId in TileLayerInfo.AllLayerIds)
+            foreach (int layerId in TileLayerRegistry.AllLayerIds)
             {
                 if (!chunkLayerBuffers.ContainsKey(layerId))
                 {

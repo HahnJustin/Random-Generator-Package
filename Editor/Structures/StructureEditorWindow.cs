@@ -114,10 +114,10 @@ public class StructureEditorWindow : EditorWindow
 
     private void RefreshRegistry()
     {
-        // LAYERS: from TileLayerInfo, filter out 0
-        var ids = Dalichrome.RandomGenerator.TileLayerInfo.AllLayerIds?.Where(l => l != 0).ToArray() ?? Array.Empty<int>();
+        // LAYERS: from TileLayerRegistry, filter out 0
+        var ids = Dalichrome.RandomGenerator.TileLayerRegistry.AllLayerIds?.Where(l => l != 0).ToArray() ?? Array.Empty<int>();
         currentLayerIds = ids;
-        currentLayerNames = currentLayerIds.Select(lid => Dalichrome.RandomGenerator.TileLayerInfo.GetName(lid) ?? $"Layer {lid}").ToArray();
+        currentLayerNames = currentLayerIds.Select(lid => Dalichrome.RandomGenerator.TileLayerRegistry.GetName(lid) ?? $"Layer {lid}").ToArray();
 
         // PALETTE: from TileObjects via GenericIdDropdownCache (ignore id 0 and tileKind Empty)
         var list = new List<PaletteItem>();
@@ -145,7 +145,7 @@ public class StructureEditorWindow : EditorWindow
             }
 
             var nm = string.IsNullOrEmpty(to.tileName) ? to.name : to.tileName;
-            var ln = Dalichrome.RandomGenerator.TileLayerInfo.GetName(to.layer) ?? $"Layer {to.layer}";
+            var ln = Dalichrome.RandomGenerator.TileLayerRegistry.GetName(to.layer) ?? $"Layer {to.layer}";
             if (s != null) spriteByTileId[id] = s;
             colorByTileId[id] = to.color;
             tileIdToLayerId[id] = to.layer;
@@ -363,14 +363,18 @@ public class StructureEditorWindow : EditorWindow
                 {
                     if (GUILayout.Button("Clear Unknown Layers")) { Undo.RecordObject(asset, "Clear Unknown Layers"); ClearUnknownLayers(); EditorUtility.SetDirty(asset); }
                     if (GUILayout.Button("Clear Unknown Tile IDs")) { Undo.RecordObject(asset, "Clear Unknown Tile IDs"); ClearUnknownTileIds(); EditorUtility.SetDirty(asset); }
-                }
-                using (new EditorGUILayout.HorizontalScope())
-                {
                     if (GUILayout.Button("Cull Wrong-Layer Tiles")) { Undo.RecordObject(asset, "Cull Wrong-Layer Tiles"); CullTilesWrongLayer(); EditorUtility.SetDirty(asset); }
                     if (GUILayout.Button("Show Ignored Tiles…"))
                     {
                         var msg = ignoredTileReasons.Count == 0 ? "No ignored tiles." : string.Join("\n", ignoredTileReasons.Take(200));
                         EditorUtility.DisplayDialog("Ignored Tiles", msg, "OK");
+                    }
+                    if (GUILayout.Button("Clear Tiles"))
+                    {
+                        Undo.RecordObject(asset, "Clear Tiles");
+                        asset.SetAllTiles(0);
+                        asset.EnsureTileArrays();
+                        EditorUtility.SetDirty(asset);
                     }
                 }
             }

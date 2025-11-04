@@ -100,7 +100,7 @@ namespace Dalichrome.RandomGenerator
                             buf[bufIdx] = null;
                         else
                             buf[bufIdx] =
-                                TileObjectInfo.GetTileBase(col[TileLayerInfo.GetLayerZ(layerId)]);
+                                TileObjectRegistry.GetTileBase(col[TileLayerRegistry.GetLayerZ(layerId)]);
                     }
                 }
                 // push one bulk call --------------------------------------------------
@@ -128,7 +128,7 @@ namespace Dalichrome.RandomGenerator
             foreach (int2 pos in tileGrid.GetPositions()) 
             {
                 int tempIndex = pos.x + (pos.y * tileGrid.width);
-                TileBase tileBase = TileObjectInfo.GetNumberTileBase(tileGrid.GetTileValue(pos));
+                TileBase tileBase = TileObjectRegistry.GetNumberTileBase(tileGrid.GetTileValue(pos));
                 tileBaseArray[tempIndex] = tileBase;
             }
 
@@ -151,7 +151,7 @@ namespace Dalichrome.RandomGenerator
 
             int seed = UnityEngine.Random.Range(0,1000000);
             StopAllCoroutines();
-            foreach (int layerId in TileLayerInfo.AllLayerIds)
+            foreach (int layerId in TileLayerRegistry.AllLayerIds)
             {
                 if (!tilemapDict.ContainsKey(layerId) && instantiateMissingTilemaps)
                 {

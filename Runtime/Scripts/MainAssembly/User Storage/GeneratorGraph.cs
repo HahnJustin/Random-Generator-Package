@@ -1,13 +1,13 @@
 ﻿using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Nodes;
 using Dalichrome.RandomGenerator.Generators;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XNode;
 
-namespace Dalichrome.RandomGenerator.Nodes
+namespace Dalichrome.RandomGenerator
 {
     [CreateAssetMenu]
     public class GeneratorGraph : NodeGraph
@@ -67,6 +67,12 @@ namespace Dalichrome.RandomGenerator.Nodes
                 map[node] = configGraphNode;
                 if (node is IConfigNode iconfigNode)
                     configGraphNode.Priority = iconfigNode.Priority;
+
+                // Populate with runtime structure table
+                if (config is IStructureConfig structConfig && !string.IsNullOrEmpty(structConfig.StructureTableId))
+                {
+                    structConfig.StructureTable = StructureTableRegistry.GetRuntime(structConfig.StructureTableId);
+                }
             }
             return configGraphNode;
         }

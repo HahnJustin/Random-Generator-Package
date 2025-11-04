@@ -30,6 +30,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 GuaranteeSpawnConfig guSpConfig => new GuaranteeSpawnGenerator(guSpConfig),
                 BorderConfig boConfig => new BorderGenerator(boConfig),
                 FillConfig fillConfig => new FillGenerator(fillConfig),
+                StructureConfig structConfig => new StructureGenerator(structConfig),
                 _ => throw new ArgumentException($"Unknown generator config: {config.GetType().Name}")
             };
         }

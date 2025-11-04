@@ -27,6 +27,25 @@ namespace Dalichrome.RandomGenerator.Editor
         where TNode : ConfigNodeBase<TCfg>
         where TCfg : AbstractConfig
     {
+#if ODIN_INSPECTOR
+        // Any field/property marked with one of these attributes will be drawn via Unity PropertyField
+        private static readonly HashSet<Type> UnityDrawerAttributeTypes = new()
+        {
+            typeof(Dalichrome.RandomGenerator.Configs.UUIDFieldAttribute),
+            typeof(Dalichrome.RandomGenerator.Configs.StructureDisplayAttribute),
+            // add more here as you create them...
+        };
+
+        private static bool HasAnyAttribute(MemberInfo mi, HashSet<Type> candidates)
+        {
+            if (mi == null) return false;
+            foreach (var t in candidates)
+                if (Attribute.IsDefined(mi, t, inherit: true))
+                    return true;
+            return false;
+        }
+#endif
+
         /* --------- field buckets by name --------- */
         private static readonly HashSet<string> SkipNames = new()
         { "_enabled", "enabled", "Enabled", "_displayName", "_priority" };
@@ -216,6 +235,19 @@ namespace Dalichrome.RandomGenerator.Editor
                 NodeEditorReloadHook.LiveTrees.Add(tree);
             }
 
+            // Build a lookup of immediate child SerializedProperties (depth + 1) for Unity drawing.
+            var unityChildren = new Dictionary<string, SerializedProperty>(32);
+            {
+                var it = cfgProp.Copy();
+                bool enterChildren = true;
+                while (it.NextVisible(enterChildren))
+                {
+                    enterChildren = false;
+                    if (it.depth != cfgProp.depth + 1) continue;
+                    unityChildren[it.name] = it.Copy();
+                }
+            }
+
             try
             {
                 tree.BeginDraw(false);
@@ -234,7 +266,17 @@ namespace Dalichrome.RandomGenerator.Editor
                     else gen.Add(p);
                 }
 
-                foreach (var p in gen) p.Draw();
+                // Generation group
+                foreach (var p in gen)
+                {
+                    var mi = p.Info.GetMemberInfo(); // FieldInfo or PropertyInfo
+                    bool forceUnity = HasAnyAttribute(mi, UnityDrawerAttributeTypes);
+
+                    if (forceUnity && unityChildren.TryGetValue(p.Name, out var sp))
+                        EditorGUILayout.PropertyField(sp, includeChildren: true);
+                    else
+                        p.Draw();
+                }
 
                 int id = node.GetInstanceID();
 
@@ -243,7 +285,21 @@ namespace Dalichrome.RandomGenerator.Editor
                     bool open = _foldMask.TryGetValue(id, out var v) && v;
                     open = SirenixEditorGUI.Foldout(open, "Masking");
                     _foldMask[id] = open;
-                    if (open) { EditorGUI.indentLevel++; foreach (var p in mask) p.Draw(); EditorGUI.indentLevel--; }
+                    if (open)
+                    {
+                        EditorGUI.indentLevel++;
+                        foreach (var p in mask)
+                        {
+                            var mi = p.Info.GetMemberInfo();
+                            bool forceUnity = HasAnyAttribute(mi, UnityDrawerAttributeTypes);
+
+                            if (forceUnity && unityChildren.TryGetValue(p.Name, out var sp))
+                                EditorGUILayout.PropertyField(sp, true);
+                            else
+                                p.Draw();
+                        }
+                        EditorGUI.indentLevel--;
+                    }
                 }
 
                 if (cfgObj is IOccupanceConfig && occ.Count > 0)
@@ -251,7 +307,21 @@ namespace Dalichrome.RandomGenerator.Editor
                     bool open = _foldOcc.TryGetValue(id, out var v2) && v2;
                     open = SirenixEditorGUI.Foldout(open, "Occupance");
                     _foldOcc[id] = open;
-                    if (open) { EditorGUI.indentLevel++; foreach (var p in occ) p.Draw(); EditorGUI.indentLevel--; }
+                    if (open)
+                    {
+                        EditorGUI.indentLevel++;
+                        foreach (var p in occ)
+                        {
+                            var mi = p.Info.GetMemberInfo();
+                            bool forceUnity = HasAnyAttribute(mi, UnityDrawerAttributeTypes);
+
+                            if (forceUnity && unityChildren.TryGetValue(p.Name, out var sp))
+                                EditorGUILayout.PropertyField(sp, true);
+                            else
+                                p.Draw();
+                        }
+                        EditorGUI.indentLevel--;
+                    }
                 }
             }
             finally { tree.EndDraw(); }

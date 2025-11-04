@@ -15,7 +15,7 @@ using UnityEditor;
 
 namespace Dalichrome.RandomGenerator
 {
-    public static class TileObjectInfo
+    public static class TileObjectRegistry
     {
         public const string ResourcesPath = "TileObjects";
 
@@ -54,7 +54,7 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        static TileObjectInfo()
+        static TileObjectRegistry()
         {
 #if UNITY_EDITOR
             AbstractUserData.AnyChanged += _ => Invalidate();
@@ -121,13 +121,13 @@ namespace Dalichrome.RandomGenerator
                 _tileIdToLayerId = new Dictionary<int, int>(_allTiles.Length);
                 _tileIdToLayerZ = new Dictionary<int, int>(_allTiles.Length);
 
-                // Ensure TileLayerInfo is built so z lookups are ready
-                _ = TileLayerInfo.AllLayerIds; // touches EnsureBuilt()
+                // Ensure TileLayerRegistry is built so z lookups are ready
+                _ = TileLayerRegistry.AllLayerIds; // touches EnsureBuilt()
 
                 foreach (var t in _allTiles)
                 {
                     _tileIdToLayerId[t.id] = t.layer;
-                    _tileIdToLayerZ[t.id] = TileLayerInfo.GetLayerZ(t.layer, -1); // -1 if missing
+                    _tileIdToLayerZ[t.id] = TileLayerRegistry.GetLayerZ(t.layer, -1); // -1 if missing
                 }
 
                 _tileKindById = new Dictionary<int, int>(_allTiles.Length);

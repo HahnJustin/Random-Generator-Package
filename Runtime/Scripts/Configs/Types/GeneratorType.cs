@@ -22,6 +22,7 @@ namespace Dalichrome.RandomGenerator.Configs
         Nystrom_Dungeon,
         Guarantee_Spawn,
         Border,
-        Fill
+        Fill,
+        Structure
     }
 }

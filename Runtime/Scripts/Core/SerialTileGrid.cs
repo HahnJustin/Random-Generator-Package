@@ -238,6 +238,7 @@ namespace Dalichrome.RandomGenerator.Core
             return true;
         }
 
+        // Set Tile Id
         public bool SetTileId(int x, int y, int id)
         {
             if (IsRestricted(x, y) || !CanModifyColumn(x, y)) return false;
@@ -249,6 +250,20 @@ namespace Dalichrome.RandomGenerator.Core
         public bool SetTileId(int2 position, int id)
         {
             return SetTileId(position.x, position.y, id);
+        }
+
+        // Set Tile Id Bypass Layer
+        public bool SetTileIdBypassLayer(int x, int y, int z, int id)
+        {
+            if (IsRestricted(x, y) || !CanModifyColumn(x, y)) return false;
+
+            tiles[PositionToIndex(x, y, z)] = id;
+            return true;
+        }
+
+        public bool SetTileIdBypassLayer(int3 pos, int id)
+        {
+            return SetTileIdBypassLayer(pos.x, pos.y, pos.z, id);
         }
 
         public bool ColumnContainsId(int x, int y, int id)
