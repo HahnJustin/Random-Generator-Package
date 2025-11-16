@@ -372,12 +372,14 @@ namespace Dalichrome.RandomGenerator.Core
 
         public ITileColumn GetColumn(int x, int y)
         {
+            if (!IsInBounds(x, y)) return default;
             return new NativeTileColumn(new NativeSlice<int>(tiles, PositionToIndex(x, y), depth), x, y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeTileColumn GetColumnNative(int x, int y)
         {
+            if (!IsInBounds(x, y)) return default;
             return new NativeTileColumn(new NativeSlice<int>(tiles, PositionToIndex(x, y), depth), x, y);
         }
 

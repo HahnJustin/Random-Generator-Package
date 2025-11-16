@@ -150,7 +150,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _radius: 1
         _interior: 0
         _exterior: 100
@@ -231,7 +231,7 @@ MonoBehaviour:
         _masked: 0
         _maskTime: 0
         _includeList: 
-        _excludeList: 10270000
+        _excludeList: 
         _position: 1
         _placeable: 1
         _spawnInTile: 100

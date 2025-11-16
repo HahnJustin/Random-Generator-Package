@@ -198,5 +198,15 @@ namespace Dalichrome.RandomGenerator
         {
             return spawnedObjects;
         }
+
+        public ITileColumn GetColumnAt(int2 pos)
+        {
+            return tileGrid.GetColumn(pos);
+        }
+
+        public int GetValueAt(int2 pos)
+        {
+            return tileGrid.GetTileValue(pos);
+        }
     }
 }
