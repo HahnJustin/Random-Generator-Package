@@ -26,6 +26,7 @@ namespace Dalichrome.RandomGenerator.Core
         [ReadOnly] internal NativeTileMask tileMask;
         [ReadOnly] private NativeLookupBundle bundle;
         [ReadOnly] private NativeParallelHashSet<int2> excludePositions;
+        [ReadOnly] private MetaData metaData;
 
         // Region Variables
         [ReadOnly] private NativeParallelHashSet<int2> regionPositions;
@@ -89,6 +90,8 @@ namespace Dalichrome.RandomGenerator.Core
 
             bundle = default;
 
+            metaData = new MetaData(allocator);
+
             excludePositions = allocateCollections
                 ? new NativeParallelHashSet<int2>(64, allocator)
                 : default;
@@ -129,6 +132,8 @@ namespace Dalichrome.RandomGenerator.Core
 
             // Lookups - ReadOnly so no need to copy
             grid.bundle = other.bundle;
+
+            grid.metaData = other.metaData.DeepClone(allocator);
 
             // Exclude Positions
             grid.excludePositions = NativeParallelHashSetCopy(other.excludePositions, allocator);
@@ -266,6 +271,16 @@ namespace Dalichrome.RandomGenerator.Core
         {
             int tmp = index / depth;
             return new(tmp % width, tmp / width, index % depth);
+        }
+
+        private bool ZInBounds(int z)
+        {
+            return z >= 0 && z < depth;
+        }
+
+        private bool ZInMetaBounds(int z)
+        {
+            return (z >= 0 && z < depth) || z == MetaData.ColumnZ;
         }
 
         private bool CanModifyPosition(int3 pos)
@@ -475,6 +490,131 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetTileValue(int2 position)
         {
             return GetTileValue(position.x, position.y);
+        }
+
+        // Meta Data Func
+
+        public void AddDataLayerId(int2 pos, int layerId, string field, int value)
+        {
+            AddData(pos.x, pos.y, GetLayerIndexFromLayedId(layerId), field, value);
+        }
+
+        public void AddDataLayerId(int x, int y, int layerId, string field, int value)
+        {
+            AddData(x, y, GetLayerIndexFromLayedId(layerId), field, value);
+        }
+
+        public void AddData(int x, int y, int layerZ, string field, int value)
+        {
+            if (!IsInBounds(x, y) || !ZInBounds(layerZ)) return;
+
+            metaData.AddData(new int3(x, y, layerZ), field, value);
+        }
+
+        public void AddData(int2 pos, int layerZ, string field, int value)
+        {
+            AddData(pos.x, pos.y, layerZ, field, value);
+        }
+
+        public void AddData(int x, int y, string field, int value)
+        {
+            AddData(x, y, MetaData.ColumnZ, field, value);
+        }
+
+        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value)
+        {
+            if (!IsInBounds(x, y) || !ZInBounds(layerZ)) return;
+
+            metaData.AddData(new int3(x, y, layerZ), fieldHash, value);
+        }
+
+        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value)
+        {
+            AddData(pos.x, pos.y, layerZ, fieldHash, value);
+        }
+
+        public void AddData(int x, int y, ulong fieldHash, int value)
+        {
+            AddData(x, y, MetaData.ColumnZ, fieldHash, value);
+        }
+
+        public int GetDataLayerId(int2 pos, int layerId, string field)
+        {
+            return GetData(pos.x, pos.y, GetLayerIndexFromLayedId(layerId), field);
+        }
+
+        public int GetDataLayerId(int x, int y, int layerId, string field)
+        {
+            return GetData(x, y, GetLayerIndexFromLayedId(layerId), field);
+        }
+
+        public int GetData(int x, int y, int layerZ, string field)
+        {
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return 0;
+
+            int val;
+            if (metaData.TryGetData(new int3(x, y, layerZ), field, out val))
+            {
+                return val;
+            }
+            return 0;
+        }
+
+        public int GetData(int2 pos, int layerZ, string field)
+        {
+            return GetData(pos.x, pos.y, layerZ, field);
+        }
+
+        public int GetData(int x, int y, string field)
+        {
+            return GetData(x, y, MetaData.ColumnZ, field);
+        }
+
+        public int GetData(int2 pos, string field)
+        {
+            return GetData(pos.x, pos.y, MetaData.ColumnZ, field);
+        }
+
+        public int GetData(int x, int y, int layerZ, ulong fieldHash)
+        {
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return 0;
+
+            int val;
+            if (metaData.TryGetData(new int3(x, y, layerZ), fieldHash, out val))
+            {
+                return val;
+            }
+            return 0;
+        }
+
+        public int GetData(int2 pos, int layerZ, ulong fieldHash)
+        {
+            return GetData(pos.x, pos.y, layerZ, fieldHash);
+        }
+
+        public int GetData(int x, int y, ulong fieldHash)
+        {
+            return GetData(x, y, MetaData.ColumnZ, fieldHash);
+        }
+
+        public int GetData(int2 pos, ulong fieldHash)
+        {
+            return GetData(pos.x, pos.y, MetaData.ColumnZ, fieldHash);
+        }
+
+        public List<MetaPair> GetAllData(int3 pos)
+        {
+            return metaData.GetAllData(pos);
+        }
+
+        public List<PositionValue> GetAllData(ulong fieldHash)
+        {
+            return metaData.GetAllData(fieldHash);
+        }
+
+        public List<PositionValue> GetAllData(string field)
+        {
+            return metaData.GetAllData(field);
         }
 
         // Masking
@@ -856,6 +996,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             tiles.Dispose();
             tileMask.Dispose();
+            metaData.Dispose();
 
             excludePositions.Dispose();
             regionPositions.Dispose();

@@ -27,7 +27,6 @@ namespace Dalichrome.RandomGenerator.Core
 
         // Set Tile Id Bypass Layer Funcs
         public abstract bool SetTileIdBypassLayer(int3 position, int value);
-
         public abstract bool SetTileIdBypassLayer(int x, int y, int z, int value);
 
         // Set All Ids At Pos Funcs
@@ -65,6 +64,35 @@ namespace Dalichrome.RandomGenerator.Core
 
         // Set All Tiles
         public abstract void SetAllTiles(IEnumerable<int> tileArray);
+
+        // Meta Data Func
+        public void AddDataLayerId(int2 pos, int layerId, string field, int value);
+        public void AddDataLayerId(int x, int y, int layerId, string field, int value);
+
+        public void AddData(int x, int y, int layerZ, string field, int value);
+        public void AddData(int2 pos, int layerZ, string field, int value);
+        public void AddData(int x, int y, string field, int value);
+
+        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value);
+        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value);
+        public void AddData(int x, int y, ulong fieldHash, int value);
+
+        public int GetDataLayerId(int2 pos, int layerId, string field);
+        public int GetDataLayerId(int x, int y, int layerId, string field);
+
+        public int GetData(int x, int y, int layerZ, string field);
+        public int GetData(int2 pos, int layerZ, string field);
+        public int GetData(int x, int y, string field);
+        public int GetData(int2 pos, string field);
+
+        public int GetData(int x, int y, int layerZ, ulong fieldHash);
+        public int GetData(int2 pos, int layerZ, ulong fieldHash);
+        public int GetData(int x, int y, ulong fieldHash);
+        public int GetData(int2 pos, ulong fieldHash);
+
+        public List<MetaPair> GetAllData(int3 pos);
+        public List<PositionValue> GetAllData(ulong fieldHash);
+        public List<PositionValue> GetAllData(string field);
 
         // Masking Funcs
         public bool Masked { get; }

@@ -404,6 +404,109 @@ namespace Dalichrome.RandomGenerator.Core
             return GetTileValue(position.x, position.y);
         }
 
+        // Meta Data Funcs
+        public void AddDataLayerId(int2 pos, int layerId, string field, int value)
+        {
+            
+        }
+        public void AddDataLayerId(int x, int y, int layerId, string field, int value)
+        {
+            
+        }
+
+        public void AddData(int x, int y, int layerZ, string field, int value)
+        {
+            
+        }
+
+        public void AddData(int2 pos, int layerZ, string field, int value)
+        {
+            
+        }
+
+        public void AddData(int x, int y, string field, int value)
+        {
+            
+        }
+
+        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value)
+        {
+            
+        }
+
+        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value)
+        {
+            
+        }
+
+        public void AddData(int x, int y, ulong fieldHash, int value)
+        {
+            
+        }
+
+        public int GetDataLayerId(int2 pos, int layerId, string field)
+        {
+            return 0;
+        }
+
+        public int GetDataLayerId(int x, int y, int layerId, string field)
+        {
+            return 0;
+        }
+
+        public int GetData(int x, int y, int layerZ, string field)
+        {
+            return 0;
+        }
+
+        public int GetData(int2 pos, int layerZ, string field)
+        {
+            return 0;
+        }
+
+        public int GetData(int x, int y, string field)
+        {
+            return 0;
+        }
+
+        public int GetData(int2 pos, string field)
+        {
+            return 0;
+        }
+
+        public int GetData(int x, int y, int layerZ, ulong fieldHash)
+        {
+            return 0;
+        }
+
+        public int GetData(int2 pos, int layerZ, ulong fieldHash)
+        {
+            return 0;
+        }
+
+        public int GetData(int x, int y, ulong fieldHash)
+        {
+            return 0;
+        }
+
+        public int GetData(int2 pos, ulong fieldHash)
+        {
+            return 0;
+        }
+
+        public List<MetaPair> GetAllData(int3 pos)
+        {
+            return new();
+        }
+        public List<PositionValue> GetAllData(ulong fieldHash)
+        {
+            return new();
+        }
+        public List<PositionValue> GetAllData(string field)
+        {
+            return new();
+        }
+
         public void RemoveMask()
         {
             masked = false;

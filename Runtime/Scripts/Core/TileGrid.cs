@@ -1,10 +1,13 @@
+using Dalichrome.RandomGenerator.Random;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
-using UnityEngine;
-using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
+using static UnityEditor.PlayerSettings;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -238,6 +241,109 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetTileValue(int2 position)
         {
             return GetTileValue(position.x, position.y);
+        }
+
+        // Meta Data Funcs
+        public void AddDataLayerId(int2 pos, int layerId, string field, int value)
+        {
+            subgrid.AddDataLayerId(pos, layerId, field, value);
+        }
+        public void AddDataLayerId(int x, int y, int layerId, string field, int value)
+        {
+            subgrid.AddDataLayerId(x, y, layerId, field, value);
+        }
+
+        public void AddData(int x, int y, int layerZ, string field, int value)
+        {
+            subgrid.AddData(x, y, layerZ, field, value);
+        }
+
+        public void AddData(int2 pos, int layerZ, string field, int value)
+        {
+            subgrid.AddData(pos, layerZ, field, value);
+        }
+
+        public void AddData(int x, int y, string field, int value)
+        {
+            subgrid.AddData(x, y, field, value);
+        }
+
+        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value)
+        {
+            subgrid.AddData(x, y, layerZ, fieldHash, value);
+        }
+
+        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value)
+        {
+            subgrid.AddData(pos, layerZ, fieldHash, value);
+        }
+
+        public void AddData(int x, int y, ulong fieldHash, int value)
+        {
+            subgrid.AddData(x, y, fieldHash, value);
+        }
+
+        public int GetDataLayerId(int2 pos, int layerId, string field)
+        {
+            return subgrid.GetDataLayerId(pos, layerId, field);
+        }
+
+        public int GetDataLayerId(int x, int y, int layerId, string field)
+        {
+            return subgrid.GetDataLayerId(x, y, layerId, field);
+        }
+
+        public int GetData(int x, int y, int layerZ, string field)
+        {
+            return subgrid.GetData(x, y, layerZ, field);
+        }
+
+        public int GetData(int2 pos, int layerZ, string field)
+        {
+            return subgrid.GetData(pos, layerZ, field);
+        }
+
+        public int GetData(int x, int y, string field)
+        {
+            return subgrid.GetData(x, y, field);
+        }
+
+        public int GetData(int2 pos, string field)
+        {
+            return subgrid.GetData(pos, field);
+        }
+
+        public int GetData(int x, int y, int layerZ, ulong fieldHash)
+        {
+            return subgrid.GetData(x, y, layerZ, fieldHash);
+        }
+
+        public int GetData(int2 pos, int layerZ, ulong fieldHash)
+        {
+            return subgrid.GetData(pos, layerZ, fieldHash);
+        }
+
+        public int GetData(int x, int y, ulong fieldHash)
+        {
+            return subgrid.GetData(x, y, fieldHash);
+        }
+
+        public int GetData(int2 pos, ulong fieldHash)
+        {
+            return subgrid.GetData(pos, fieldHash);
+        }
+
+        public List<MetaPair> GetAllData(int3 pos)
+        {
+            return subgrid.GetAllData(pos);
+        }
+        public List<PositionValue> GetAllData(ulong fieldHash)
+        {
+            return subgrid.GetAllData(fieldHash);
+        }
+        public List<PositionValue> GetAllData(string field)
+        {
+            return subgrid.GetAllData(field);
         }
 
         // Mask Funcs
