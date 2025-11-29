@@ -350,6 +350,10 @@ MonoBehaviour:
         asm: Dalichrome.RandomGenerator.Configs}
       data:
         _enabled: 1
+        _masked: 0
+        _maskTime: 0
+        _includeList: 
+        _excludeList: 0c270000
         _regionMin: 35
         _regionMax: 40
 --- !u!114 &11400000
@@ -534,7 +538,7 @@ MonoBehaviour:
         _excludeList: 
         _density: 0.15
         _repetitions: 1
-        _tiles: fa0f0000
+        _tiles: 05000000
 --- !u!114 &5305461975377240851
 MonoBehaviour:
   m_ObjectHideFlags: 0
