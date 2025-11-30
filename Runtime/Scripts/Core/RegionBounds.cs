@@ -31,7 +31,7 @@ namespace Dalichrome.RandomGenerator.Core
             for (int i = regionIncludedPositons.Count -1; i >= 0; i--)
             {
                 int2 positon = regionIncludedPositons[i];
-                if (!grid.IsInsideMask(positon))
+                if (!grid.IsInsideMask(positon.x, positon.y))
                 {
                     regionIncludedPositons.RemoveAt(i);
                     continue;
@@ -56,7 +56,7 @@ namespace Dalichrome.RandomGenerator.Core
             for (int i = regionIncludedPositons.Count - 1; i >= 0; i--)
             {
                 int2 positon = regionIncludedPositons[i];
-                if (!grid.IsInsideMask(positon))
+                if (!grid.IsInsideMask(positon.x, positon.y))
                 {
                     regionIncludedPositons.RemoveAt(i);
                 }

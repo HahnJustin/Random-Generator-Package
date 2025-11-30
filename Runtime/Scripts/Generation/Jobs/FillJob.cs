@@ -17,7 +17,7 @@ public struct FillJob : IJobParallelFor
 
         for (int i = 0; i < fillIds.Length; i++)
         {
-            writeGrid.SetTileId(pos, fillIds[i]);
+            writeGrid.SetTileId(pos.x, pos.y, fillIds[i]);
         }
     }
 }

@@ -4,10 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEditor.PlayerSettings;
+using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -17,28 +15,42 @@ namespace Dalichrome.RandomGenerator.Core
         public readonly int height;
         public readonly int depth;
 
-        public int2 Center { get { return new int2(Mathf.Clamp(width / 2, 0, width), Mathf.Clamp(height / 2, 0, height)); } }
+        public int2 Center =>
+            new int2(
+                Mathf.Clamp(width / 2, 0, width),
+                Mathf.Clamp(height / 2, 0, height)
+            );
 
-        public BoundsInt Bounds { get { return new(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1)); } }
-
-        public bool Masked { get { return subgrid.Masked; } }
-
-        public ITileMask TileMask { get { return subgrid.TileMask; } set { subgrid.TileMask = value; } }
+        public BoundsInt Bounds =>
+            new BoundsInt(new Vector3Int(0, 0, 0), new Vector3Int(width, height, 1));
 
         private ITileGrid subgrid;
-
-        public bool IsSerial{ get { return isSerial; }}
         private bool isSerial = false;
+
+        public bool IsSerial => isSerial;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private string allocationStack;
         private bool isDisposed = false;
 #endif
 
-        public bool IsValid 
+        // ---------------- ITileGrid properties ----------------
+
+        public int2 Minimum => subgrid.Minimum;
+        public int2 Maximum => subgrid.Maximum;
+
+        public bool IsValid
         {
-            get { return subgrid.IsValid; }
-            set { subgrid.IsValid = value; }
+            get => subgrid.IsValid;
+            set => subgrid.IsValid = value;
+        }
+
+        public bool Masked => subgrid.Masked;
+
+        public ITileMask TileMask
+        {
+            get => subgrid.TileMask;
+            set => subgrid.TileMask = value;
         }
 
         public bool IsIncludingTiles
@@ -49,6 +61,7 @@ namespace Dalichrome.RandomGenerator.Core
                 return subgrid.TileMask.IsIncludingTiles;
             }
         }
+
         public bool IsExcludingTiles
         {
             get
@@ -58,15 +71,7 @@ namespace Dalichrome.RandomGenerator.Core
             }
         }
 
-        public int2 Minimum
-        {
-            get { return subgrid.Minimum; }
-        }
-
-        public int2 Maximum
-        {
-            get { return subgrid.Maximum; }
-        }
+        // ---------------- ctor / cloning ----------------
 
         public TileGrid(int width, int height, int depth)
         {
@@ -83,357 +88,437 @@ namespace Dalichrome.RandomGenerator.Core
 
         public static TileGrid DeepClone(TileGrid other)
         {
-            TileGrid grid = new(other.width, other.height, other.depth);
-            if(other.IsValid) grid.subgrid = other.subgrid.DeepClone();
+            var grid = new TileGrid(other.width, other.height, other.depth);
+            if (other.IsValid)
+                grid.subgrid = other.subgrid.DeepClone();
             return grid;
         }
 
-        // Private Funcs
-        public void SetGridData(NativeTileGrid newData) => subgrid = newData;
+        // For internal wiring when NativeTileGrid (struct) changes
+        private void SetGridData(NativeTileGrid newData) => subgrid = newData;
 
-        // Set Tile Type
-        public bool SetTileId(int x, int y, int id)
-        {
-            return subgrid.SetTileId(x, y, id);
-        }
+        // ---------------- Primitive tile / column ops ----------------
 
-        public bool SetTileId(Vector2Int position, int id)
-        {
-            return SetTileId(position.x, position.y, id);
-        }
+        public bool SetTileId(int x, int y, int id) =>
+            subgrid.SetTileId(x, y, id);
 
-        public bool SetTileId(int2 position, int id)
-        {
-            return SetTileId(position.x, position.y, id);
-        }
+        // sugar
+        public bool SetTileId(int2 position, int id) =>
+            SetTileId(position.x, position.y, id);
 
-        // Force Tile Type
-        public bool SetTileIdBypassLayer(int3 position, int id)
-        {
-            return subgrid.SetTileIdBypassLayer(position, id);
-        }
+        public bool SetTileId(Vector2Int position, int id) =>
+            SetTileId(position.x, position.y, id);
 
-        public bool SetTileIdBypassLayer(int2 position, int z, int id)
-        {
-            return subgrid.SetTileIdBypassLayer(position.x, position.y, z, id);
-        }
+        public bool SetTileIdBypassLayer(int x, int y, int z, int value) =>
+            subgrid.SetTileIdBypassLayer(x, y, z, value);
 
-        public bool SetTileIdBypassLayer(int x, int y, int z, int id)
-        {
-            return subgrid.SetTileIdBypassLayer(x, y, z, id);
-        }
+        // sugar
+        public bool SetTileIdBypassLayer(int3 position, int value) =>
+            SetTileIdBypassLayer(position.x, position.y, position.z, value);
 
-        // Contains Type
-        public bool ColumnContainsId(int x, int y, int id)
-        {
-            return subgrid.ColumnContainsId(x, y, id);
-        }
+        public bool SetTileIdBypassLayer(int2 position, int z, int value) =>
+            SetTileIdBypassLayer(position.x, position.y, z, value);
 
-        public bool ColumnContainsId(int2 position, int id)
-        {
-            return ColumnContainsId(position.x, position.y, id);
-        }
+        public bool CopyColumn(int2 replacer, int2 replaced) =>
+            subgrid.CopyColumn(replacer, replaced);
 
-        public bool ColumnContainsId(Vector2Int position, int id)
-        {
-            return ColumnContainsId(position.x, position.y, id);
-        }
+        public ITileColumn GetColumn(int x, int y) =>
+            subgrid.GetColumn(x, y);
 
-        // Get Tile
-        public int GetTileId(int x, int y, int layerId)
-        {
-            return subgrid.GetTileId(x, y, layerId);
-        }
+        // sugar
+        public ITileColumn GetColumn(int2 pos) =>
+            GetColumn(pos.x, pos.y);
 
-        public int GetTileId(Vector2Int position, int layerId)
-        {
-            return GetTileId(position.x, position.y, layerId);
-        }
+        public ITileColumn GetColumn(Vector2Int pos) =>
+            GetColumn(pos.x, pos.y);
 
-        public int GetTileId(int2 position, int layerId)
-        {
-            return GetTileId(position.x, position.y, layerId);
-        }
+        public bool SetColumn(ITileColumn col) =>
+            subgrid.SetColumn(col);
 
-        // Copy Column
-        public bool CopyColumn(int2 replacer, int2 replaced)
-        {
-            return subgrid.CopyColumn(replacer, replaced);
-        }
+        public int GetEmpty(int id) =>
+            subgrid.GetEmpty(id);
 
-        // Get Column
-        public ITileColumn GetColumn(int2 pos)
-        {
-            return subgrid.GetColumn(pos);
-        }
+        // sugar
+        public bool GetEmptyBool(int id) =>
+            subgrid.GetEmpty(id) == 1;
 
-        public ITileColumn GetColumn(int x, int y)
-        {
-            return subgrid.GetColumn(x, y);
-        }
+        public int GetNotEmpty(int id) =>
+            -(subgrid.GetEmpty(id) - 1);
 
-        public ITileColumn GetColumn(Vector2Int pos)
-        {
-            return subgrid.GetColumn(pos.x, pos.y);
-        }
+        public bool ColumnContainsId(int x, int y, int id) =>
+            subgrid.ColumnContainsId(x, y, id);
 
-        // Set Column
+        // sugar
+        public bool ColumnContainsId(int2 position, int id) =>
+            ColumnContainsId(position.x, position.y, id);
 
-        public bool SetColumn(ITileColumn col)
-        {
-            return subgrid.SetColumn(col);
-        }
+        public bool ColumnContainsId(Vector2Int position, int id) =>
+            ColumnContainsId(position.x, position.y, id);
 
-        // Get Empty
-        public int GetEmpty(int tileId)
-        {
-            return subgrid.GetEmpty(tileId);
-        }
+        public int GetTileId(int x, int y, int layerId) =>
+            subgrid.GetTileId(x, y, layerId);
 
-        public bool GetEmptyBool(int tileId)
-        {
-            return subgrid.GetEmpty(tileId) == 1;
-        }
+        // sugar
+        public int GetTileId(int2 position, int layerId) =>
+            GetTileId(position.x, position.y, layerId);
 
-        public int GetNotEmpty(int tileId)
-        {
-            return -(subgrid.GetEmpty(tileId) -1);
-        }
+        public int GetTileId(Vector2Int position, int layerId) =>
+            GetTileId(position.x, position.y, layerId);
 
-        // Get Occupied
-        public int GetOccupied(int x, int y)
-        {
-            return subgrid.GetOccupied(x, y);
-        }
+        public int GetOccupied(int x, int y) =>
+            subgrid.GetOccupied(x, y);
 
-        public int GetOccupied(int2 pos)
-        {
-            return subgrid.GetOccupied(pos);
-        }
+        // sugar
+        public int GetOccupied(int2 pos) =>
+            GetOccupied(pos.x, pos.y);
 
-        // Set Tile Value
-        public bool SetTileValue(int x, int y, int value)
-        {
-            return subgrid.SetTileValue(x, y, value);
-        }
+        public bool SetTileValue(int x, int y, int value) =>
+            subgrid.SetTileValue(x, y, value);
 
-        public bool SetTileValue(Vector2Int position, int value)
-        {
-            return SetTileValue(position.x, position.y, value);
-        }
+        // sugar
+        public bool SetTileValue(int2 position, int value) =>
+            SetTileValue(position.x, position.y, value);
 
-        public bool SetTileValue(int2 position, int value)
-        {
-            return SetTileValue(position.x, position.y, value);
-        }
+        public bool SetTileValue(Vector2Int position, int value) =>
+            SetTileValue(position.x, position.y, value);
 
-        // Get Tile Type
-        public int GetTileValue(int x, int y)
-        {
-            return subgrid.GetTileValue(x, y);
-        }
+        public int GetTileValue(int x, int y) =>
+            subgrid.GetTileValue(x, y);
 
-        public int GetTileValue(Vector2Int position)
-        {
-            return GetTileValue(position.x, position.y);
-        }
+        // sugar
+        public int GetTileValue(int2 position) =>
+            GetTileValue(position.x, position.y);
 
-        public int GetTileValue(int2 position)
-        {
-            return GetTileValue(position.x, position.y);
-        }
+        public int GetTileValue(Vector2Int position) =>
+            GetTileValue(position.x, position.y);
 
-        // Meta Data Funcs
-        public void AddDataLayerId(int2 pos, int layerId, string field, int value)
-        {
-            subgrid.AddDataLayerId(pos, layerId, field, value);
-        }
-        public void AddDataLayerId(int x, int y, int layerId, string field, int value)
-        {
+        public void SetAllTiles(IEnumerable<int> tileArray) =>
+            subgrid.SetAllTiles(tileArray);
+
+        // ---------------- Meta data primitives + sugar ----------------
+
+        public void AddDataLayerId(int x, int y, int layerId, string field, int value) =>
             subgrid.AddDataLayerId(x, y, layerId, field, value);
-        }
 
-        public void AddData(int x, int y, int layerZ, string field, int value)
-        {
+        public void AddDataLayerId(int2 pos, int layerId, string field, int value) =>
+            AddDataLayerId(pos.x, pos.y, layerId, field, value);
+
+        public void AddData(int x, int y, int layerZ, string field, int value) =>
             subgrid.AddData(x, y, layerZ, field, value);
-        }
 
-        public void AddData(int2 pos, int layerZ, string field, int value)
-        {
-            subgrid.AddData(pos, layerZ, field, value);
-        }
+        // sugar
+        public void AddData(int2 pos, int layerZ, string field, int value) =>
+            AddData(pos.x, pos.y, layerZ, field, value);
 
-        public void AddData(int x, int y, string field, int value)
-        {
-            subgrid.AddData(x, y, field, value);
-        }
+        public void AddData(int x, int y, string field, int value) =>
+            AddData(x, y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value)
-        {
+        public void AddData(int2 pos, string field, int value) =>
+            AddData(pos.x, pos.y, MetaData.ColumnZ, field, value);
+
+        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value) =>
             subgrid.AddData(x, y, layerZ, fieldHash, value);
-        }
 
-        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value)
-        {
-            subgrid.AddData(pos, layerZ, fieldHash, value);
-        }
+        // sugar
+        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value) =>
+            AddData(pos.x, pos.y, layerZ, fieldHash, value);
 
-        public void AddData(int x, int y, ulong fieldHash, int value)
-        {
-            subgrid.AddData(x, y, fieldHash, value);
-        }
+        public void AddData(int x, int y, ulong fieldHash, int value) =>
+            AddData(x, y, MetaData.ColumnZ, fieldHash, value);
 
-        public int GetDataLayerId(int2 pos, int layerId, string field)
-        {
-            return subgrid.GetDataLayerId(pos, layerId, field);
-        }
+        public void AddData(int2 pos, ulong fieldHash, int value) =>
+            AddData(pos.x, pos.y, MetaData.ColumnZ, fieldHash, value);
 
-        public int GetDataLayerId(int x, int y, int layerId, string field)
-        {
-            return subgrid.GetDataLayerId(x, y, layerId, field);
-        }
+        public int GetDataLayerId(int x, int y, int layerId, string field) =>
+            subgrid.GetDataLayerId(x, y, layerId, field);
 
-        public int GetData(int x, int y, int layerZ, string field)
-        {
-            return subgrid.GetData(x, y, layerZ, field);
-        }
+        public int GetDataLayerId(int2 pos, int layerId, string field) =>
+            GetDataLayerId(pos.x, pos.y, layerId, field);
 
-        public int GetData(int2 pos, int layerZ, string field)
-        {
-            return subgrid.GetData(pos, layerZ, field);
-        }
+        public int GetData(int x, int y, int layerZ, string field) =>
+            subgrid.GetData(x, y, layerZ, field);
 
-        public int GetData(int x, int y, string field)
-        {
-            return subgrid.GetData(x, y, field);
-        }
+        // sugar
+        public int GetData(int3 pos, string field) =>
+            GetData(pos.x, pos.y, pos.z, field);
 
-        public int GetData(int2 pos, string field)
-        {
-            return subgrid.GetData(pos, field);
-        }
+        public int GetData(int2 pos, int layerZ, string field) =>
+            GetData(pos.x, pos.y, layerZ, field);
 
-        public int GetData(int x, int y, int layerZ, ulong fieldHash)
-        {
-            return subgrid.GetData(x, y, layerZ, fieldHash);
-        }
+        public int GetData(int x, int y, string field) =>
+            GetData(x, y, MetaData.ColumnZ, field);
 
-        public int GetData(int2 pos, int layerZ, ulong fieldHash)
-        {
-            return subgrid.GetData(pos, layerZ, fieldHash);
-        }
+        public int GetData(int2 pos, string field) =>
+            GetData(pos.x, pos.y, MetaData.ColumnZ, field);
 
-        public int GetData(int x, int y, ulong fieldHash)
-        {
-            return subgrid.GetData(x, y, fieldHash);
-        }
+        public int GetData(int x, int y, int layerZ, ulong fieldHash) =>
+            subgrid.GetData(x, y, layerZ, fieldHash);
 
-        public int GetData(int2 pos, ulong fieldHash)
-        {
-            return subgrid.GetData(pos, fieldHash);
-        }
+        // sugar
+        public int GetData(int3 pos, ulong fieldHash) =>
+            GetData(pos.x, pos.y, pos.z, fieldHash);
 
-        public List<MetaPair> GetAllData(int3 pos)
-        {
-            return subgrid.GetAllData(pos);
-        }
-        public List<PositionValue> GetAllData(ulong fieldHash)
-        {
-            return subgrid.GetAllData(fieldHash);
-        }
-        public List<PositionValue> GetAllData(string field)
-        {
-            return subgrid.GetAllData(field);
-        }
+        public int GetData(int2 pos, int layerZ, ulong fieldHash) =>
+            GetData(pos.x, pos.y, layerZ, fieldHash);
 
-        // Mask Funcs
-        public void RemoveMask()
-        {
+        public int GetData(int x, int y, ulong fieldHash) =>
+            GetData(x, y, MetaData.ColumnZ, fieldHash);
+
+        public int GetData(int2 pos, ulong fieldHash) =>
+            GetData(pos.x, pos.y, MetaData.ColumnZ, fieldHash);
+
+        public List<MetaPair> GetAllData(int3 pos) =>
+            subgrid.GetAllData(pos);
+
+        public List<PositionValue> GetAllData(ulong fieldHash) =>
+            subgrid.GetAllData(fieldHash);
+
+        public List<PositionValue> GetAllData(string field) =>
+            subgrid.GetAllData(field);
+
+        // ---------------- Masking ----------------
+
+        public void RemoveMask() =>
             subgrid.RemoveMask();
-        }
 
         public void CreateMask(List<int> includeList, List<int> excludeList)
         {
             subgrid.CreateMask(includeList, excludeList);
-            if(subgrid is NativeTileGrid grid) SetGridData(grid);
+
+            // If NativeTileGrid is a struct, this keeps our local copy in sync
+            if (subgrid is NativeTileGrid grid)
+                SetGridData(grid);
         }
 
-        public void ToggleMasked(bool on)
+        public void ToggleMasked(bool on) => subgrid.ToggleMasked(on);
+
+        public void AddExcludedPosition(int2 position) => subgrid.AddExcludedPosition(position);
+        public void AddExcludedPosition(int x, int y) => AddExcludedPosition(new int2( x, y));
+        public void AddExcludedPosition(Vector2Int position) => AddExcludedPosition(position.x, position.y);
+
+        public bool IsExcluding(int x, int y) => IsExcluding(new int2(x, y));
+        public bool IsExcluding(int2 position) => subgrid.IsExcluding(position);
+        public bool IsExcluding(Vector2Int position) => IsExcluding(position.x, position.y);
+
+        public bool IsInsideMask(int x, int y) => subgrid.IsInsideMask(x, y);
+        public bool IsInsideMask(int2 pos) => IsInsideMask(pos.x, pos.y);
+
+        // ---------------- Neighbor helpers (shared logic) ----------------
+
+        private void NeighborPosHelper(int2 pos, List<int2> list)
         {
-            subgrid.ToggleMasked(on);
+            if (IsInBounds(pos.x, pos.y))
+                list.Add(pos);
         }
 
-        public void AddExcludedPosition(int2 position)
+        public List<int2> GetEightNeighborPositions(int2 pos)
         {
-            subgrid.AddExcludedPosition(position);
+            var positions = new List<int2>(8);
+            NeighborPosHelper(pos + Constants.Int2Left, positions);
+            NeighborPosHelper(pos + Constants.Int2Left + Constants.Int2Up, positions);
+            NeighborPosHelper(pos + Constants.Int2Up, positions);
+            NeighborPosHelper(pos + Constants.Int2Right + Constants.Int2Up, positions);
+            NeighborPosHelper(pos + Constants.Int2Right, positions);
+            NeighborPosHelper(pos + Constants.Int2Right + Constants.Int2Down, positions);
+            NeighborPosHelper(pos + Constants.Int2Down, positions);
+            NeighborPosHelper(pos + Constants.Int2Left + Constants.Int2Down, positions);
+            return positions;
         }
 
-        public void AddExcludedPosition(Vector2Int position)
+        public List<int2> GetFourNeighborPositions(int2 pos)
         {
-            AddExcludedPosition(new int2(position.x, position.y));
+            var positions = new List<int2>(4);
+            NeighborPosHelper(pos + Constants.Int2Left, positions);
+            NeighborPosHelper(pos + Constants.Int2Up, positions);
+            NeighborPosHelper(pos + Constants.Int2Right, positions);
+            NeighborPosHelper(pos + Constants.Int2Down, positions);
+            return positions;
         }
 
-        public bool IsExcluding(int x, int y)
-        {
-            return IsExcluding(new int2(x, y));
-        }
-
-        public bool IsExcluding(Vector2Int position)
-        {
-            return IsExcluding(position.x, position.y);
-        }
-
-        public bool IsExcluding(int2 position)
-        {
-            return subgrid.IsExcluding(position);
-        }
+        // ---------------- Nearest / random edge (shared logic) ----------------
 
         public int2 GetNearestPosition(int x, int y, int id)
         {
-            return subgrid.GetNearestPosition(x, y, id);
+            int maxRadius = math.max(height, width);
+
+            for (int d = 1; d < maxRadius; d++)
+            {
+                for (int dx = -d; dx <= d; dx++)
+                {
+                    int dy1 = d - math.abs(dx);
+                    int dy2 = -dy1;
+
+                    int x1 = x + dx;
+                    int y1 = y + dy1;
+                    if (IsInBounds(x1, y1) && ColumnContainsId(x1, y1, id))
+                        return new int2(x1, y1);
+
+                    if (dy1 != dy2)
+                    {
+                        int x2 = x + dx;
+                        int y2 = y + dy2;
+                        if (IsInBounds(x2, y2) && ColumnContainsId(x2, y2, id))
+                            return new int2(x2, y2);
+                    }
+                }
+            }
+
+            return Constants.OutsideGridInt2;
         }
+
+        // sugar
+        public int2 GetNearestPosition(int2 position, int id) =>
+            GetNearestPosition(position.x, position.y, id);
 
         public Vector2Int GetNearestPosition(Vector2Int position, int id)
         {
-            int2 nearest =  GetNearestPosition(position.x, position.y, id);
+            int2 nearest = GetNearestPosition(position.x, position.y, id);
             return new Vector2Int(nearest.x, nearest.y);
-        }
-
-        public int2 GetNearestPosition(int2 position, int id)
-        {
-            return GetNearestPosition(position.x, position.y, id);
         }
 
         public int2 GetRandomEdgePoint(AbstractRandom random)
         {
-            return subgrid.GetRandomEdgePoint(random);
+            int value = random.NextInt(4);
+
+            // x == width or y == height => just outside grid, preserving prior behavior
+            return value switch
+            {
+                0 => new int2(width, random.NextInt(height)),
+                1 => new int2(0, random.NextInt(height)),
+                2 => new int2(random.NextInt(width), height),
+                _ => new int2(random.NextInt(width), 0),
+            };
         }
 
         public Vector2Int GetRandomEdgeVector2(AbstractRandom random)
         {
-            int2 position = subgrid.GetRandomEdgePoint(random);
-            return new(position.x, position.y);
+            int2 p = GetRandomEdgePoint(random);
+            return new Vector2Int(p.x, p.y);
         }
 
-        public void ClearNumbers()
-        {
+        // ---------------- Region API (delegated) ----------------
+
+        public RegionBounds GetRegionBounds() =>
+            subgrid.GetRegionBounds();
+
+        public void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions) =>
+            subgrid.SetRegionBounds(min, max, regionExcludedPositions);
+
+        public void SetRegionBounds(Vector2Int min, Vector2Int max, List<int2> regionExcludedPositions) =>
+            SetRegionBounds(new int2(min.x, min.y), new int2(max.x, max.y), regionExcludedPositions);
+
+        public void SetRegionBounds(RegionBounds regionBounds) =>
+            SetRegionBounds(regionBounds.min, regionBounds.max, regionBounds.includingPositions);
+
+        public void RemoveRegion() =>
+            subgrid.RemoveRegion();
+
+        public void AddRegionPosition(int x, int y) => subgrid.AddRegionPosition(x, y);
+        public void AddRegionPosition(int2 pos) => AddRegionPosition(pos.x, pos.y);
+        public void AddRegionPosition(Vector2Int pos) => AddRegionPosition(pos.x, pos.y);
+
+        public bool IsInRegion(int x, int y) => subgrid.IsInRegion(x, y);
+        public bool IsInRegion(int2 pos) => IsInRegion(pos.x, pos.y);
+        public bool IsInRegion(Vector2Int pos) => IsInRegion(pos.x, pos.y);
+
+        // ---------------- Bounds / restriction (shared logic) ----------------
+
+        public bool IsInBounds(int x, int y) => subgrid.IsInBounds(x, y);
+        public bool IsInBounds(int2 pos) => IsInBounds(pos.x, pos.y);
+        public bool IsInBounds(Vector2Int pos) => IsInBounds(pos.x, pos.y);
+
+        // Restricted = out of bounds OR excluded OR out of region
+        public bool IsRestricted(int x, int y) => !IsInBounds(x, y) || IsExcluding(x, y) || !IsInRegion(x, y);
+        public bool IsRestricted(int2 pos) => IsRestricted(pos.x, pos.y);
+        public bool IsRestricted(Vector2Int pos) => IsRestricted(pos.x, pos.y);
+
+        // ---------------- Misc ----------------
+
+        public void ClearNumbers() =>
             subgrid.ClearNumbers();
+
+        public void ClearPositiveNumbers() =>
+            subgrid.ClearPositiveNumbers();
+
+        public bool CanHaveTiles() =>
+            subgrid.CanHaveTiles();
+
+        public void SetLookupBundle(ILookupBundle bundle)
+        {
+            if ((!isSerial && bundle is NativeLookupBundle) ||
+                (isSerial && bundle is SerialLookupBundle))
+            {
+                subgrid.SetLookupBundle(bundle);
+            }
         }
 
-        public void ClearPositiveNumbers()
+        public NativeTileGrid GetNative() =>
+            subgrid is NativeTileGrid grid ? grid : default;
+
+        public NativeTileGrid CloneNativeGrid()
         {
-           subgrid.ClearPositiveNumbers();
+            if (subgrid is NativeTileGrid grid)
+                return NativeTileGrid.DeepClone(grid);
+            return default;
         }
 
-        public bool CanHaveTiles()
+        public void OverrideSubGrid(NativeTileGrid data)
         {
-            return subgrid.CanHaveTiles();
+            subgrid.Dispose();
+            subgrid = data;
         }
+
+        public void ToSerial()
+        {
+            if (subgrid is NativeTileGrid nativeGrid)
+            {
+                SerialTileGrid newGrid = nativeGrid.ToSerial();
+                nativeGrid.Dispose();
+                subgrid = newGrid;
+                isSerial = true;
+            }
+        }
+
+        // ---------------- Enumeration ----------------
+
+        public NativeArray<int> AsNativeArray() =>
+            subgrid.AsNativeArray();
+
+        public IEnumerable<int2> GetPositions() =>
+            subgrid.GetPositions();
+
+        public IEnumerable<int3> GetPositions3D() =>
+            subgrid.GetPositions3D();
+
+        public IEnumerable<int4> GetPositionsWithId() =>
+            subgrid.GetPositionsWithId();
+
+        public IEnumerable<ITileColumn> GetColumns() =>
+            subgrid.GetColumns();
+
+        public IEnumerable<int2> GetRegionPositions() =>
+            subgrid.GetRegionPositions();
+
+        public IEnumerable<ITileColumn> GetRegionColumns() =>
+            subgrid.GetRegionColumns();
+
+        public IEnumerable<int2> GetRegionGridPositions() =>
+            subgrid.GetRegionGridPositions();
+
+        public IEnumerable<ITileColumn> GetRegionGridColumns() =>
+            subgrid.GetRegionGridColumns();
+
+        public IEnumerator<ITileColumn> GetEnumerator() =>
+            subgrid.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() =>
+            GetEnumerator();
+
+        // ---------------- Lifetime ----------------
 
         public void Dispose()
         {
             subgrid.Dispose();
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             isDisposed = true;
 #endif
@@ -444,203 +529,12 @@ namespace Dalichrome.RandomGenerator.Core
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (!isDisposed && subgrid is NativeTileGrid)
             {
-                Debug.LogError($"[TileGrid] Native memory leak detected! TileGrid was not disposed properly.\nAllocation stack:\n{allocationStack}");
+                Debug.LogError(
+                    $"[TileGrid] Native memory leak detected! TileGrid was not disposed properly.\n" +
+                    $"Allocation stack:\n{allocationStack}"
+                );
             }
 #endif
-        }
-
-        public List<int2> GetEightNeighborPositions(int2 pos)
-        {
-            return subgrid.GetEightNeighborPositions(pos);
-        }
-
-        public List<int2> GetFourNeighborPositions(int2 pos)
-        {
-            return subgrid.GetFourNeighborPositions(pos);
-        }
-
-
-        public bool IsInBounds(int x, int y)
-        {
-            return subgrid.IsInBounds(x, y);
-        }
-
-        public bool IsInBounds(int2 position)
-        {
-            return subgrid.IsInBounds(position);
-        }
-
-        public RegionBounds GetRegionBounds()
-        {
-            return subgrid.GetRegionBounds();
-        }
-
-        public void SetRegionBounds(RegionBounds regionBounds)
-        {
-            subgrid.SetRegionBounds(regionBounds);
-        }
-
-        public void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions) 
-        {
-            subgrid.SetRegionBounds(min, max, regionExcludedPositions);
-        }
-
-        public void SetRegionBounds(Vector2Int min, Vector2Int max, List<int2> regionExcludedPositions)
-        {
-            subgrid.SetRegionBounds(new (min.x, min.y), new(max.x, max.y), regionExcludedPositions);
-        }
-
-        public void RemoveRegion()
-        {
-            subgrid.RemoveRegion();
-        }
-
-        public void AddRegionPosition(int x, int y)
-        {
-            subgrid.AddRegionPosition(x, y);
-        }
-
-        public void AddRegionPosition(Vector2Int pos)
-        {
-            subgrid.AddRegionPosition(pos.x, pos.y);
-        }
-
-        public void AddRegionPosition(int2 pos)
-        {
-            subgrid.AddRegionPosition(pos);
-        }
-
-        public bool IsInRegion(Vector2Int pos)
-        {
-            return subgrid.IsInRegion(pos.x, pos.y);
-        }
-
-        public bool IsInRegion(int2 pos) 
-        {
-            return subgrid.IsInRegion(pos);
-        }
-
-        public bool IsInRegion(int x, int y)
-        {
-            return subgrid.IsInRegion(x, y);
-        }
-
-        public bool IsRestricted(int x, int y)
-        {
-            return subgrid.IsRestricted(x, y);
-        }
-
-        public bool IsRestricted(Vector2Int pos)
-        {
-            return subgrid.IsRestricted(pos.x, pos.y);
-        }
-
-        public bool IsRestricted(int2 pos)
-        {
-            return subgrid.IsRestricted(pos);
-        }
-
-        public bool IsInsideMask(int2 pos)
-        {
-            return subgrid.IsInsideMask(pos);
-        }
-
-        public bool IsInsideMask(int x, int y)
-        {
-            return subgrid.IsInsideMask(x, y);
-        }
-
-        // Ienumeration
-        public NativeArray<int> AsNativeArray()
-        {
-            return subgrid.AsNativeArray();
-        }
-
-        public IEnumerable<int2> GetPositions()
-        {
-            return subgrid.GetPositions();
-        }
-
-        public IEnumerable<int3> GetPositions3D()
-        {
-            return subgrid.GetPositions3D();
-        }
-
-        public IEnumerable<int4> GetPositionsWithId()
-        {
-            return subgrid.GetPositionsWithId();
-        }
-
-        public IEnumerable<ITileColumn> GetColumns()
-        {
-            return subgrid.GetColumns();
-        }
-
-        public IEnumerable<int2> GetRegionPositions()
-        {
-            return subgrid.GetRegionPositions();
-        }
-
-        public IEnumerable<ITileColumn> GetRegionColumns()
-        {
-            return subgrid.GetRegionColumns();
-        }
-
-        public IEnumerable<int2> GetRegionGridPositions()
-        {
-            return subgrid.GetRegionGridPositions();
-        }
-
-        public IEnumerable<ITileColumn> GetRegionGridColumns()
-        {
-            return subgrid.GetRegionGridColumns();
-        }
-
-        public IEnumerator<ITileColumn> GetEnumerator()
-        {
-            return subgrid.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-            => subgrid.GetEnumerator();
-
-        public NativeTileGrid GetNative() =>
-            subgrid is NativeTileGrid grid ? grid : default;
-
-        public NativeTileGrid CloneNativeGrid()
-        {
-            if (subgrid is NativeTileGrid grid)
-                return NativeTileGrid.DeepClone(grid);
-            else return default;
-        }
-
-        public void OverrideSubGrid(NativeTileGrid _data)
-        {
-            subgrid.Dispose();
-            subgrid = _data;
-        }
-
-        public void SetLookupBundle(ILookupBundle bundle)
-        {
-            if((!isSerial && bundle is NativeLookupBundle) ||
-                (isSerial && bundle is SerialLookupBundle))
-                subgrid.SetLookupBundle(bundle);
-        }
-
-        public void SetAllTiles(IEnumerable<int> tileArray)
-        {
-            subgrid.SetAllTiles(tileArray);
-        }
-
-        public void ToSerial()
-        {
-            if(subgrid is NativeTileGrid nativeGrid)
-            {
-                SerialTileGrid newGrid = nativeGrid.ToSerial();
-                nativeGrid.Dispose();
-                subgrid = newGrid;
-                isSerial = true;
-            }
         }
     }
 }

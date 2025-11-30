@@ -36,7 +36,7 @@ public struct GuaranteeSpawnJob : IJob
         {
             int2 pos = candidateTiles[i];
 
-            if ((useEntranceDistance && inputGrid.GetTileValue(pos) > -minDistance) ||
+            if ((useEntranceDistance && inputGrid.GetTileValue(pos.x, pos.y) > -minDistance) ||
                 inputGrid.IsExcluding(pos))
                 continue;
 
@@ -55,7 +55,7 @@ public struct GuaranteeSpawnJob : IJob
                 }
             }
 
-            outputGrid.SetTileId(pos, tileId);
+            outputGrid.SetTileId(pos.x, pos.y, tileId);
             if (updateMask)
                 outputExcludes.AddNoResize(pos);
 

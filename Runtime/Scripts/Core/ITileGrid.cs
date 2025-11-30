@@ -1,162 +1,107 @@
 using Dalichrome.RandomGenerator.Random;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core
 {
-
     public interface ITileGrid : IDisposable, IEnumerable<ITileColumn>
     {
-        public int2 Minimum { get; }
-        public int2 Maximum { get; }
+        int2 Minimum { get; }
+        int2 Maximum { get; }
 
         // Validity
-        public bool IsValid { get; set; }
+        bool IsValid { get; set; }
 
         // Masking Properties
-        public bool IsIncludingTiles { get; }
-        public bool IsExcludingTiles { get; }
+        bool Masked { get; }
+        ITileMask TileMask { get; set; }
+        bool IsIncludingTiles { get; }
+        bool IsExcludingTiles { get; }
 
-        // Set Tile Id Funcs
-        public abstract bool SetTileId(int x, int y, int id);
-        public abstract bool SetTileId(int2 position, int id);
+        // ---------------- Tile / column primitives ----------------
 
-        // Set Tile Id Bypass Layer Funcs
-        public abstract bool SetTileIdBypassLayer(int3 position, int value);
-        public abstract bool SetTileIdBypassLayer(int x, int y, int z, int value);
+        bool SetTileId(int x, int y, int id);
+        bool SetTileIdBypassLayer(int x, int y, int z, int value);
 
-        // Set All Ids At Pos Funcs
-        public abstract bool CopyColumn(int2 replacer, int2 replaced);
+        bool CopyColumn(int2 replacer, int2 replaced);
 
-        // Get Column
-        public abstract ITileColumn GetColumn(int2 pos);
-        public abstract ITileColumn GetColumn(int x, int y);
+        ITileColumn GetColumn(int x, int y);
+        bool SetColumn(ITileColumn col);
 
-        // Set Column
-        public abstract bool SetColumn(ITileColumn col);
+        int GetEmpty(int id);
+        bool ColumnContainsId(int x, int y, int id);
 
-        // Get Empty
-        public abstract int GetEmpty(int id);
+        int GetTileId(int x, int y, int layerId);
+        int GetOccupied(int x, int y);
 
-        // Contains Id Funcs
-        public abstract bool ColumnContainsId(int x, int y, int id);
-        public abstract bool ColumnContainsId(int2 position, int id);
+        bool SetTileValue(int x, int y, int value);
+        int GetTileValue(int x, int y);
 
-        // Get Tile Id Funcs
-        public abstract int GetTileId(int x, int y, int layerId);
-        public abstract int GetTileId(int2 position, int layerId);
+        void SetAllTiles(IEnumerable<int> tileArray);
 
-        // Get Occupied
-        public abstract int GetOccupied(int2 pos);
-        public abstract int GetOccupied(int x, int y);
+        // ---------------- Meta data primitives ----------------
 
-        // Set Tile Value Funcs
-        public abstract bool SetTileValue(int x, int y, int value);
-        public abstract bool SetTileValue(int2 position, int value);
+        void AddDataLayerId(int x, int y, int layerId, string field, int value);
 
-        // Get Tile Value Funcs
-        public abstract int GetTileValue(int x, int y);
-        public abstract int GetTileValue(int2 position);
+        void AddData(int x, int y, int layerZ, string field, int value);
+        void AddData(int x, int y, int layerZ, ulong fieldHash, int value);
 
-        // Set All Tiles
-        public abstract void SetAllTiles(IEnumerable<int> tileArray);
+        int GetDataLayerId(int x, int y, int layerId, string field);
 
-        // Meta Data Func
-        public void AddDataLayerId(int2 pos, int layerId, string field, int value);
-        public void AddDataLayerId(int x, int y, int layerId, string field, int value);
+        int GetData(int x, int y, int layerZ, string field);
+        int GetData(int x, int y, int layerZ, ulong fieldHash);
 
-        public void AddData(int x, int y, int layerZ, string field, int value);
-        public void AddData(int2 pos, int layerZ, string field, int value);
-        public void AddData(int x, int y, string field, int value);
+        List<MetaPair> GetAllData(int3 pos);
+        List<PositionValue> GetAllData(ulong fieldHash);
+        List<PositionValue> GetAllData(string field);
 
-        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value);
-        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value);
-        public void AddData(int x, int y, ulong fieldHash, int value);
+        // ---------------- Masking primitives ----------------
 
-        public int GetDataLayerId(int2 pos, int layerId, string field);
-        public int GetDataLayerId(int x, int y, int layerId, string field);
+        void RemoveMask();
+        void CreateMask(List<int> includeList, List<int> excludeList);
+        void ToggleMasked(bool on);
 
-        public int GetData(int x, int y, int layerZ, string field);
-        public int GetData(int2 pos, int layerZ, string field);
-        public int GetData(int x, int y, string field);
-        public int GetData(int2 pos, string field);
+        void AddExcludedPosition(int2 pos);
+        bool IsExcluding(int2 pos);
+        bool IsInsideMask(int x, int y);
 
-        public int GetData(int x, int y, int layerZ, ulong fieldHash);
-        public int GetData(int2 pos, int layerZ, ulong fieldHash);
-        public int GetData(int x, int y, ulong fieldHash);
-        public int GetData(int2 pos, ulong fieldHash);
+        // ---------------- Helpers / misc ----------------
 
-        public List<MetaPair> GetAllData(int3 pos);
-        public List<PositionValue> GetAllData(ulong fieldHash);
-        public List<PositionValue> GetAllData(string field);
+        void ClearNumbers();
+        void ClearPositiveNumbers();
 
-        // Masking Funcs
-        public bool Masked { get; }
-        public ITileMask TileMask { get; set; }
-        public abstract void RemoveMask();
-        public abstract void CreateMask(List<int> includeList, List<int> excludeList);
-        public abstract void ToggleMasked(bool on);
-        public abstract void AddExcludedPosition(int2 position);
-        public abstract bool IsExcluding(int2 position);
-        public abstract bool IsExcluding(int x, int y);
+        bool CanHaveTiles();
 
-        // Helper Funcs - could move
-        public abstract int2 GetNearestPosition(int x, int y, int id);
-        public abstract int2 GetNearestPosition(int2 position, int id);
-        public abstract int2 GetRandomEdgePoint(AbstractRandom random);
-        public abstract void ClearNumbers();
-        public abstract void ClearPositiveNumbers();
+        // ---------------- Region funcs ----------------
 
-        // Validity Func
-        public abstract bool CanHaveTiles();
+        RegionBounds GetRegionBounds();
+        void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions);
+        void RemoveRegion();
 
-        // Transversal Funcs
-        public abstract List<int2> GetEightNeighborPositions(int2 pos);
-        public abstract List<int2> GetFourNeighborPositions(int2 pos);
+        void AddRegionPosition(int x, int y);
+        bool IsInRegion(int x, int y);
 
-        // Region Funcs
-        public abstract RegionBounds GetRegionBounds();
-        public abstract void SetRegionBounds(int2 min, int2 max, List<int2> regionExcludedPositions);
-        public abstract void SetRegionBounds(RegionBounds regionBounds);
-        public abstract void RemoveRegion();
+        // ---------------- Bounds / restriction ----------------
 
-        public abstract void AddRegionPosition(int x, int y);
-        public abstract void AddRegionPosition(int2 pos);
+        bool IsInBounds(int x, int y);
+        bool IsRestricted(int x, int y);
 
-        public abstract bool IsInRegion(int x, int y);
-        public abstract bool IsInRegion(int2 pos);
+        // ---------------- Iteration ----------------
 
-        // Bounds Checking Funcs
-        public abstract bool IsInBounds(int x, int y);
-        public abstract bool IsInBounds(int2 pos);
+        NativeArray<int> AsNativeArray();
+        IEnumerable<int2> GetPositions();
+        IEnumerable<int3> GetPositions3D();
+        IEnumerable<int4> GetPositionsWithId();
+        IEnumerable<ITileColumn> GetColumns();
+        IEnumerable<int2> GetRegionPositions();
+        IEnumerable<ITileColumn> GetRegionColumns();
+        IEnumerable<int2> GetRegionGridPositions();
+        IEnumerable<ITileColumn> GetRegionGridColumns();
 
-        // Restricted = Either Universal Mask Excluded, Out of Bounds or Region Excluded
-        public abstract bool IsRestricted(int x, int y);
-        public abstract bool IsRestricted(int2 pos);
+        // ---------------- Layer lookup ----------------
 
-        // IsInsideMask
-        public abstract bool IsInsideMask(int x, int y);
-
-        public abstract bool IsInsideMask(int2 pos);
-
-        // Ienumeration
-        public abstract NativeArray<int> AsNativeArray();
-        public abstract IEnumerable<int2> GetPositions();
-        public abstract IEnumerable<int3> GetPositions3D();
-        public abstract IEnumerable<int4> GetPositionsWithId();
-        public abstract IEnumerable<ITileColumn> GetColumns();
-        public abstract IEnumerable<int2> GetRegionPositions();
-        public abstract IEnumerable<ITileColumn> GetRegionColumns();
-        public abstract IEnumerable<int2> GetRegionGridPositions();
-        public abstract IEnumerable<ITileColumn> GetRegionGridColumns();
-
-
-        // Layer Lookup Funcs
-        public abstract void SetLookupBundle(ILookupBundle bundle);
-
+        void SetLookupBundle(ILookupBundle bundle);
     }
 }

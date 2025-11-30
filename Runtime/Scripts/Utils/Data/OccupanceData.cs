@@ -1,7 +1,8 @@
-using Unity.Mathematics;
-using Unity.Collections;
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
+using Unity.Collections;
+using Unity.Mathematics;
+using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -24,7 +25,7 @@ namespace Dalichrome.RandomGenerator.Utils
 
         public int IsOccupied(int2 pos, NativeTileGrid grid)
         {
-            if (!grid.IsInBounds(pos))
+            if (!grid.IsInBounds(pos.x, pos.y))
                 return outOfBoundsValue;
 
             int value;
@@ -32,14 +33,14 @@ namespace Dalichrome.RandomGenerator.Utils
             switch (occupanceType)
             {
                 case OccupanceType.Layer_Not_NA:
-                    value = grid.GetNotEmptyAt(pos, occupyLayer);
+                    value = grid.GetNotEmpty(grid.GetTileId(pos.x, pos.y, occupyLayer));
                     break;
                 case OccupanceType.Contains_A:
-                    value = grid.ColumnContainsId(pos,tileA) ? 1 : 0;
+                    value = grid.ColumnContainsId(pos.x, pos.y, tileA) ? 1 : 0;
                     break;
                 // TODO add new type that can have multiple layers then check all configged layers
                 default:
-                    value = grid.GetOccupied(pos);
+                    value = grid.GetOccupied(pos.x, pos.y);
                     break;
             }
 
