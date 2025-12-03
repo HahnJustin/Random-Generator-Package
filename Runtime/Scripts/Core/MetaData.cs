@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -8,12 +7,9 @@ namespace Dalichrome.RandomGenerator.Core
 {
     internal struct MetaData : IDisposable
     {
-        private Dictionary<string, ulong> _fieldToHash;
-        private Dictionary<ulong, string> _hashToField;
-
         private NativeParallelHashMap<MetaKey, int> _data;
         private NativeParallelMultiHashMap<int3, MetaKey> _byPos;
-        private NativeParallelMultiHashMap<ulong, MetaKey> _byField;
+        private NativeParallelMultiHashMap<FixedString64Bytes, MetaKey> _byField;
 
         private Allocator _allocator;
         private int _capacity;
@@ -26,66 +22,12 @@ namespace Dalichrome.RandomGenerator.Core
         public MetaData(Allocator allocator)
         {
             _allocator = allocator;
-
-            _fieldToHash = new Dictionary<string, ulong>(StringComparer.Ordinal);
-            _hashToField = new Dictionary<ulong, string>();
-
             _capacity = DefaultInitialCapacity;
             _count = 0;
 
             _data = new NativeParallelHashMap<MetaKey, int>(_capacity, allocator);
             _byPos = new NativeParallelMultiHashMap<int3, MetaKey>(_capacity, allocator);
-            _byField = new NativeParallelMultiHashMap<ulong, MetaKey>(_capacity, allocator);
-        }
-
-        // ---------- Hashing / field registry ----------
-
-        // 64-bit FNV-1a
-        private static ulong Hash(string field)
-        {
-            unchecked
-            {
-                const ulong offset = 14695981039346656037UL;
-                const ulong prime = 1099511628211UL;
-
-                ulong h = offset;
-                for (int i = 0; i < field.Length; i++)
-                {
-                    h ^= field[i];
-                    h *= prime;
-                }
-                return h;
-            }
-        }
-
-        private ulong GetHash(string field)
-        {
-            if (_fieldToHash.TryGetValue(field, out var existing))
-                return existing;
-
-            ulong hash = Hash(field);
-
-            // Collision detection: should basically never happen with 64-bit,
-            // but if it does, fail loudly.
-            if (_hashToField.TryGetValue(hash, out var existingName) && existingName != field)
-            {
-                throw new InvalidOperationException(
-                    $"MetaData hash collision between '{existingName}' and '{field}'. " +
-                    "Rename one of the fields or change the hash scheme."
-                );
-            }
-
-            _fieldToHash[field] = hash;
-            _hashToField[hash] = field;
-            return hash;
-        }
-
-        private string Unhash(ulong fieldHash)
-        {
-            if (_hashToField.TryGetValue(fieldHash, out var name))
-                return name;
-
-            return $"#field_{fieldHash}";
+            _byField = new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(_capacity, allocator);
         }
 
         // ---------- Capacity management ----------
@@ -113,7 +55,7 @@ namespace Dalichrome.RandomGenerator.Core
         {
             var newData = new NativeParallelHashMap<MetaKey, int>(newCapacity, _allocator);
             var newByPos = new NativeParallelMultiHashMap<int3, MetaKey>(newCapacity, _allocator);
-            var newByField = new NativeParallelMultiHashMap<ulong, MetaKey>(newCapacity, _allocator);
+            var newByField = new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(newCapacity, _allocator);
 
             int newCount = 0;
 
@@ -134,7 +76,8 @@ namespace Dalichrome.RandomGenerator.Core
                     }
                     else
                     {
-                        // Should not happen (MetaKey uniqueness), but if it did, we still rebuild indexes.
+                        // Should not happen (MetaKey uniqueness), but if it did,
+                        // we still rebuild indexes.
                         newData[key] = value;
                     }
                 }
@@ -167,13 +110,6 @@ namespace Dalichrome.RandomGenerator.Core
                 return new MetaData(allocator);
 
             var clone = new MetaData(allocator);
-
-            // Copy dictionaries (string <-> hash)
-            foreach (var kv in _fieldToHash)
-                clone._fieldToHash.Add(kv.Key, kv.Value);
-
-            foreach (var kv in _hashToField)
-                clone._hashToField.Add(kv.Key, kv.Value);
 
             // Copy all entries from _data/_byPos/_byField
             var keys = _data.GetKeyArray(Allocator.Temp);
@@ -208,21 +144,22 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int3 pos, string field, int value)
         {
-            ulong hash = GetHash(field);
-            AddData(pos, hash, value);
+            FixedString64Bytes f = (FixedString64Bytes)field;
+            AddData(pos, f, value);
         }
 
-        public void AddData(int3 pos, ulong fieldHash, int value)
+        public void AddData(int3 pos, FixedString64Bytes fixedField, int value)
         {
             EnsureCapacity(1);
 
-            var key = new MetaKey { pos = pos, field = fieldHash };
+            var key = new MetaKey { pos = pos, field = fixedField };
 
+            // Only add to indexes when this is a *new* key
             if (_data.TryAdd(key, value))
             {
                 _byPos.Add(pos, key);
-                _byField.Add(fieldHash, key);
-                _count++; // new unique key
+                _byField.Add(fixedField, key);
+                _count++;
             }
             else
             {
@@ -234,16 +171,14 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool TryGetData(int3 pos, string field, out int value)
         {
-            value = default;
-            if (!_fieldToHash.TryGetValue(field, out var hash))
-                return false;
-
-            return TryGetData(pos, hash, out value);
+            FixedString64Bytes f = (FixedString64Bytes)field;
+            var key = new MetaKey { pos = pos, field = f };
+            return _data.TryGetValue(key, out value);
         }
 
-        public bool TryGetData(int3 pos, ulong fieldHash, out int value)
+        public bool TryGetData(int3 pos, FixedString64Bytes fixedField, out int value)
         {
-            var key = new MetaKey { pos = pos, field = fieldHash };
+            var key = new MetaKey { pos = pos, field = fixedField };
             return _data.TryGetValue(key, out value);
         }
 
@@ -251,15 +186,15 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<MetaPair> GetAllData(int3 pos)
         {
-            var pairs = new List<MetaPair>();
+            var result = new List<MetaPair>();
 
             if (_byPos.TryGetFirstValue(pos, out var key, out var it))
             {
                 if (TryGetData(key, out int firstVal))
                 {
-                    pairs.Add(new MetaPair
+                    result.Add(new MetaPair
                     {
-                        field = Unhash(key.field),
+                        field = key.field.ToString(),
                         value = firstVal
                     });
                 }
@@ -268,23 +203,23 @@ namespace Dalichrome.RandomGenerator.Core
                 {
                     if (TryGetData(key, out int val))
                     {
-                        pairs.Add(new MetaPair
+                        result.Add(new MetaPair
                         {
-                            field = Unhash(key.field),
+                            field = key.field.ToString(),
                             value = val
                         });
                     }
                 }
             }
 
-            return pairs;
+            return result;
         }
 
-        public List<PositionValue> GetAllData(ulong fieldHash)
+        public List<PositionValue> GetAllData(FixedString64Bytes fixedString)
         {
             var pairs = new List<PositionValue>();
 
-            if (_byField.TryGetFirstValue(fieldHash, out var key, out var it))
+            if (_byField.TryGetFirstValue(fixedString, out var key, out var it))
             {
                 if (TryGetData(key, out int firstVal))
                 {
@@ -313,21 +248,18 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<PositionValue> GetAllData(string field)
         {
-            if (!_fieldToHash.TryGetValue(field, out var hash))
-                return new List<PositionValue>();
-
-            return GetAllData(hash);
+            return GetAllData((FixedString64Bytes)field);
         }
 
         public bool Remove(int3 pos, string field)
         {
-            if (!_fieldToHash.TryGetValue(field, out var hash))
-                return false;
-
-            var key = new MetaKey { pos = pos, field = hash };
+            var key = new MetaKey { pos = pos, field = (FixedString64Bytes)field };
 
             if (_data.Remove(key))
             {
+                // NOTE: _byPos / _byField still retain stale entries, which only
+                // matters if you rely on them after heavy removals. If you ever
+                // add lots of removes, we can implement a compacting pass.
                 _count = Math.Max(0, _count - 1);
                 return true;
             }
@@ -337,7 +269,23 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<string> GetFields()
         {
-            return _fieldToHash.Keys.ToList();
+            if (!_byField.IsCreated)
+                return new List<string>();
+
+            var keyArray = _byField.GetKeyArray(Allocator.Temp);
+            try
+            {
+                var list = new List<string>(keyArray.Length);
+                for (int i = 0; i < keyArray.Length; i++)
+                {
+                    list.Add(keyArray[i].ToString());
+                }
+                return list;
+            }
+            finally
+            {
+                keyArray.Dispose();
+            }
         }
 
         // ---------- IDisposable ----------

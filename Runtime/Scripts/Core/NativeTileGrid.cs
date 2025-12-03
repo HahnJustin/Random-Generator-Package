@@ -396,14 +396,14 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddData(int x, int y, string field, int value) =>
             AddData(x, y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value)
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value)
         {
             if (!IsInBounds(x, y) || !ZInBounds(layerZ)) return;
-            metaData.AddData(new int3(x, y, layerZ), fieldHash, value);
+            metaData.AddData(new int3(x, y, layerZ), fixedField, value);
         }
 
-        public void AddData(int x, int y, ulong fieldHash, int value) =>
-            AddData(x, y, MetaData.ColumnZ, fieldHash, value);
+        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) =>
+            AddData(x, y, MetaData.ColumnZ, fixedField, value);
 
         public int GetDataLayerId(int x, int y, int layerId, string field) =>
             GetData(x, y, GetLayerIndexFromLayerId(layerId), field);
@@ -421,24 +421,24 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetData(int x, int y, string field) =>
             GetData(x, y, MetaData.ColumnZ, field);
 
-        public int GetData(int x, int y, int layerZ, ulong fieldHash)
+        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField)
         {
             if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return 0;
 
-            if (metaData.TryGetData(new int3(x, y, layerZ), fieldHash, out int val))
+            if (metaData.TryGetData(new int3(x, y, layerZ), fixedField, out int val))
                 return val;
 
             return 0;
         }
 
-        public int GetData(int x, int y, ulong fieldHash) =>
-            GetData(x, y, MetaData.ColumnZ, fieldHash);
+        public int GetData(int x, int y, FixedString64Bytes fixedField) =>
+            GetData(x, y, MetaData.ColumnZ, fixedField);
 
         public List<MetaPair> GetAllData(int3 pos) =>
             metaData.GetAllData(pos);
 
-        public List<PositionValue> GetAllData(ulong fieldHash) =>
-            metaData.GetAllData(fieldHash);
+        public List<PositionValue> GetAllData(FixedString64Bytes fixedField) =>
+            metaData.GetAllData(fixedField);
 
         public List<PositionValue> GetAllData(string field) =>
             metaData.GetAllData(field);

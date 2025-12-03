@@ -1,4 +1,5 @@
 using System;
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Core
@@ -6,7 +7,7 @@ namespace Dalichrome.RandomGenerator.Core
     internal struct MetaKey : IEquatable<MetaKey>
     {
         public int3 pos;
-        public ulong field;
+        public FixedString64Bytes field;
 
         public bool Equals(MetaKey other)
         {

@@ -46,15 +46,15 @@ namespace Dalichrome.RandomGenerator.Core
         void AddDataLayerId(int x, int y, int layerId, string field, int value);
 
         void AddData(int x, int y, int layerZ, string field, int value);
-        void AddData(int x, int y, int layerZ, ulong fieldHash, int value);
+        void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value);
 
         int GetDataLayerId(int x, int y, int layerId, string field);
 
         int GetData(int x, int y, int layerZ, string field);
-        int GetData(int x, int y, int layerZ, ulong fieldHash);
+        int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField);
 
         List<MetaPair> GetAllData(int3 pos);
-        List<PositionValue> GetAllData(ulong fieldHash);
+        List<PositionValue> GetAllData(FixedString64Bytes fixedField);
         List<PositionValue> GetAllData(string field);
 
         // ---------------- Masking primitives ----------------

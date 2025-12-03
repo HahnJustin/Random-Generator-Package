@@ -300,17 +300,17 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddDataLayerId(int x, int y, int layerId, string field, int value) { }
         public void AddData(int x, int y, int layerZ, string field, int value) { }
         public void AddData(int x, int y, string field, int value) { }
-        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value) { }
-        public void AddData(int x, int y, ulong fieldHash, int value) { }
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) { }
+        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) { }
 
         public int GetDataLayerId(int x, int y, int layerId, string field) => 0;
         public int GetData(int x, int y, int layerZ, string field) => 0;
         public int GetData(int x, int y, string field) => 0;
-        public int GetData(int x, int y, int layerZ, ulong fieldHash) => 0;
-        public int GetData(int x, int y, ulong fieldHash) => 0;
+        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) => 0;
+        public int GetData(int x, int y, FixedString64Bytes fixedField) => 0;
 
         public List<MetaPair> GetAllData(int3 pos) => new();
-        public List<PositionValue> GetAllData(ulong fieldHash) => new();
+        public List<PositionValue> GetAllData(FixedString64Bytes fixedField) => new();
         public List<PositionValue> GetAllData(string field) => new();
 
         // Masking

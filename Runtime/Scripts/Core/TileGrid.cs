@@ -216,18 +216,18 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddData(int2 pos, string field, int value) =>
             AddData(pos.x, pos.y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int x, int y, int layerZ, ulong fieldHash, int value) =>
-            subgrid.AddData(x, y, layerZ, fieldHash, value);
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) =>
+            subgrid.AddData(x, y, layerZ, fixedField, value);
 
         // sugar
-        public void AddData(int2 pos, int layerZ, ulong fieldHash, int value) =>
-            AddData(pos.x, pos.y, layerZ, fieldHash, value);
+        public void AddData(int2 pos, int layerZ, FixedString64Bytes fixedField, int value) =>
+            AddData(pos.x, pos.y, layerZ, fixedField, value);
 
-        public void AddData(int x, int y, ulong fieldHash, int value) =>
-            AddData(x, y, MetaData.ColumnZ, fieldHash, value);
+        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) =>
+            AddData(x, y, MetaData.ColumnZ, fixedField, value);
 
-        public void AddData(int2 pos, ulong fieldHash, int value) =>
-            AddData(pos.x, pos.y, MetaData.ColumnZ, fieldHash, value);
+        public void AddData(int2 pos, FixedString64Bytes fixedField, int value) =>
+            AddData(pos.x, pos.y, MetaData.ColumnZ, fixedField, value);
 
         public int GetDataLayerId(int x, int y, int layerId, string field) =>
             subgrid.GetDataLayerId(x, y, layerId, field);
@@ -251,27 +251,26 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetData(int2 pos, string field) =>
             GetData(pos.x, pos.y, MetaData.ColumnZ, field);
 
-        public int GetData(int x, int y, int layerZ, ulong fieldHash) =>
-            subgrid.GetData(x, y, layerZ, fieldHash);
+        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) =>
+            subgrid.GetData(x, y, layerZ, fixedField);
 
-        // sugar
-        public int GetData(int3 pos, ulong fieldHash) =>
-            GetData(pos.x, pos.y, pos.z, fieldHash);
+        public int GetData(int3 pos, FixedString64Bytes fixedField) =>
+            GetData(pos.x, pos.y, pos.z, fixedField);
 
-        public int GetData(int2 pos, int layerZ, ulong fieldHash) =>
-            GetData(pos.x, pos.y, layerZ, fieldHash);
+        public int GetData(int2 pos, int layerZ, FixedString64Bytes fixedField) =>
+            GetData(pos.x, pos.y, layerZ, fixedField);
 
-        public int GetData(int x, int y, ulong fieldHash) =>
-            GetData(x, y, MetaData.ColumnZ, fieldHash);
+        public int GetData(int x, int y, FixedString64Bytes fixedField) =>
+            GetData(x, y, MetaData.ColumnZ, fixedField);
 
-        public int GetData(int2 pos, ulong fieldHash) =>
-            GetData(pos.x, pos.y, MetaData.ColumnZ, fieldHash);
+        public int GetData(int2 pos, FixedString64Bytes fixedField) =>
+            GetData(pos.x, pos.y, MetaData.ColumnZ, fixedField);
 
         public List<MetaPair> GetAllData(int3 pos) =>
             subgrid.GetAllData(pos);
 
-        public List<PositionValue> GetAllData(ulong fieldHash) =>
-            subgrid.GetAllData(fieldHash);
+        public List<PositionValue> GetAllData(FixedString64Bytes fixedField) =>
+            subgrid.GetAllData(fixedField);
 
         public List<PositionValue> GetAllData(string field) =>
             subgrid.GetAllData(field);
