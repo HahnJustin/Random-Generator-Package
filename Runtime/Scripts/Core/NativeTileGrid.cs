@@ -88,7 +88,9 @@ namespace Dalichrome.RandomGenerator.Core
 
             bundle = default;
 
-            metaData = new MetaData(allocator);
+            metaData = allocateCollections
+               ? new MetaData(allocator)
+               : default;
 
             excludePositions = allocateCollections
                 ? new NativeParallelHashSet<int2>(64, allocator)
@@ -129,7 +131,9 @@ namespace Dalichrome.RandomGenerator.Core
             grid.bundle = other.bundle;
 
             // Meta
-            grid.metaData = other.metaData.DeepClone(allocator);
+            grid.metaData = other.metaData.IsValid
+                ? other.metaData.DeepClone()
+                : new MetaData(allocator);
 
             // Exclude Positions
             grid.excludePositions = NativeParallelHashSetCopy(other.excludePositions, allocator);
@@ -389,7 +393,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int x, int y, int layerZ, string field, int value)
         {
-            if (!IsInBounds(x, y) || !ZInBounds(layerZ)) return;
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return;
             metaData.AddData(new int3(x, y, layerZ), field, value);
         }
 
@@ -398,7 +402,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value)
         {
-            if (!IsInBounds(x, y) || !ZInBounds(layerZ)) return;
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return;
             metaData.AddData(new int3(x, y, layerZ), fixedField, value);
         }
 
@@ -442,6 +446,8 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<PositionValue> GetAllData(string field) =>
             metaData.GetAllData(field);
+
+        public List<string> GetMetaFields() => metaData.GetFields();
 
         // Masking
         public void RemoveMask()

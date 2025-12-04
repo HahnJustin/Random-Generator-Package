@@ -269,11 +269,16 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllData(int3 pos) =>
             subgrid.GetAllData(pos);
 
+        public List<MetaPair> GetAllData(int2 pos) =>
+            subgrid.GetAllData(new int3(pos.x, pos.y, MetaData.ColumnZ));
+
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) =>
             subgrid.GetAllData(fixedField);
 
         public List<PositionValue> GetAllData(string field) =>
             subgrid.GetAllData(field);
+
+        public List<string> GetMetaFields() => subgrid.GetMetaFields();
 
         // ---------------- Masking ----------------
 

@@ -208,5 +208,15 @@ namespace Dalichrome.RandomGenerator
         {
             return tileGrid.GetTileValue(pos);
         }
+
+        public List<MetaPair> GetAllMetaAt(int2 pos)
+        {
+            return tileGrid.GetAllData(pos);
+        }
+
+        public TileGrid GetTileGrid()
+        {
+            return tileGrid;
+        }
     }
 }

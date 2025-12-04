@@ -17,26 +17,11 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public override GeneratorType Type { get { return GeneratorType.In_Development; } }
 
-        public int MaxWalkers { get { return _maxWalkers; } set { _maxWalkers = value; } }
-        [SerializeField] private int _maxWalkers = 100;
+        public string MetaFieldName { get { return _metaFieldName; } set { _metaFieldName = value; } }
+        [SerializeField] private string _metaFieldName = "";
 
-        public int Iterations { get { return _iterations; } set { _iterations = value; } }
-        [SerializeField] private int _iterations = 500;
-
-        public float Shrink { get { return _shrink; } set { _shrink = value; } }
-        [SerializeField] private float _shrink = 0.995f;
-
-        public float Radius { get { return _radius; } set { _radius = value; } }
-        [SerializeField] private float _radius = 3;
-
-        public int Speed { get { return _speed; } set { _speed = value; } }
-        [SerializeField] private int _speed = 10;
-
-        public bool HasHeadAtCenter { get { return _hasHeadAtCenter; } set { _hasHeadAtCenter = value; } }
-        [SerializeField] private bool _hasHeadAtCenter = true;
-
-        public int StickTo { get { return _stickTo; } set { _stickTo = value; } }
-        [SerializeField] private int _stickTo = (int)TileDefaults.Wall_NA;
+        public float Density { get { return _density; } set { _density = value; } }
+        [SerializeField] private float _density = 0.5f;
 
         public OccupanceType Occupance { get { return _occupance; } set { _occupance = value; } }
         [SerializeField] protected OccupanceType _occupance = OccupanceType.Contains_A;

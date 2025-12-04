@@ -312,6 +312,7 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllData(int3 pos) => new();
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) => new();
         public List<PositionValue> GetAllData(string field) => new();
+        public List<string> GetMetaFields() => new();
 
         // Masking
         public void RemoveMask()

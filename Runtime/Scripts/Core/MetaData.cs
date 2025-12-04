@@ -19,6 +19,8 @@ namespace Dalichrome.RandomGenerator.Core
 
         public static readonly int ColumnZ = -1;
 
+        public bool IsValid { get; internal set; }
+
         public MetaData(Allocator allocator)
         {
             _allocator = allocator;
@@ -28,12 +30,16 @@ namespace Dalichrome.RandomGenerator.Core
             _data = new NativeParallelHashMap<MetaKey, int>(_capacity, allocator);
             _byPos = new NativeParallelMultiHashMap<int3, MetaKey>(_capacity, allocator);
             _byField = new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(_capacity, allocator);
+
+            IsValid = true;
         }
 
         // ---------- Capacity management ----------
 
         private void EnsureCapacity(int additionalKeys = 1)
         {
+            if (!IsValid) return;
+
             int needed = _count + additionalKeys;
             if (needed <= _capacity)
                 return;
@@ -61,7 +67,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             if (_data.IsCreated)
             {
-                var keys = _data.GetKeyArray(Allocator.Temp);
+                var keys = _data.GetKeyArray(Allocator.Persistent);
 
                 for (int i = 0; i < keys.Length; i++)
                 {
@@ -99,20 +105,39 @@ namespace Dalichrome.RandomGenerator.Core
         // ---------- Internal helpers ----------
 
         private bool TryGetData(in MetaKey key, out int value)
-            => _data.TryGetValue(key, out value);
+        {
+            if (!_data.IsCreated)
+            {
+                value = default;
+                return false;
+            }
+
+            return _data.TryGetValue(key, out value);
+        }
 
         // ---------- Deep clone ----------
 
-        internal MetaData DeepClone(Allocator allocator)
+        internal MetaData DeepClone()
         {
-            // If this MetaData was never initialized, just return an empty one
-            if (!_data.IsCreated)
-                return new MetaData(allocator);
+            // If this MetaData was never initialized or was disposed, return a non-allocating invalid struct.
+            if (!_data.IsCreated || !IsValid)
+            {
+                return new MetaData
+                {
+                    _allocator = this._allocator,
+                    _capacity = 0,
+                    _count = 0,
+                    _data = default,
+                    _byPos = default,
+                    _byField = default,
+                    IsValid = false
+                };
+            }
 
-            var clone = new MetaData(allocator);
+            var clone = new MetaData(_allocator);
 
             // Copy all entries from _data/_byPos/_byField
-            var keys = _data.GetKeyArray(Allocator.Temp);
+            var keys = _data.GetKeyArray(Allocator.Persistent);
             int needed = keys.Length;
 
             // Ensure clone has enough capacity to hold all keys in one go
@@ -144,12 +169,15 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int3 pos, string field, int value)
         {
+            if (!IsValid) return;
             FixedString64Bytes f = (FixedString64Bytes)field;
             AddData(pos, f, value);
         }
 
         public void AddData(int3 pos, FixedString64Bytes fixedField, int value)
         {
+            if (!IsValid) return;
+
             EnsureCapacity(1);
 
             var key = new MetaKey { pos = pos, field = fixedField };
@@ -171,6 +199,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool TryGetData(int3 pos, string field, out int value)
         {
+            value = default;
+            if (!IsValid || !_data.IsCreated) return false;
+
             FixedString64Bytes f = (FixedString64Bytes)field;
             var key = new MetaKey { pos = pos, field = f };
             return _data.TryGetValue(key, out value);
@@ -178,6 +209,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool TryGetData(int3 pos, FixedString64Bytes fixedField, out int value)
         {
+            value = default;
+            if (!IsValid || !_data.IsCreated) return false;
+
             var key = new MetaKey { pos = pos, field = fixedField };
             return _data.TryGetValue(key, out value);
         }
@@ -187,6 +221,7 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllData(int3 pos)
         {
             var result = new List<MetaPair>();
+            if (!IsValid || !_byPos.IsCreated) return result;
 
             if (_byPos.TryGetFirstValue(pos, out var key, out var it))
             {
@@ -218,6 +253,7 @@ namespace Dalichrome.RandomGenerator.Core
         public List<PositionValue> GetAllData(FixedString64Bytes fixedString)
         {
             var pairs = new List<PositionValue>();
+            if (!IsValid || !_byField.IsCreated) return pairs;
 
             if (_byField.TryGetFirstValue(fixedString, out var key, out var it))
             {
@@ -253,13 +289,14 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool Remove(int3 pos, string field)
         {
+            if (!IsValid || !_data.IsCreated) return false;
+
             var key = new MetaKey { pos = pos, field = (FixedString64Bytes)field };
 
             if (_data.Remove(key))
             {
-                // NOTE: _byPos / _byField still retain stale entries, which only
-                // matters if you rely on them after heavy removals. If you ever
-                // add lots of removes, we can implement a compacting pass.
+                // NOTE: _byPos / _byField still retain stale entries.
+                // If you ever need heavy remove usage, we can add a compact step.
                 _count = Math.Max(0, _count - 1);
                 return true;
             }
@@ -269,18 +306,35 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<string> GetFields()
         {
-            if (!_byField.IsCreated)
-                return new List<string>();
+            var result = new List<string>();
+            if (!IsValid || !_byField.IsCreated)
+                return result;
 
-            var keyArray = _byField.GetKeyArray(Allocator.Temp);
+            var keyArray = _byField.GetKeyArray(Allocator.Persistent);
             try
             {
-                var list = new List<string>(keyArray.Length);
-                for (int i = 0; i < keyArray.Length; i++)
+                if (keyArray.Length == 0)
+                    return result;
+
+                // Sort in-place so duplicates are adjacent
+                keyArray.Sort(); // requires: using Unity.Collections;
+
+                // First element is always included
+                FixedString64Bytes last = keyArray[0];
+                result.Add(last.ToString());
+
+                // Only add when the key changes
+                for (int i = 1; i < keyArray.Length; i++)
                 {
-                    list.Add(keyArray[i].ToString());
+                    var current = keyArray[i];
+                    if (!current.Equals(last))
+                    {
+                        result.Add(current.ToString());
+                        last = current;
+                    }
                 }
-                return list;
+
+                return result;
             }
             finally
             {
@@ -298,6 +352,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             _capacity = 0;
             _count = 0;
+            IsValid = false;
         }
     }
 }

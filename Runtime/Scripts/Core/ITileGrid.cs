@@ -57,6 +57,8 @@ namespace Dalichrome.RandomGenerator.Core
         List<PositionValue> GetAllData(FixedString64Bytes fixedField);
         List<PositionValue> GetAllData(string field);
 
+        List<string> GetMetaFields();
+
         // ---------------- Masking primitives ----------------
 
         void RemoveMask();
