@@ -1,8 +1,8 @@
-
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Core;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -16,10 +16,10 @@ namespace Dalichrome.RandomGenerator.UserData
     public class TileObject : AbstractUserData
     {
         [Header("Core Fields")]
-        [SerializeField,TileTypeCollision] public int id;
+        [SerializeField, TileTypeCollision] public int id;
         [SerializeField, LayerDisplay] public int layer;
         [SerializeField] public TileKind tileKind = TileKind.Normal;
-        
+
         public override int GetId() => id;
 
         [Header("Generator UI Fields")]
@@ -41,40 +41,39 @@ namespace Dalichrome.RandomGenerator.UserData
                    ShowIndexLabels = true)]
 #endif
         [SerializeField] public List<MetaDataTileSpawn> metaDataSpawnList;
-    }
 
-    public enum TileSpawnType
-    {
-        Sprite,
-        TileBase,
-        GameObject
-    }
+        /// <summary>
+        /// Pick the appropriate TileSpawn variant for this tile based on the
+        /// already-grouped metadata pairs for this tile (3D + 2D/column).
+        /// </summary>
+        public TileSpawn GetSpawnForMeta(List<MetaPair> metaPairs)
+        {
+            if (metaPairs == null || metaPairs.Count == 0 ||
+                metaDataSpawnList == null || metaDataSpawnList.Count == 0)
+            {
+                return tileSpawn;
+            }
 
-    [Serializable]
-    public class TileSpawn
-    {
-        [SerializeField] public TileSpawnType spawnType;
+            // Build a logical metadata context: field -> value
+            var context = new Dictionary<string, int>(metaPairs.Count);
+            for (int i = 0; i < metaPairs.Count; i++)
+            {
+                var p = metaPairs[i];
+                context[p.field] = p.value;
+            }
 
-        [SerializeField, Condition(nameof(spawnType), TileSpawnType.Sprite)]
-        public Sprite sprite;
+            // First matching variant wins
+            for (int i = 0; i < metaDataSpawnList.Count; i++)
+            {
+                var variant = metaDataSpawnList[i];
+                if (variant == null)
+                    continue;
 
-        [SerializeField, Condition(nameof(spawnType), TileSpawnType.TileBase)]
-        public TileBase tileBase;
+                if (variant.Matches(context))
+                    return variant.tileSpawn;
+            }
 
-        [SerializeField, Condition(nameof(spawnType), TileSpawnType.GameObject)]
-        public GameObject gameObject;
-    }
-
-    [Serializable]
-    public class MetaDataTileSpawn
-    {
-#if ODIN_INSPECTOR
-        [InlineProperty, HideLabel]
-#endif
-        [SerializeField] public SerialPair<string,string> metaDataToMatch;
-#if ODIN_INSPECTOR
-        [InlineProperty, HideLabel]
-#endif
-        [SerializeField] public TileSpawn tileSpawn;
+            return tileSpawn;
+        }
     }
 }

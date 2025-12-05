@@ -1,11 +1,11 @@
+using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using Dalichrome.RandomGenerator.Core;
-using Dalichrome.RandomGenerator.Random;
-using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -35,9 +35,9 @@ namespace Dalichrome.RandomGenerator
         }
 
         public IEnumerator SetTilesCoroutine(
-                int layerId,
-                int tilesPerFrame = 2_000,   // how many tiles youÅfre OK pushing in one frame
-                int seed = 0)
+            int layerId,
+            int tilesPerFrame = 2_000,
+            int seed = 0)
         {
             if (layerId == 0) yield break;
 
@@ -48,9 +48,9 @@ namespace Dalichrome.RandomGenerator
             int height = tileGrid.height;
             int blocksX = Mathf.CeilToInt((float)width / blockSize);
             int blocksY = Mathf.CeilToInt((float)height / blockSize);
-            Vector2 centre = new (width * 0.5f, height * 0.5f);
+            Vector2 centre = new(width * 0.5f, height * 0.5f);
 
-            // ---------- 1.  build + sort block list  ----------
+            // ---------- 1. build + sort block list ----------
             var rng = new System.Random(seed);
             var blocks = new List<(int sx, int sy, float key)>(blocksX * blocksY);
 
@@ -60,9 +60,9 @@ namespace Dalichrome.RandomGenerator
                 {
                     float cx = (bx + 0.5f) * blockSize;
                     float cy = (by + 0.5f) * blockSize;
-                    float dist = Vector2.Distance(new (cx, cy), centre);
-                    float bias = 1f / (dist + 1f);              // centre-weighted
-                    float key = (float) rng.NextDouble() + (1f - bias) * .5f;
+                    float dist = Vector2.Distance(new(cx, cy), centre);
+                    float bias = 1f / (dist + 1f);  // centre-weighted
+                    float key = (float)rng.NextDouble() + (1f - bias) * .5f;
 
                     blocks.Add((bx * blockSize, by * blockSize, key));
                 }
@@ -75,7 +75,7 @@ namespace Dalichrome.RandomGenerator
 
             int tilesDoneThisFrame = 0;
 
-            // ---------- 2.  stream blocks ----------
+            // ---------- 2. stream blocks ----------
             foreach (var (sx, sy, _) in blocks)
             {
                 // fill buf ------------------------------------------------------------
@@ -90,19 +90,33 @@ namespace Dalichrome.RandomGenerator
                         int bufIdx = x + y * blockSize;
 
                         if (tyOut || tx >= width)
-                        {   // outside map Å® clear
+                        {
+                            // outside map Å® clear
                             buf[bufIdx] = null;
                             continue;
                         }
 
                         ITileColumn col = tileGrid.GetColumn(tx, ty);
-                        if (useGameObjects && SpawnTileGameObject(col, layerId))
+                        int2 pos = new int2(tx, ty);
+
+                        // Combined 3D + 2D metadata for this tile position
+                        List<MetaPair> metaPairs = tileGrid.GetAllData(pos);
+                        // Or: List<MetaPair> metaPairs = GetAllMetaAt(pos); if you prefer the wrapper
+
+                        int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
+
+                        if (useGameObjects && SpawnTileGameObject(col, layerId, metaPairs))
+                        {
                             buf[bufIdx] = null;
+                        }
                         else
-                            buf[bufIdx] =
-                                TileObjectRegistry.GetTileBase(col[TileLayerRegistry.GetLayerZ(layerId)]);
+                        {
+                            // Metadata-aware TileBase selection
+                            buf[bufIdx] = TileObjectRegistry.GetTileBase(tileId, metaPairs);
+                        }
                     }
                 }
+
                 // push one bulk call --------------------------------------------------
                 var bounds = new BoundsInt(sx, sy, 0, blockSize, blockSize, 1);
                 tilemap.SetTilesBlock(bounds, buf);
@@ -125,7 +139,7 @@ namespace Dalichrome.RandomGenerator
 
             TileBase[] tileBaseArray = new TileBase[width * height];
 
-            foreach (int2 pos in tileGrid.GetPositions()) 
+            foreach (int2 pos in tileGrid.GetPositions())
             {
                 int tempIndex = pos.x + (pos.y * tileGrid.width);
                 TileBase tileBase = TileObjectRegistry.GetNumberTileBase(tileGrid.GetTileValue(pos));
@@ -149,7 +163,7 @@ namespace Dalichrome.RandomGenerator
             }
             this.tileGrid = tileGrid;
 
-            int seed = UnityEngine.Random.Range(0,1000000);
+            int seed = UnityEngine.Random.Range(0, 1000000);
             StopAllCoroutines();
             foreach (int layerId in TileLayerRegistry.AllLayerIds)
             {
@@ -158,7 +172,7 @@ namespace Dalichrome.RandomGenerator
                     CreateTileMap(layerId);
                 }
 
-                if(!coroutineLoading)
+                if (!coroutineLoading)
                     SetTilesByLayer(layerId);
                 else
                     StartCoroutine(SetTilesCoroutine(layerId, tilesPerFrame: tilesPerFrame, seed: seed));

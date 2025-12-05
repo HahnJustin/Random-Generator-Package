@@ -336,6 +336,62 @@ namespace Dalichrome.RandomGenerator
             return tb;
         }
 
+        /// <summary>
+        /// Returns the TileSpawn to use for this tileId, optionally using metadata
+        /// to select a variant. If metaPairs is null or empty, the base spawn is used.
+        /// </summary>
+        public static TileSpawn GetTileSpawn(int tileId, List<MetaPair> metaPairs = null)
+        {
+            EnsureBuilt();
+
+            if (!_byId.TryGetValue(tileId, out var t) || t == null)
+                return default;
+
+            // If no metadata or no variant rules, use the base spawn
+            if (metaPairs == null || metaPairs.Count == 0 ||
+                t.metaDataSpawnList == null || t.metaDataSpawnList.Count == 0)
+            {
+                return t.tileSpawn;
+            }
+
+            // Use the TileObject's metadata logic
+            return t.GetSpawnForMeta(metaPairs);
+        }
+
+        /// <summary>
+        /// Returns the GameObject for this tileId given metadata (or null if spawn type is not GameObject).
+        /// </summary>
+        public static GameObject GetGameObject(int tileId, List<MetaPair> metaPairs)
+        {
+            var spawn = GetTileSpawn(tileId, metaPairs);
+            return spawn.spawnType == TileSpawnType.GameObject ? spawn.gameObject : null;
+        }
+
+        /// <summary>
+        /// Returns the TileBase for this tileId given metadata.
+        /// If the spawn is a TileBase, that is returned.
+        /// If the spawn is a Sprite, a CustomTileBase is created from that sprite.
+        /// If the spawn is a GameObject, this returns null (no tile).
+        /// NOTE: this path is NOT cached, since it's metadata-dependent.
+        /// </summary>
+        public static TileBase GetTileBase(int tileId, List<MetaPair> metaPairs)
+        {
+            var spawn = GetTileSpawn(tileId, metaPairs);
+
+            switch (spawn.spawnType)
+            {
+                case TileSpawnType.TileBase:
+                    return spawn.tileBase;
+
+                case TileSpawnType.Sprite:
+                    return CreateCustomTileFromSprite(spawn.sprite);
+
+                case TileSpawnType.GameObject:
+                default:
+                    return null;
+            }
+        }
+
         // Helpers
         private static TileBase CreateCustomTileFromSprite(Sprite sprite)
         {

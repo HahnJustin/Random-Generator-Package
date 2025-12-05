@@ -33,18 +33,23 @@ namespace Dalichrome.RandomGenerator
 
         protected TileGrid tileGrid;
 
-        protected bool SpawnTileGameObject(ITileColumn col, int layerId)
+        protected bool SpawnTileGameObject(ITileColumn col, int layerId, List<MetaPair> metaPairs)
         {
             int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
 
-            GameObject prefab = TileObjectRegistry.GetGameObject(tileId);
+            GameObject prefab = TileObjectRegistry.GetGameObject(tileId, metaPairs);
             if (prefab == null) return false;
 
             Vector2 circle = UnityEngine.Random.insideUnitCircle * gameObjectVariance;
 
-            GameObject spawned = Instantiate(prefab, new Vector3(col.X + circle.x + gameObjectOffset.x,
-                                                                 col.Y + circle.y + gameObjectOffset.y,
-                                            prefab.transform.position.z), Quaternion.identity, gameObjectParent);
+            GameObject spawned = Instantiate(
+                prefab,
+                new Vector3(col.X + circle.x + gameObjectOffset.x,
+                            col.Y + circle.y + gameObjectOffset.y,
+                            prefab.transform.position.z),
+                Quaternion.identity,
+                gameObjectParent);
+
             spawnedObjects.Add(spawned);
             return true;
         }
@@ -60,20 +65,31 @@ namespace Dalichrome.RandomGenerator
 
             TileBase[] tileBaseArray = new TileBase[width * height];
 
-            foreach (ITileColumn col in tileGrid) 
+            foreach (ITileColumn col in tileGrid)
             {
+                int2 pos = new int2(col.X, col.Y);
+                // Combined 2D + 3D metadata for this tile position
+                List<MetaPair> metaPairs = tileGrid.GetAllData(pos);
+
                 int tempIndex = col.X + (col.Y * tileGrid.width);
-                if (useGameObjects && SpawnTileGameObject(col, layerId)) {
+                int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
+
+                if (useGameObjects && SpawnTileGameObject(col, layerId, metaPairs))
+                {
+                    // GameObject spawned, clear tile
                     tileBaseArray[tempIndex] = null;
                 }
                 else
                 {
-                    TileBase tileBase = TileObjectRegistry.GetTileBase(col[TileLayerRegistry.GetLayerZ(layerId)]);
+                    // Metadata-aware TileBase selection
+                    TileBase tileBase = TileObjectRegistry.GetTileBase(tileId, metaPairs);
                     tileBaseArray[tempIndex] = tileBase;
                 }
             }
+
             tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
         }
+
 
         private void SetNumberTiles()
         {

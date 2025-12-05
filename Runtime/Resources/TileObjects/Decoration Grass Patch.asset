@@ -23,4 +23,16 @@ MonoBehaviour:
     sprite: {fileID: 0}
     tileBase: {fileID: 11400000, guid: 6218c9b9c5ab2d94bbb0372365195655, type: 2}
     gameObject: {fileID: 0}
-  metaDataSpawnList: []
+  metaDataSpawnList:
+  - condition:
+      keyCondition: fieldname|test2
+      keyIntConditions:
+      - key: fieldname
+        intCondition: 0-10
+      - key: test2
+        intCondition: 0-10
+    tileSpawn:
+      spawnType: 0
+      sprite: {fileID: -1713440345, guid: bd7204bd8ccebac4b866c4e9f3e67d5c, type: 3}
+      tileBase: {fileID: 0}
+      gameObject: {fileID: 0}
