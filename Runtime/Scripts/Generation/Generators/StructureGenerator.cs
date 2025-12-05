@@ -141,7 +141,7 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 for (int sx = 0; sx < W; sx++)
                 {
-                    int baseIdx = (sy * W + sx) * depth;
+                    int baseIdx = ((H - sy - 1) * W + sx) * depth;
                     int2 point = new int2(anchor.x + sx, anchor.y + sy);
 
                     for (int z = 0; z < depth; z++)

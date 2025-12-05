@@ -48,32 +48,33 @@ namespace Dalichrome.RandomGenerator.UserData
         /// </summary>
         public TileSpawn GetSpawnForMeta(List<MetaPair> metaPairs)
         {
-            if (metaPairs == null || metaPairs.Count == 0 ||
-                metaDataSpawnList == null || metaDataSpawnList.Count == 0)
+            if (metaDataSpawnList != null && metaDataSpawnList.Count > 0 && metaPairs != null && metaPairs.Count > 0)
             {
-                return tileSpawn;
+                for (int i = 0; i < metaDataSpawnList.Count; i++)
+                {
+                    var variant = metaDataSpawnList[i];
+                    if (variant != null && variant.Matches(metaPairs))
+                        return variant.tileSpawn;
+                }
             }
 
-            // Build a logical metadata context: field -> value
-            var context = new Dictionary<string, int>(metaPairs.Count);
-            for (int i = 0; i < metaPairs.Count; i++)
-            {
-                var p = metaPairs[i];
-                context[p.field] = p.value;
-            }
-
-            // First matching variant wins
-            for (int i = 0; i < metaDataSpawnList.Count; i++)
-            {
-                var variant = metaDataSpawnList[i];
-                if (variant == null)
-                    continue;
-
-                if (variant.Matches(context))
-                    return variant.tileSpawn;
-            }
-
+            // Fallback: default spawn
             return tileSpawn;
         }
+
+        // in TileObject
+        internal void PrecompileMetaConditions()
+        {
+            if (metaDataSpawnList == null)
+                return;
+
+            for (int i = 0; i < metaDataSpawnList.Count; i++)
+            {
+                var rule = metaDataSpawnList[i];
+                if (rule?.condition != null)
+                    rule.condition.Precompile();
+            }
+        }
+
     }
 }

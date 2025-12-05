@@ -29,6 +29,7 @@ namespace Dalichrome.RandomGenerator
         private static Dictionary<int, int> _tileIdToLayerId; // tileId -> layerId
         private static Dictionary<int, int> _tileIdToLayerZ;  // tileId -> z (compressed)
         private static Dictionary<int, int> _tileKindById;   // tileId -> tileKind
+        private static HashSet<int> _tilesWithMetaVariants;
 
         private static readonly Dictionary<int, TileBase> _tileBaseCache = new();
         private static readonly Dictionary<int, TileBase> _numberTileBaseCache = new();
@@ -124,10 +125,19 @@ namespace Dalichrome.RandomGenerator
                 // Ensure TileLayerRegistry is built so z lookups are ready
                 _ = TileLayerRegistry.AllLayerIds; // touches EnsureBuilt()
 
+                _tilesWithMetaVariants = new HashSet<int>();
+
                 foreach (var t in _allTiles)
                 {
                     _tileIdToLayerId[t.id] = t.layer;
-                    _tileIdToLayerZ[t.id] = TileLayerRegistry.GetLayerZ(t.layer, -1); // -1 if missing
+                    _tileIdToLayerZ[t.id] = TileLayerRegistry.GetLayerZ(t.layer, -1);
+
+                    // NOTE: metaDataSpawnList lives on TileObject
+                    if (t.metaDataSpawnList != null && t.metaDataSpawnList.Count > 0)
+                    {
+                        _tilesWithMetaVariants.Add(t.id);
+                        t.PrecompileMetaConditions(); // from earlier step
+                    }
                 }
 
                 _tileKindById = new Dictionary<int, int>(_allTiles.Length);
@@ -318,6 +328,11 @@ namespace Dalichrome.RandomGenerator
             return map;
         }
 
+        public static bool HasMetaVariants(int tileId)
+        {
+            EnsureBuilt();
+            return _tilesWithMetaVariants != null && _tilesWithMetaVariants.Contains(tileId);
+        }
 
         // Number Tiles - TODO: Move elsewhere
         public static TileBase GetNumberTileBase(int number)
@@ -347,14 +362,13 @@ namespace Dalichrome.RandomGenerator
             if (!_byId.TryGetValue(tileId, out var t) || t == null)
                 return default;
 
-            // If no metadata or no variant rules, use the base spawn
-            if (metaPairs == null || metaPairs.Count == 0 ||
-                t.metaDataSpawnList == null || t.metaDataSpawnList.Count == 0)
+            // If no variants or no metadata, just default
+            if (t.metaDataSpawnList == null || t.metaDataSpawnList.Count == 0 ||
+                metaPairs == null || metaPairs.Count == 0)
             {
                 return t.tileSpawn;
             }
 
-            // Use the TileObject's metadata logic
             return t.GetSpawnForMeta(metaPairs);
         }
 
@@ -363,6 +377,10 @@ namespace Dalichrome.RandomGenerator
         /// </summary>
         public static GameObject GetGameObject(int tileId, List<MetaPair> metaPairs)
         {
+            // If tile has no variants, just use the old fast path with caching
+            if (!HasMetaVariants(tileId))
+                return GetGameObject(tileId); // your existing, cached version
+
             var spawn = GetTileSpawn(tileId, metaPairs);
             return spawn.spawnType == TileSpawnType.GameObject ? spawn.gameObject : null;
         }
@@ -376,6 +394,10 @@ namespace Dalichrome.RandomGenerator
         /// </summary>
         public static TileBase GetTileBase(int tileId, List<MetaPair> metaPairs)
         {
+            // If tile has no variants, keep using the cached path
+            if (!HasMetaVariants(tileId))
+                return GetTileBase(tileId); // existing cached version
+
             var spawn = GetTileSpawn(tileId, metaPairs);
 
             switch (spawn.spawnType)

@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Dalichrome.RandomGenerator.Core;
+
 
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
@@ -27,9 +29,9 @@ namespace Dalichrome.RandomGenerator.UserData
 #endif
         public TileSpawn tileSpawn;
 
-        public bool Matches(IReadOnlyDictionary<string, int> context)
+        public bool Matches(List<MetaPair> metaPairs)
         {
-            return condition != null && condition.Matches(context);
+            return condition != null && condition.Matches(metaPairs);
         }
     }
 }

@@ -99,11 +99,15 @@ namespace Dalichrome.RandomGenerator
                         ITileColumn col = tileGrid.GetColumn(tx, ty);
                         int2 pos = new int2(tx, ty);
 
-                        // Combined 3D + 2D metadata for this tile position
-                        List<MetaPair> metaPairs = tileGrid.GetAllData(pos);
-                        // Or: List<MetaPair> metaPairs = GetAllMetaAt(pos); if you prefer the wrapper
-
                         int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
+                        List<MetaPair> metaPairs = null;
+
+                        if (TileObjectRegistry.HasMetaVariants(tileId))
+                        {
+                            metaPairs = tileGrid.GetAllData(pos);
+                            if (metaPairs == null || metaPairs.Count == 0)
+                                metaPairs = null;
+                        }
 
                         if (useGameObjects && SpawnTileGameObject(col, layerId, metaPairs))
                         {
@@ -111,7 +115,6 @@ namespace Dalichrome.RandomGenerator
                         }
                         else
                         {
-                            // Metadata-aware TileBase selection
                             buf[bufIdx] = TileObjectRegistry.GetTileBase(tileId, metaPairs);
                         }
                     }

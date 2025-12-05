@@ -67,21 +67,25 @@ namespace Dalichrome.RandomGenerator
 
             foreach (ITileColumn col in tileGrid)
             {
-                int2 pos = new int2(col.X, col.Y);
-                // Combined 2D + 3D metadata for this tile position
-                List<MetaPair> metaPairs = tileGrid.GetAllData(pos);
-
                 int tempIndex = col.X + (col.Y * tileGrid.width);
                 int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
 
+                List<MetaPair> metaPairs = null;
+                bool hasMetaVariants = TileObjectRegistry.HasMetaVariants(tileId);
+
+                if (hasMetaVariants)
+                {
+                    metaPairs = tileGrid.GetAllData(new int2(col.X, col.Y));
+                    if (metaPairs == null || metaPairs.Count == 0)
+                        metaPairs = null; // normalize empty
+                }
+
                 if (useGameObjects && SpawnTileGameObject(col, layerId, metaPairs))
                 {
-                    // GameObject spawned, clear tile
                     tileBaseArray[tempIndex] = null;
                 }
                 else
                 {
-                    // Metadata-aware TileBase selection
                     TileBase tileBase = TileObjectRegistry.GetTileBase(tileId, metaPairs);
                     tileBaseArray[tempIndex] = tileBase;
                 }
