@@ -302,6 +302,7 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddData(int x, int y, string field, int value) { }
         public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) { }
         public void AddData(int x, int y, FixedString64Bytes fixedField, int value) { }
+        public void AddData(MetadataEntry entry) { }
 
         public int GetDataLayerId(int x, int y, int layerId, string field) => 0;
         public int GetData(int x, int y, int layerZ, string field) => 0;
@@ -310,6 +311,7 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetData(int x, int y, FixedString64Bytes fixedField) => 0;
 
         public List<MetaPair> GetAllData(int3 pos) => new();
+        public List<MetaPair> GetAllDataWithColData(int3 pos) => new();
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) => new();
         public List<PositionValue> GetAllData(string field) => new();
         public List<string> GetMetaFields() => new();

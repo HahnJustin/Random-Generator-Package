@@ -98,13 +98,14 @@ namespace Dalichrome.RandomGenerator
 
                         ITileColumn col = tileGrid.GetColumn(tx, ty);
                         int2 pos = new int2(tx, ty);
+                        int z = TileLayerRegistry.GetLayerZ(layerId);
 
-                        int tileId = col[TileLayerRegistry.GetLayerZ(layerId)];
+                        int tileId = col[z];
                         List<MetaPair> metaPairs = null;
 
                         if (TileObjectRegistry.HasMetaVariants(tileId))
                         {
-                            metaPairs = tileGrid.GetAllData(pos);
+                            metaPairs = tileGrid.GetAllDataWithColData(new int3(pos.x, pos.y, z));
                             if (metaPairs == null || metaPairs.Count == 0)
                                 metaPairs = null;
                         }

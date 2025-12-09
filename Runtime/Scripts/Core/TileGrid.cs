@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -206,6 +205,9 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddData(int x, int y, int layerZ, string field, int value) =>
             subgrid.AddData(x, y, layerZ, field, value);
 
+        public void AddData(MetadataEntry entry) =>
+            subgrid.AddData(entry);
+
         // sugar
         public void AddData(int2 pos, int layerZ, string field, int value) =>
             AddData(pos.x, pos.y, layerZ, field, value);
@@ -271,6 +273,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<MetaPair> GetAllData(int2 pos) =>
             subgrid.GetAllData(new int3(pos.x, pos.y, MetaData.ColumnZ));
+
+        public List<MetaPair> GetAllDataWithColData(int3 pos) =>
+            subgrid.GetAllDataWithColData(pos);
 
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) =>
             subgrid.GetAllData(fixedField);

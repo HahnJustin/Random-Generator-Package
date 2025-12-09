@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -246,6 +247,33 @@ namespace Dalichrome.RandomGenerator.Core
                     }
                 }
             }
+
+            return result;
+        }
+
+        public List<MetaPair> GetAllDataWithColData(int3 pos)
+        {
+            if (!IsValid || !_byPos.IsCreated)
+                return new List<MetaPair>(0);
+
+            // Per-cell data
+            List<MetaPair> posData = GetAllData(pos);
+
+            // Column-level data (z = ColumnZ)
+            List<MetaPair> colData = GetAllData(new int3(pos.x, pos.y, ColumnZ));
+
+            // Fast paths: if one side is empty, just return the other list directly.
+            // NOTE: This reuses the list from GetAllData, which avoids one allocation.
+            if (colData.Count == 0)
+                return posData;
+            if (posData.Count == 0)
+                return colData;
+
+            // Both have entries: concatenate.
+            // We don't try to dedupe by field for perf reasons; it's OK if duplicates exist.
+            var result = new List<MetaPair>(colData.Count + posData.Count);
+            result.AddRange(colData);
+            result.AddRange(posData);
 
             return result;
         }

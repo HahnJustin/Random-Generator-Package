@@ -13,19 +13,23 @@ namespace Dalichrome.RandomGenerator.Core
     {
         private readonly int[] _tiles;
 
+        private readonly MetadataEntry[] _meta;
+
         public int Width { get; }
         public int Height { get; }
         public int Length => _tiles.Length;
 
-        public Structure(int[] tiles, int width, int height)
+        public Structure(int[] tiles, MetadataEntry[] meta, int width, int height)
         {
             _tiles = tiles ?? Array.Empty<int>();
+            _meta = meta ?? Array.Empty<MetadataEntry>();
             Width = Math.Max(1, width);
             Height = Math.Max(1, height);
         }
 
         public int this[int index] => _tiles[index];
 
+        public IEnumerable<MetadataEntry> GetMetaEnumerable() => _meta;
         public IEnumerator<int> GetEnumerator() => ((IEnumerable<int>)_tiles).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

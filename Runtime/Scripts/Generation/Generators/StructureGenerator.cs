@@ -6,7 +6,11 @@ using Dalichrome.RandomGenerator.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using Unity.Collections;
 using Unity.Mathematics;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -141,7 +145,8 @@ namespace Dalichrome.RandomGenerator.Generators
             {
                 for (int sx = 0; sx < W; sx++)
                 {
-                    int baseIdx = ((H - sy - 1) * W + sx) * depth;
+                    //Places upside down due to the way structures are origined at the top left, tilemaps are origined at bottom right
+                    int baseIdx = (sy * W + sx) * depth;
                     int2 point = new int2(anchor.x + sx, anchor.y + sy);
 
                     for (int z = 0; z < depth; z++)
@@ -151,6 +156,12 @@ namespace Dalichrome.RandomGenerator.Generators
                         TileGrid.SetTileIdBypassLayer(point, z, tileId);
                     }
                 }
+            }
+
+            foreach (MetadataEntry entry in structure.GetMetaEnumerable())
+            {
+                entry.Shift(anchor, true);
+                TileGrid.AddData(entry);
             }
         }
 

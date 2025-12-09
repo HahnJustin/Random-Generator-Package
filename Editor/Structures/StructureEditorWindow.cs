@@ -40,7 +40,7 @@ public class StructureEditorWindow : EditorWindow
     private int paintTileId = -1;
     private bool isDraggingPaint; private Vector2 lastMousePos;
 
-    private enum ToolMode { Brush, Erase, Fill, Picker }
+    private enum ToolMode { Brush, Erase, Fill, Picker, Metadata }
 
     // Palette & drawing caches
     private struct PaletteItem { public int id; public string name; public Sprite sprite; public Color color; public int layerId; public string layerName; }
@@ -78,6 +78,10 @@ public class StructureEditorWindow : EditorWindow
     private float _hoverBoxW = 0f, _hoverBoxH = 0f;
     private int _hoverActiveLayerIndex = -1; // so we refresh when active layer changes
     private readonly GUIContent _scratchContent = new GUIContent(); // reuse to avoid allocs
+
+    // --- Metadata editing state ---
+    private Vector3Int _metaTarget = new Vector3Int(-1, -1, -1); // x,y,layerId (z)
+    private string _metaText = "";
 
     [MenuItem("Random Generator/Structure Painter")]
     public static void Open()
@@ -356,6 +360,9 @@ public class StructureEditorWindow : EditorWindow
             }
 
             EditorGUILayout.Space(8);
+            DrawMetadataPanel();
+
+            EditorGUILayout.Space(8);
             maintenanceFoldout = EditorGUILayout.Foldout(maintenanceFoldout, "Maintenance", true);
             if (maintenanceFoldout)
             {
@@ -394,13 +401,92 @@ public class StructureEditorWindow : EditorWindow
                     if (GUILayout.Toggle(tool == ToolMode.Brush, "Brush (B)", EditorStyles.miniButtonLeft)) tool = ToolMode.Brush;
                     if (GUILayout.Toggle(tool == ToolMode.Erase, "Erase (E)", EditorStyles.miniButtonMid)) tool = ToolMode.Erase;
                     if (GUILayout.Toggle(tool == ToolMode.Fill, "Fill (G)", EditorStyles.miniButtonMid)) tool = ToolMode.Fill;
-                    if (GUILayout.Toggle(tool == ToolMode.Picker, "Picker (I)", EditorStyles.miniButtonRight)) tool = ToolMode.Picker;
+                    if (GUILayout.Toggle(tool == ToolMode.Picker, "Picker (I)", EditorStyles.miniButtonMid)) tool = ToolMode.Picker;
+                    if (GUILayout.Toggle(tool == ToolMode.Metadata, "Meta (M)", EditorStyles.miniButtonRight)) tool = ToolMode.Metadata;
                 }
+
                 EditorGUILayout.Space(6);
                 EditorGUILayout.LabelField("View", EditorStyles.boldLabel);
                 zoom = EditorGUILayout.Slider("Zoom", zoom, MinZoom, MaxZoom);
                 otherLayersOpacity = EditorGUILayout.Slider("Other Layers Opacity", Mathf.Clamp(otherLayersOpacity, 0.1f, 1f), 0.1f, 1f);
                 if (GUILayout.Button("Reset View")) { zoom = 1f; pan = Vector2.zero; Repaint(); }
+            }
+        }
+    }
+
+    private void DrawMetadataPanel()
+    {
+        EditorGUILayout.LabelField("Metadata", EditorStyles.boldLabel);
+
+        if (asset == null)
+        {
+            EditorGUILayout.HelpBox("Assign a Structure to edit metadata.", MessageType.Info);
+            return;
+        }
+
+        if (_metaTarget.x < 0 || _metaTarget.y < 0 || _metaTarget.z <= 0)
+        {
+            EditorGUILayout.HelpBox(
+                "Select the Meta (M) tool, then click a cell on the canvas to edit metadata.",
+                MessageType.Info);
+            return;
+        }
+
+        // Fetch tile ID at target
+        int lid = _metaTarget.z;
+        int tx = _metaTarget.x;
+        int ty = _metaTarget.y;
+
+        string layerName = "Unknown Layer";
+        int layerIndex = Array.IndexOf(currentLayerIds, lid);
+        if (layerIndex >= 0 && layerIndex < currentLayerNames.Length)
+            layerName = currentLayerNames[layerIndex];
+
+        int tileId = asset.GetTileByLayerId(lid, tx, ty);
+        string tileName =
+            tileId == 0 ? "(empty)" :
+            tileId == MaskTileId ? MaskTileName :
+            (tileIdToName.TryGetValue(tileId, out var nm) ? nm : $"ID {tileId}");
+
+        // Display nicer header
+        EditorGUILayout.LabelField(
+            $"Target: ({tx}, {ty}) on {layerName}");
+
+        // Display tile info
+        EditorGUILayout.LabelField(
+            $"Tile: {tileName} (id {tileId})",
+            EditorStyles.miniLabel);
+
+        EditorGUILayout.LabelField(
+            "Raw metadata i.e. (field:1, other:2, ...)",
+            EditorStyles.miniLabel);
+
+        _metaText = EditorGUILayout.TextArea(_metaText, GUILayout.MinHeight(40));
+
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("Save"))
+            {
+                Undo.RecordObject(asset, "Edit Metadata");
+                asset.SetMetadata(_metaTarget.z, _metaTarget.x, _metaTarget.y, _metaText);
+                EditorUtility.SetDirty(asset);
+                Repaint();
+            }
+
+            if (GUILayout.Button("Clear"))
+            {
+                Undo.RecordObject(asset, "Clear Metadata");
+                asset.SetMetadata(_metaTarget.z, _metaTarget.x, _metaTarget.y, null);
+                _metaText = string.Empty;
+                EditorUtility.SetDirty(asset);
+                Repaint();
+            }
+
+            if (GUILayout.Button("Unselect", GUILayout.Width(80)))
+            {
+                _metaTarget = new Vector3Int(-1, -1, -1);
+                _metaText = string.Empty;
+                Repaint();
             }
         }
     }
@@ -438,6 +524,12 @@ public class StructureEditorWindow : EditorWindow
             else
             {
                 linesList.Add($"{lname}: -");
+            }
+
+            string meta = asset.GetMetadata(lid, hx, hy);
+            if (!string.IsNullOrEmpty(meta))
+            {
+                linesList.Add($"    meta: {meta}");
             }
         }
 
@@ -637,6 +729,23 @@ public class StructureEditorWindow : EditorWindow
                         DrawSprite(cellRect, sp, alpha);
                     else
                         DrawColor(cellRect, colorByTileId.TryGetValue(id, out var c) ? c : Color.gray, alpha);
+                    string metaHere = asset.GetMetadata(lid, x, y);
+                    if (!string.IsNullOrEmpty(metaHere))
+                    {
+                        // Only show strongly on active layer, faint on others
+                        float iconAlpha = (li == activeLayerIndex) ? alpha : alpha * 0.5f;
+
+                        // Tiny square in top-right corner
+                        var iconRect = new Rect(
+                            cellRect.xMax - Mathf.Max(4f, cell * 0.15f) - 2f,
+                            cellRect.yMin + 2f,
+                            Mathf.Max(4f, cell * 0.15f),
+                            Mathf.Max(4f, cell * 0.15f)
+                        );
+
+                        var iconColor = new Color(1.0f, 0.8f, 0.2f, iconAlpha); // warm yellow-ish
+                        EditorGUI.DrawRect(iconRect, iconColor);
+                    }
                 }
             }
         }
@@ -708,26 +817,60 @@ public class StructureEditorWindow : EditorWindow
 
         if (e.type == EventType.MouseDown && e.button == 0)
         {
-            isDraggingPaint = true; lastMousePos = e.mousePosition; GUI.FocusControl(null);
+            GUI.FocusControl(null);
+
+            // Metadata tool: click selects metadata target (x,y,layerId)
+            if (tool == ToolMode.Metadata)
+            {
+                _metaTarget = new Vector3Int(cx, cy, activeLayerId);
+                string existing = asset.GetMetadata(activeLayerId, cx, cy);
+                _metaText = existing ?? string.Empty;
+                Repaint();
+                e.Use();
+                return;
+            }
+
+            // Normal painting tools
+            isDraggingPaint = true;
+            lastMousePos = e.mousePosition;
+
             Undo.RecordObject(asset, "Paint Structure");
-            if (tool == ToolMode.Picker) paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
-            else if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
-            else if (!invalidPlacement) ApplyToolAt(activeLayerId, cx, cy);
-            asset.EnsureTileArrays(); EditorUtility.SetDirty(asset); Repaint(); e.Use();
+            if (tool == ToolMode.Picker)
+                paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
+            else if (tool == ToolMode.Erase)
+                asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
+            else if (!invalidPlacement)
+                ApplyToolAt(activeLayerId, cx, cy);
+
+            asset.EnsureTileArrays();
+            EditorUtility.SetDirty(asset);
+            Repaint();
+            e.Use();
         }
         else if (e.type == EventType.MouseDrag && e.button == 0 && isDraggingPaint)
         {
             if ((e.mousePosition - lastMousePos).sqrMagnitude > 0.5f)
             {
-                if (tool == ToolMode.Erase) asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
-                else if (tool == ToolMode.Picker) paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
-                else if (!invalidPlacement) ApplyToolAt(activeLayerId, cx, cy);
-                EditorUtility.SetDirty(asset); Repaint(); lastMousePos = e.mousePosition;
+                if (tool == ToolMode.Erase)
+                    asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
+                else if (tool == ToolMode.Picker)
+                    paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
+                else if (tool != ToolMode.Metadata && !invalidPlacement)
+                    ApplyToolAt(activeLayerId, cx, cy);
+
+                EditorUtility.SetDirty(asset);
+                Repaint();
+                lastMousePos = e.mousePosition;
             }
             e.Use();
         }
         else if (e.type == EventType.MouseUp && e.button == 0)
-        { isDraggingPaint = false; e.Use(); }
+        {
+            isDraggingPaint = false;
+            e.Use();
+        }
+
+
     }
 
     private void ApplyToolAt(int layerId, int x, int y)
@@ -766,10 +909,34 @@ public class StructureEditorWindow : EditorWindow
 
     private void HandleShortcuts()
     {
-        var e = Event.current; if (e.type != EventType.KeyDown) return;
+        var e = Event.current;
+        if (e.type != EventType.KeyDown) return;
+
         switch (e.keyCode)
-        { case KeyCode.B: tool = ToolMode.Brush; Repaint(); break; case KeyCode.E: tool = ToolMode.Erase; Repaint(); break; case KeyCode.G: tool = ToolMode.Fill; Repaint(); break; case KeyCode.I: tool = ToolMode.Picker; Repaint(); break; }
+        {
+            case KeyCode.B:
+                tool = ToolMode.Brush;
+                Repaint();
+                break;
+            case KeyCode.E:
+                tool = ToolMode.Erase;
+                Repaint();
+                break;
+            case KeyCode.G:
+                tool = ToolMode.Fill;
+                Repaint();
+                break;
+            case KeyCode.I:
+                tool = ToolMode.Picker;
+                Repaint();
+                break;
+            case KeyCode.M:
+                tool = ToolMode.Metadata;
+                Repaint();
+                break;
+        }
     }
+
 
     private (int x, int y, bool onGrid) MouseCell(Vector2 mouse, Vector2 origin, float cell)
     { int x = Mathf.FloorToInt((mouse.x - origin.x) / cell); int y = Mathf.FloorToInt((mouse.y - origin.y) / cell); bool on = x >= 0 && x < asset.width && y >= 0 && y < asset.height; return (x, y, on); }
