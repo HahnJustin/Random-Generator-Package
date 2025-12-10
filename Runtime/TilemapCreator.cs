@@ -134,25 +134,6 @@ namespace Dalichrome.RandomGenerator
             }
         }
 
-        private void SetNumberTiles()
-        {
-            numberTilemap.ClearAllTiles();
-
-            int width = tileGrid.width;
-            int height = tileGrid.height;
-
-            TileBase[] tileBaseArray = new TileBase[width * height];
-
-            foreach (int2 pos in tileGrid.GetPositions())
-            {
-                int tempIndex = pos.x + (pos.y * tileGrid.width);
-                TileBase tileBase = TileObjectRegistry.GetNumberTileBase(tileGrid.GetTileValue(pos));
-                tileBaseArray[tempIndex] = tileBase;
-            }
-
-            numberTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
-        }
-
         public override void CreateWithTilegrid(TileGrid tileGrid)
         {
             if (tilemapDict == null)
@@ -181,11 +162,6 @@ namespace Dalichrome.RandomGenerator
                 else
                     StartCoroutine(SetTilesCoroutine(layerId, tilesPerFrame: tilesPerFrame, seed: seed));
             }
-
-            if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();
-            else if (!makeNumberLayer && numberTilemap != null) Destroy(numberTilemap.gameObject);
-
-            if (makeNumberLayer) SetNumberTiles();
         }
     }
 }

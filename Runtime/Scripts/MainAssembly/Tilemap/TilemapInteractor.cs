@@ -29,7 +29,6 @@ namespace Dalichrome.RandomGenerator
         protected RandomGenerator randomGenerator;
 
         protected Dictionary<int, Tilemap> tilemapDict = new();
-        protected Tilemap numberTilemap;
 
         protected TileGrid tileGrid;
 
@@ -95,27 +94,6 @@ namespace Dalichrome.RandomGenerator
             tilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
         }
 
-
-        private void SetNumberTiles()
-        {
-            numberTilemap.ClearAllTiles();
-
-            int width = tileGrid.width;
-            int height = tileGrid.height;
-
-            TileBase[] tileBaseArray = new TileBase[width * height];
-
-            foreach (int2 pos in tileGrid.GetPositions())
-            {
-                int tempIndex = pos.x + (pos.y * tileGrid.width);
-                    TileBase tileBase = TileObjectRegistry.GetNumberTileBase(tileGrid.GetTileValue(pos));
-                    tileBaseArray[tempIndex] = tileBase;
-                
-            }
-
-            numberTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), tileBaseArray);
-        }
-
         protected void CreateTileMap(int layerId)
         {
             if (layerId == 0) return;
@@ -154,19 +132,6 @@ namespace Dalichrome.RandomGenerator
             tilemapDict[layerId] = tilemap;
         }
 
-        protected void CreateNumberTileMap()
-        {
-            GameObject tilemapObject = Instantiate(TilemapPrefab, transform);
-            tilemapObject.GetComponent<TilemapRenderer>().sortingOrder = 10;
-            Tilemap tilemap = tilemapObject.GetComponent<Tilemap>();
-            if (tilemap == null)
-            {
-                Debug.LogError("TilemapPrefab must have a Tilemap Component");
-            }
-            numberTilemap = tilemap;
-            tilemapObject.SetActive(false);
-        }
-
         public virtual void CreateWithTilegrid(TileGrid tileGrid)
         {
             if (tileGrid == null || !tileGrid.IsValid)
@@ -187,11 +152,6 @@ namespace Dalichrome.RandomGenerator
 
                 SetTilesByLayer(id);
             }
-
-            if (makeNumberLayer && numberTilemap == null) CreateNumberTileMap();
-            else if (!makeNumberLayer && numberTilemap != null) Destroy(numberTilemap.gameObject);
-
-            if (makeNumberLayer) SetNumberTiles();
         }
 
         public void SetRandomGenerator(RandomGenerator randomGenerator)
@@ -208,11 +168,6 @@ namespace Dalichrome.RandomGenerator
         public Dictionary<int,Tilemap> GetTilemapDictionary()
         {
             return tilemapDict;
-        }
-
-        public Tilemap GetNumberTilemap()
-        {
-            return numberTilemap;
         }
 
         public List<GameObject> GetGameObjects()
