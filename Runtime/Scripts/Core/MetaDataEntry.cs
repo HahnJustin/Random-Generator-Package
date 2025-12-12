@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 [Serializable]
 public struct MetadataEntry
@@ -16,6 +13,8 @@ public struct MetadataEntry
     public int shiftX;
     public int shiftY;
     public bool inverseY;
+
+    public int3 Int3 { get { return new int3(x, y, layerId); } }
 
     public void Shift(int2 shift, bool inverseY)
     {

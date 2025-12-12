@@ -2,7 +2,8 @@
     "name": "Dalichrome.RandomGenerator.Configs",
     "rootNamespace": "",
     "references": [
-        "GUID:ac422043113dd38479a01a1904702f3b"
+        "GUID:ac422043113dd38479a01a1904702f3b",
+        "GUID:e0cd26848372d4e5c891c569017e11f1"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

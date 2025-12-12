@@ -181,7 +181,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             EnsureCapacity(1);
 
-            var key = new MetaKey { pos = pos, field = fixedField };
+            var key = new MetaKey(pos, fixedField);
 
             // Only add to indexes when this is a *new* key
             if (_data.TryAdd(key, value))
@@ -204,7 +204,7 @@ namespace Dalichrome.RandomGenerator.Core
             if (!IsValid || !_data.IsCreated) return false;
 
             FixedString64Bytes f = (FixedString64Bytes)field;
-            var key = new MetaKey { pos = pos, field = f };
+            var key = new MetaKey(pos, f);
             return _data.TryGetValue(key, out value);
         }
 
@@ -213,7 +213,7 @@ namespace Dalichrome.RandomGenerator.Core
             value = default;
             if (!IsValid || !_data.IsCreated) return false;
 
-            var key = new MetaKey { pos = pos, field = fixedField };
+            var key = new MetaKey(pos, fixedField);
             return _data.TryGetValue(key, out value);
         }
 
@@ -319,7 +319,7 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (!IsValid || !_data.IsCreated) return false;
 
-            var key = new MetaKey { pos = pos, field = (FixedString64Bytes)field };
+            var key = new MetaKey(pos,(FixedString64Bytes)field);
 
             if (_data.Remove(key))
             {
@@ -330,6 +330,31 @@ namespace Dalichrome.RandomGenerator.Core
             }
 
             return false;
+        }
+
+        public int RemoveAllAt(int3 pos)
+        {
+            if (!IsValid || !_data.IsCreated || !_byPos.IsCreated) return 0;
+
+            int removed = 0;
+
+            if (_byPos.TryGetFirstValue(pos, out var key, out var it))
+            {
+                do
+                {
+                    if (_data.Remove(key))
+                    {
+                        removed++;
+                        _count = Math.Max(0, _count - 1);
+                    }
+                }
+                while (_byPos.TryGetNextValue(out key, ref it));
+            }
+
+            // Fully clean the position index. (Does not touch _byField.)
+            _byPos.Remove(pos);
+
+            return removed;
         }
 
         public List<string> GetFields()

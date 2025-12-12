@@ -117,20 +117,6 @@ namespace Dalichrome.RandomGenerator.Core
             return grid;
         }
 
-        private int GetLayerIndexFromTileId(int id)
-        {
-            if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
-                return index;
-            return -1;
-        }
-
-        private int GetLayerIndexFromLayerId(int id)
-        {
-            if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
-                return index;
-            return -1;
-        }
-
         private int GetTileKindFromTileId(int id)
         {
             if (bundle.tileIdToTileKindLookup.TryGetValue(id, out int kind))
@@ -180,6 +166,21 @@ namespace Dalichrome.RandomGenerator.Core
                     return false;
             }
             return true;
+        }
+
+        //Exposed Helpers
+        public int GetLayerIndexFromTileId(int id)
+        {
+            if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+            return -1;
+        }
+
+        public int GetLayerIndexFromLayerId(int id)
+        {
+            if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+            return -1;
         }
 
         // ---------------- ITileGrid primitives ----------------
@@ -314,6 +315,9 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllDataWithColData(int3 pos) => new();
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) => new();
         public List<PositionValue> GetAllData(string field) => new();
+
+        public int RemoveAllAt(int3 pos) => 0;
+
         public List<string> GetMetaFields() => new();
 
         // Masking

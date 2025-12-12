@@ -40,7 +40,10 @@ public class StructureEditorWindow : EditorWindow
     private int paintTileId = -1;
     private bool isDraggingPaint; private Vector2 lastMousePos;
 
-    private enum ToolMode { Brush, Erase, Fill, Picker, Metadata }
+    private enum ToolMode { Brush, Erase, Fill, Picker }
+
+    // Meta-mode (switch tools to operate on metadata instead of tiles)
+    private bool _metaMode = false;
 
     // Palette & drawing caches
     private struct PaletteItem { public int id; public string name; public Sprite sprite; public Color color; public int layerId; public string layerName; }
@@ -72,16 +75,43 @@ public class StructureEditorWindow : EditorWindow
     private static bool s_maskTried;
     private static string s_scriptFolder; // cached script folder to avoid repeated scans
 
+    // --- Live metadata editing (debounced) ---
+    private double _metaLastEditTime = -1;
+    private bool _metaDirty = false;
+    private bool _metaUndoArmed = false;
+    private int _metaUndoGroup = -1;
+    private const string MetaTextControlName = "MetaTextArea";
+
+    // How long after the last keystroke we commit to the asset
+    private const double MetaCommitDelay = 0.20; // 200ms feels snappy
+
+    // --- NEW: metadata icon sprites ---
+    private const string MetaIconFile = "MetaDataIcon.png";
+    private const string MetaSelectionFile = "MetaSelection.png";
+
+    private static Sprite s_metaIconSprite;
+    private static Sprite s_metaSelectionSprite;
+    private static bool s_metaIconTried;
+    private static bool s_metaSelectionTried;
+
     // --- Hover cache (perf) ---
     private Vector2Int _hoverCell = new Vector2Int(int.MinValue, int.MinValue);
     private string[] _hoverLines = Array.Empty<string>();
     private float _hoverBoxW = 0f, _hoverBoxH = 0f;
     private int _hoverActiveLayerIndex = -1; // so we refresh when active layer changes
     private readonly GUIContent _scratchContent = new GUIContent(); // reuse to avoid allocs
+    private bool _hoverDirty = true; // NEW: force rebuild when data changes
 
-    // --- Metadata editing state ---
-    private Vector3Int _metaTarget = new Vector3Int(-1, -1, -1); // x,y,layerId (z)
+    // --- Metadata state ---
+    // Current "target" cell for metadata editing (x,y,layerId)
+    private Vector3Int _metaTarget = new Vector3Int(-1, -1, -1);
     private string _metaText = "";
+
+    // Source cell for metadata copy (Picker in meta mode)
+    private Vector3Int _metaSource = new Vector3Int(-1, -1, -1);
+
+    // Visual toggle for metadata markers
+    private bool _showMetaMarkers = true;
 
     [MenuItem("Random Generator/Structure Painter")]
     public static void Open()
@@ -119,8 +149,13 @@ public class StructureEditorWindow : EditorWindow
     private void RefreshRegistry()
     {
         // LAYERS: from TileLayerRegistry, filter out 0
-        var ids = Dalichrome.RandomGenerator.TileLayerRegistry.AllLayerIds?.Where(l => l != 0).ToArray() ?? Array.Empty<int>();
+        var ids = Dalichrome.RandomGenerator.TileLayerRegistry.AllLayerIds?
+            .Where(l => l != 0)
+            .ToArray() ?? Array.Empty<int>();
+
+        Array.Sort(ids);            // ensure ascending by layerId
         currentLayerIds = ids;
+
         currentLayerNames = currentLayerIds.Select(lid => Dalichrome.RandomGenerator.TileLayerRegistry.GetName(lid) ?? $"Layer {lid}").ToArray();
 
         // PALETTE: from TileObjects via GenericIdDropdownCache (ignore id 0 and tileKind Empty)
@@ -202,28 +237,32 @@ public class StructureEditorWindow : EditorWindow
         activeLayerIndex = Mathf.Clamp(activeLayerIndex, 0, Mathf.Max(0, currentLayerIds.Length - 1));
     }
 
-    // *** FIX: no CreateInstance() here. No recursion. Cached lookup. ***
+    private static void EnsureScriptFolder()
+    {
+#if UNITY_EDITOR
+        if (!string.IsNullOrEmpty(s_scriptFolder)) return;
+
+        var guids = AssetDatabase.FindAssets("t:MonoScript StructureEditorWindow");
+        foreach (var guid in guids)
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var ms = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+            if (ms != null && ms.GetClass() == typeof(StructureEditorWindow))
+            {
+                s_scriptFolder = System.IO.Path.GetDirectoryName(path)?.Replace("\\", "/");
+                break;
+            }
+        }
+#endif
+    }
+
+    // existing mask loader can now reuse EnsureScriptFolder()
     private static Sprite EnsureMaskSprite()
     {
 #if UNITY_EDITOR
         if (s_maskSprite != null || s_maskTried) return s_maskSprite;
 
-        // Try to resolve the folder containing this script once
-        if (string.IsNullOrEmpty(s_scriptFolder))
-        {
-            // Find the MonoScript that defines this window
-            var guids = AssetDatabase.FindAssets("t:MonoScript StructureEditorWindow");
-            foreach (var guid in guids)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var ms = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
-                if (ms != null && ms.GetClass() == typeof(StructureEditorWindow))
-                {
-                    s_scriptFolder = System.IO.Path.GetDirectoryName(path)?.Replace("\\", "/");
-                    break;
-                }
-            }
-        }
+        EnsureScriptFolder();
 
         if (!string.IsNullOrEmpty(s_scriptFolder))
         {
@@ -234,7 +273,49 @@ public class StructureEditorWindow : EditorWindow
         s_maskTried = true;
         return s_maskSprite;
 #else
-        return null;
+    return null;
+#endif
+    }
+
+    // NEW: metadata icon (for “cell has metadata”)
+    private static Sprite EnsureMetaIconSprite()
+    {
+#if UNITY_EDITOR
+        if (s_metaIconSprite != null || s_metaIconTried) return s_metaIconSprite;
+
+        EnsureScriptFolder();
+
+        if (!string.IsNullOrEmpty(s_scriptFolder))
+        {
+            var path = (s_scriptFolder + "/" + MetaIconFile).Replace("\\", "/");
+            s_metaIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        s_metaIconTried = true;
+        return s_metaIconSprite;
+#else
+    return null;
+#endif
+    }
+
+    // NEW: metadata selection icon (for picked meta source)
+    private static Sprite EnsureMetaSelectionSprite()
+    {
+#if UNITY_EDITOR
+        if (s_metaSelectionSprite != null || s_metaSelectionTried) return s_metaSelectionSprite;
+
+        EnsureScriptFolder();
+
+        if (!string.IsNullOrEmpty(s_scriptFolder))
+        {
+            var path = (s_scriptFolder + "/" + MetaSelectionFile).Replace("\\", "/");
+            s_metaSelectionSprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        s_metaSelectionTried = true;
+        return s_metaSelectionSprite;
+#else
+    return null;
 #endif
     }
 
@@ -246,6 +327,14 @@ public class StructureEditorWindow : EditorWindow
         {
             DrawSidebar();
             DrawCanvas();
+        }
+
+        // If we were typing and lost focus, commit immediately
+        if (_metaDirty)
+        {
+            bool focused = GUI.GetNameOfFocusedControl() == MetaTextControlName;
+            if (!focused && !EditorGUIUtility.editingTextField)
+                CommitMetaIfDirty(force: true);
         }
     }
 
@@ -280,8 +369,8 @@ public class StructureEditorWindow : EditorWindow
 
             leftScroll = EditorGUILayout.BeginScrollView(
                 leftScroll,
-                false,                       // horizontal: off (already narrow)
-                false,                       // vertical: native scrollbar
+                false,
+                false,
                 GUIStyle.none,
                 GUI.skin.verticalScrollbar,
                 GUIStyle.none,
@@ -333,16 +422,65 @@ public class StructureEditorWindow : EditorWindow
             }
 
             EditorGUILayout.Space(8);
-            EditorGUILayout.LabelField("Tiles", EditorStyles.boldLabel);
-            using (new EditorGUILayout.HorizontalScope())
+
+            if (!_metaMode)
             {
-                paletteSearch = EditorGUILayout.TextField("Search", paletteSearch);
-                filterByActiveLayer = GUILayout.Toggle(filterByActiveLayer, "Filter by Active Layer", EditorStyles.miniButton, GUILayout.Width(170));
+                // Normal tile mode: full palette UI
+                EditorGUILayout.LabelField("Tiles", EditorStyles.boldLabel);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    paletteSearch = EditorGUILayout.TextField("Search", paletteSearch);
+                    filterByActiveLayer = GUILayout.Toggle(
+                        filterByActiveLayer,
+                        "Filter by Active Layer",
+                        EditorStyles.miniButton,
+                        GUILayout.Width(170)
+                    );
+                }
+                DrawPaletteGrid();
             }
-            DrawPaletteGrid();
+            else
+            {
+                // Meta mode: hide palette and show an obvious banner instead
+                EditorGUILayout.LabelField("Tiles (disabled in Metadata Mode)", EditorStyles.boldLabel);
+            }
 
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Layers", EditorStyles.boldLabel);
+
+            // Layer visibility shortcuts
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Solo Active", EditorStyles.miniButtonLeft, GUILayout.Width(100)))
+                {
+                    if (asset != null && currentLayerIds.Length > 0 && activeLayerIndex >= 0 && activeLayerIndex < currentLayerIds.Length)
+                    {
+                        int activeLid = currentLayerIds[activeLayerIndex];
+                        Undo.RecordObject(asset, "Solo Active Layer");
+                        foreach (var L in asset.Layers)
+                        {
+                            L.visible = (L.layerId == activeLid);
+                        }
+                        EditorUtility.SetDirty(asset);
+                        Repaint();
+                    }
+                }
+                if (GUILayout.Button("Show All", EditorStyles.miniButtonRight, GUILayout.Width(80)))
+                {
+                    if (asset != null)
+                    {
+                        Undo.RecordObject(asset, "Show All Layers");
+                        foreach (var L in asset.Layers)
+                        {
+                            L.visible = true;
+                        }
+                        EditorUtility.SetDirty(asset);
+                        Repaint();
+                    }
+                }
+            }
+
             for (int i = 0; i < currentLayerIds.Length; i++)
             {
                 int lid = currentLayerIds[i]; string lname = (i < currentLayerNames.Length ? currentLayerNames[i] : $"Layer {lid}");
@@ -366,22 +504,43 @@ public class StructureEditorWindow : EditorWindow
             maintenanceFoldout = EditorGUILayout.Foldout(maintenanceFoldout, "Maintenance", true);
             if (maintenanceFoldout)
             {
-                using (new EditorGUILayout.HorizontalScope())
+                using (new EditorGUILayout.VerticalScope())
                 {
-                    if (GUILayout.Button("Clear Unknown Layers")) { Undo.RecordObject(asset, "Clear Unknown Layers"); ClearUnknownLayers(); EditorUtility.SetDirty(asset); }
-                    if (GUILayout.Button("Clear Unknown Tile IDs")) { Undo.RecordObject(asset, "Clear Unknown Tile IDs"); ClearUnknownTileIds(); EditorUtility.SetDirty(asset); }
-                    if (GUILayout.Button("Cull Wrong-Layer Tiles")) { Undo.RecordObject(asset, "Cull Wrong-Layer Tiles"); CullTilesWrongLayer(); EditorUtility.SetDirty(asset); }
-                    if (GUILayout.Button("Show Ignored Tiles…"))
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        var msg = ignoredTileReasons.Count == 0 ? "No ignored tiles." : string.Join("\n", ignoredTileReasons.Take(200));
-                        EditorUtility.DisplayDialog("Ignored Tiles", msg, "OK");
+                        if (GUILayout.Button("Clear Unknown Layers"))
+                        {
+                            Undo.RecordObject(asset, "Clear Unknown Layers");
+                            ClearUnknownLayers();
+                            EditorUtility.SetDirty(asset);
+                        }
+                        if (GUILayout.Button("Clear Unknown Tile IDs"))
+                        {
+                            Undo.RecordObject(asset, "Clear Unknown Tile IDs");
+                            ClearUnknownTileIds();
+                            EditorUtility.SetDirty(asset);
+                        }
                     }
-                    if (GUILayout.Button("Clear Tiles"))
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        Undo.RecordObject(asset, "Clear Tiles");
-                        asset.SetAllTiles(0);
-                        asset.EnsureTileArrays();
-                        EditorUtility.SetDirty(asset);
+                        if (GUILayout.Button("Cull Wrong-Layer Tiles"))
+                        {
+                            Undo.RecordObject(asset, "Cull Wrong-Layer Tiles");
+                            CullTilesWrongLayer();
+                            EditorUtility.SetDirty(asset);
+                        }
+                        if (GUILayout.Button("Show Ignored Tiles…"))
+                        {
+                            var msg = ignoredTileReasons.Count == 0 ? "No ignored tiles." : string.Join("\n", ignoredTileReasons.Take(200));
+                            EditorUtility.DisplayDialog("Ignored Tiles", msg, "OK");
+                        }
+                        if (GUILayout.Button("Clear Tiles"))
+                        {
+                            Undo.RecordObject(asset, "Clear Tiles");
+                            asset.SetAllTiles(0);
+                            asset.EnsureTileArrays();
+                            EditorUtility.SetDirty(asset);
+                        }
                     }
                 }
             }
@@ -401,8 +560,22 @@ public class StructureEditorWindow : EditorWindow
                     if (GUILayout.Toggle(tool == ToolMode.Brush, "Brush (B)", EditorStyles.miniButtonLeft)) tool = ToolMode.Brush;
                     if (GUILayout.Toggle(tool == ToolMode.Erase, "Erase (E)", EditorStyles.miniButtonMid)) tool = ToolMode.Erase;
                     if (GUILayout.Toggle(tool == ToolMode.Fill, "Fill (G)", EditorStyles.miniButtonMid)) tool = ToolMode.Fill;
-                    if (GUILayout.Toggle(tool == ToolMode.Picker, "Picker (I)", EditorStyles.miniButtonMid)) tool = ToolMode.Picker;
-                    if (GUILayout.Toggle(tool == ToolMode.Metadata, "Meta (M)", EditorStyles.miniButtonRight)) tool = ToolMode.Metadata;
+                    if (GUILayout.Toggle(tool == ToolMode.Picker, "Picker (I)", EditorStyles.miniButtonRight)) tool = ToolMode.Picker;
+                }
+
+                bool newMetaMode = EditorGUILayout.ToggleLeft("Metadata Mode (M)", _metaMode);
+                if (newMetaMode != _metaMode)
+                {
+                    _metaMode = newMetaMode;
+                    if (!_metaMode)
+                    {
+                        // Same behavior as keyboard toggle
+                        _metaTarget = new Vector3Int(-1, -1, -1);
+                        _metaSource = new Vector3Int(-1, -1, -1);
+                        _metaText = string.Empty;
+                        GUI.FocusControl(null);
+                    }
+                    Repaint();
                 }
 
                 EditorGUILayout.Space(6);
@@ -424,10 +597,20 @@ public class StructureEditorWindow : EditorWindow
             return;
         }
 
+        _showMetaMarkers = EditorGUILayout.ToggleLeft("Show metadata borders", _showMetaMarkers);
+
+        EditorGUILayout.LabelField(
+            "Meta Mode: when enabled, Brush/Fill/Erase/Picker operate on metadata instead of tiles. " +
+            "Use Picker (I) to select a tile. If it already has metadata, that tile becomes the copy source " +
+            "for Brush/Fill. If it has no metadata, you can type new metadata here, but Brush/Fill " +
+            "won't work until you've picked a tile that already has metadata.",
+            EditorStyles.wordWrappedMiniLabel);
+
         if (_metaTarget.x < 0 || _metaTarget.y < 0 || _metaTarget.z <= 0)
         {
             EditorGUILayout.HelpBox(
-                "Select the Meta (M) tool, then click a cell on the canvas to edit metadata.",
+                "Enable Metadata Mode (M), select Picker (I), then click a tile that already has metadata.\n" +
+                "That tile becomes the source for Brush/Fill and is editable here.",
                 MessageType.Info);
             return;
         }
@@ -458,34 +641,60 @@ public class StructureEditorWindow : EditorWindow
             EditorStyles.miniLabel);
 
         EditorGUILayout.LabelField(
-            "Raw metadata i.e. (field:1, other:2, ...)",
+            "Raw metadata (e.g. field:1, other:2, ...)",
             EditorStyles.miniLabel);
 
-        _metaText = EditorGUILayout.TextArea(_metaText, GUILayout.MinHeight(40));
+
+        GUI.SetNextControlName(MetaTextControlName);
+
+        EditorGUI.BeginChangeCheck();
+        string newText = EditorGUILayout.TextArea(_metaText, GUILayout.MinHeight(40));
+        if (EditorGUI.EndChangeCheck())
+        {
+            // User typed
+            _metaText = newText;
+
+            BeginMetaTypingUndoIfNeeded();
+            _metaDirty = true;
+            _metaLastEditTime = EditorApplication.timeSinceStartup;
+
+            // Keep UI responsive
+            _hoverDirty = true;
+            Repaint();
+        }
+
+        // Commit debounced while typing
+        CommitMetaIfDirty(force: false);
 
         using (new EditorGUILayout.HorizontalScope())
         {
-            if (GUILayout.Button("Save"))
-            {
-                Undo.RecordObject(asset, "Edit Metadata");
-                asset.SetMetadata(_metaTarget.z, _metaTarget.x, _metaTarget.y, _metaText);
-                EditorUtility.SetDirty(asset);
-                Repaint();
-            }
-
             if (GUILayout.Button("Clear"))
             {
-                Undo.RecordObject(asset, "Clear Metadata");
-                asset.SetMetadata(_metaTarget.z, _metaTarget.x, _metaTarget.y, null);
+                BeginMetaTypingUndoIfNeeded();
                 _metaText = string.Empty;
-                EditorUtility.SetDirty(asset);
+                _metaDirty = true;
+                _metaLastEditTime = EditorApplication.timeSinceStartup;
+
+                // Force immediate commit so Clear feels instant
+                CommitMetaIfDirty(force: true);
+
+                GUI.FocusControl(null);
                 Repaint();
             }
 
             if (GUILayout.Button("Unselect", GUILayout.Width(80)))
             {
+                // Commit any pending edits before leaving
+                CommitMetaIfDirty(force: true);
+
                 _metaTarget = new Vector3Int(-1, -1, -1);
+                _metaSource = new Vector3Int(-1, -1, -1);
                 _metaText = string.Empty;
+
+                CancelMetaTypingSession();
+
+                _hoverDirty = true;
+                GUI.FocusControl(null);
                 Repaint();
             }
         }
@@ -495,12 +704,15 @@ public class StructureEditorWindow : EditorWindow
     {
         if (asset == null) return;
 
-        // If cell or active layer changed, refresh cache
-        if (_hoverCell.x == hx && _hoverCell.y == hy && _hoverActiveLayerIndex == activeLayerIndex)
+        // If cell or active layer *and* nothing changed, keep cache
+        if (!_hoverDirty &&
+            _hoverCell.x == hx && _hoverCell.y == hy &&
+            _hoverActiveLayerIndex == activeLayerIndex)
             return;
 
         _hoverCell = new Vector2Int(hx, hy);
         _hoverActiveLayerIndex = activeLayerIndex;
+        _hoverDirty = false; // we'll rebuild now
 
         // Build lines without per-frame GC
         var linesList = new List<string>(1 + currentLayerIds.Length);
@@ -610,7 +822,13 @@ public class StructureEditorWindow : EditorWindow
 
                 if (p.sprite != null) DrawSprite(rct, p.sprite, 1f);
                 else if (p.color.a > 0f) DrawColor(rct, p.color, 1f);
-                else { var prev = GUI.color; GUI.color = new Color(0, 0, 0, 0.85f); GUI.Label(rct, p.id.ToString(), EditorStyles.centeredGreyMiniLabel); GUI.color = prev; }
+                else
+                {
+                    var prev = GUI.color;
+                    GUI.color = new Color(0, 0, 0, 0.85f);
+                    GUI.Label(rct, p.id.ToString(), EditorStyles.centeredGreyMiniLabel);
+                    GUI.color = prev;
+                }
             }
 
             Handles.EndGUI();
@@ -645,6 +863,11 @@ public class StructureEditorWindow : EditorWindow
 
     private void DrawCanvas()
     {
+        // Ensure sprites are available
+        s_maskSprite = EnsureMaskSprite();
+        s_metaIconSprite = EnsureMetaIconSprite();
+        s_metaSelectionSprite = EnsureMetaSelectionSprite();
+
         // Clip grid rendering to its rect so it can't overdraw the sidebar
         var rect = GUILayoutUtility.GetRect(10, 10, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
         GUI.BeginGroup(rect);
@@ -722,35 +945,95 @@ public class StructureEditorWindow : EditorWindow
                     {
                         if (s_maskSprite != null) DrawSprite(cellRect, s_maskSprite, alpha);
                         else EditorGUI.DrawRect(cellRect, new Color(1f, 0f, 1f, 0.25f)); // fallback only when no sprite
-                        continue;
+                    }
+                    else
+                    {
+                        if (spriteByTileId.TryGetValue(id, out var sp) && sp != null)
+                            DrawSprite(cellRect, sp, alpha);
+                        else
+                            DrawColor(cellRect, colorByTileId.TryGetValue(id, out var c) ? c : Color.gray, alpha);
                     }
 
-                    if (spriteByTileId.TryGetValue(id, out var sp) && sp != null)
-                        DrawSprite(cellRect, sp, alpha);
-                    else
-                        DrawColor(cellRect, colorByTileId.TryGetValue(id, out var c) ? c : Color.gray, alpha);
+                    // Metadata icon marker
                     string metaHere = asset.GetMetadata(lid, x, y);
-                    if (!string.IsNullOrEmpty(metaHere))
+                    if (_showMetaMarkers && !string.IsNullOrEmpty(metaHere))
                     {
-                        // Only show strongly on active layer, faint on others
                         float iconAlpha = (li == activeLayerIndex) ? alpha : alpha * 0.5f;
 
-                        // Tiny square in top-right corner
-                        var iconRect = new Rect(
-                            cellRect.xMax - Mathf.Max(4f, cell * 0.15f) - 2f,
-                            cellRect.yMin + 2f,
-                            Mathf.Max(4f, cell * 0.15f),
-                            Mathf.Max(4f, cell * 0.15f)
+                        if (s_metaIconSprite != null)
+                        {
+                            // Slightly inset so we don't bleed into grid lines
+                            var iconRect = new Rect(
+                                cellRect.x + 2f,
+                                cellRect.y + 2f,
+                                cellRect.width - 4f,
+                                cellRect.height - 4f
+                            );
+                            DrawSprite(iconRect, s_metaIconSprite, iconAlpha);
+                        }
+                        else
+                        {
+                            // Fallback: keep the yellow border if icon is missing
+                            var borderRect = new Rect(
+                                cellRect.x + 2f,
+                                cellRect.y + 2f,
+                                cellRect.width - 4f,
+                                cellRect.height - 4f
+                            );
+                            var borderColor = new Color(1.0f, 0.85f, 0.2f, iconAlpha);
+                            Handles.DrawSolidRectangleWithOutline(borderRect, Color.clear, borderColor);
+                        }
+                    }
+
+                    // Highlight currently selected metadata TARGET (even if it has no metadata)
+                    if (_showMetaMarkers && _metaMode &&
+                        _metaTarget.z == lid &&
+                        _metaTarget.x == x &&
+                        _metaTarget.y == y)
+                    {
+                        var tgtRect = new Rect(
+                            cellRect.x + 1f,
+                            cellRect.y + 1f,
+                            cellRect.width - 2f,
+                            cellRect.height - 2f
                         );
 
-                        var iconColor = new Color(1.0f, 0.8f, 0.2f, iconAlpha); // warm yellow-ish
-                        EditorGUI.DrawRect(iconRect, iconColor);
+                        // White outline so it's obvious what is selected
+                        var tgtColor = new Color(1f, 1f, 1f, 0.95f);
+                        Handles.DrawSolidRectangleWithOutline(tgtRect, Color.clear, tgtColor);
+                    }
+
+                    // Highlight current metadata source (picked via Picker in meta mode)
+                    if (_showMetaMarkers && _metaMode &&
+                        _metaSource.z == lid &&
+                        _metaSource.x == x &&
+                        _metaSource.y == y)
+                    {
+                        float selAlpha = 1f;
+
+                        if (s_metaSelectionSprite != null)
+                        {
+                            // Full cell overlay for clear visibility
+                            DrawSprite(cellRect, s_metaSelectionSprite, selAlpha);
+                        }
+                        else
+                        {
+                            // Fallback: bright border
+                            var srcRect = new Rect(
+                                cellRect.x + 1f,
+                                cellRect.y + 1f,
+                                cellRect.width - 2f,
+                                cellRect.height - 2f
+                            );
+                            var srcColor = new Color(1f, 1f, 0.3f, 1f);
+                            Handles.DrawSolidRectangleWithOutline(srcRect, Color.clear, srcColor);
+                        }
                     }
                 }
             }
         }
 
-        // Hover highlight + invalid-placement X
+        // Hover highlight + invalid-placement X (tile placement only)
         var (hx, hy, onGrid) = MouseCell(e.mousePosition, gridOrigin, cell);
         if (onGrid)
         {
@@ -759,7 +1042,7 @@ public class StructureEditorWindow : EditorWindow
 
             // If current selected tile cannot be placed on the active layer, draw a red X
             bool invalid = false;
-            if (paintTileId > 0 && tileIdToLayerId.TryGetValue(paintTileId, out var reqLayer))
+            if (!_metaMode && paintTileId > 0 && tileIdToLayerId.TryGetValue(paintTileId, out var reqLayer))
             {
                 int activeLayerId = (activeLayerIndex >= 0 && activeLayerIndex < currentLayerIds.Length) ? currentLayerIds[activeLayerIndex] : -1;
                 invalid = (reqLayer != activeLayerId);
@@ -804,13 +1087,132 @@ public class StructureEditorWindow : EditorWindow
 
     private void HandlePainting(Rect localRect, Vector2 gridOrigin, float cell)
     {
-        var e = Event.current; if (asset == null) return; if (!localRect.Contains(e.mousePosition)) return;
-        var (cx, cy, onGrid) = MouseCell(e.mousePosition, gridOrigin, cell); if (!onGrid) return;
+        var e = Event.current;
+        if (asset == null) return;
+        if (!localRect.Contains(e.mousePosition)) return;
 
-        int activeLayerId = (activeLayerIndex >= 0 && activeLayerIndex < currentLayerIds.Length) ? currentLayerIds[activeLayerIndex] : -1;
+        var (cx, cy, onGrid) = MouseCell(e.mousePosition, gridOrigin, cell);
+        if (!onGrid) return;
+
+        int activeLayerId = (activeLayerIndex >= 0 && activeLayerIndex < currentLayerIds.Length)
+            ? currentLayerIds[activeLayerIndex]
+            : -1;
         if (activeLayerId < 0) return;
 
-        // If we have a selected tile, enforce placement layer.
+        // ===========================
+        // META MODE: ONLY METADATA
+        // ===========================
+        if (_metaMode)
+        {
+            if (e.type == EventType.MouseDown && e.button == 0)
+            {
+                GUI.FocusControl(null);
+                Undo.RecordObject(asset, "Edit Metadata");
+
+                if (tool == ToolMode.Picker)
+                {
+                    // Pick target + optional source
+                    string existing = asset.GetMetadata(activeLayerId, cx, cy);
+                    var picked = new Vector3Int(cx, cy, activeLayerId);
+
+                    // Commit any pending edits on previous target before switching selection
+                    CommitMetaIfDirty(force: true);
+                    CancelMetaTypingSession();
+
+                    _metaTarget = picked;
+
+                    if (!string.IsNullOrWhiteSpace(existing))
+                    {
+                        // This tile has metadata → source + editable target
+                        _metaSource = picked;
+                        _metaText = existing;
+                    }
+                    else
+                    {
+                        // No metadata: editable target only, no source for Brush/Fill yet
+                        _metaSource = new Vector3Int(-1, -1, -1);
+                        _metaText = string.Empty;
+                    }
+                }
+                else if (tool == ToolMode.Brush && MetaSourceIsValid())
+                {
+                    // Single-click brush also writes
+                    string src = asset.GetMetadata(_metaSource.z, _metaSource.x, _metaSource.y);
+                    if (!string.IsNullOrWhiteSpace(src))
+                    {
+                        asset.SetMetadata(activeLayerId, cx, cy, src);
+                    }
+                }
+                else if (tool == ToolMode.Erase)
+                {
+                    asset.SetMetadata(activeLayerId, cx, cy, null);
+                }
+                else if (tool == ToolMode.Fill && MetaSourceIsValid())
+                {
+                    // Flood fill metadata from clicked cell target → src text
+                    string src = asset.GetMetadata(_metaSource.z, _metaSource.x, _metaSource.y);
+                    if (!string.IsNullOrWhiteSpace(src))
+                    {
+                        string targetRaw = asset.GetMetadata(activeLayerId, cx, cy);
+                        FloodFillMetadata(activeLayerId, cx, cy, targetRaw, src);
+                    }
+                }
+
+                EditorUtility.SetDirty(asset);
+                _hoverDirty = true;
+                Repaint();
+
+                // Drag only for Brush/Erase in meta mode
+                isDraggingPaint = (tool == ToolMode.Brush || tool == ToolMode.Erase);
+                lastMousePos = e.mousePosition;
+
+                e.Use();
+                return; // IMPORTANT: do NOT fall through into tile code
+            }
+            else if (e.type == EventType.MouseDrag && e.button == 0 && isDraggingPaint)
+            {
+                if ((e.mousePosition - lastMousePos).sqrMagnitude > 0.5f)
+                {
+                    Undo.RecordObject(asset, "Edit Metadata");
+
+                    if (tool == ToolMode.Brush && MetaSourceIsValid())
+                    {
+                        string src = asset.GetMetadata(_metaSource.z, _metaSource.x, _metaSource.y);
+                        if (!string.IsNullOrWhiteSpace(src))
+                        {
+                            asset.SetMetadata(activeLayerId, cx, cy, src);
+                        }
+                    }
+                    else if (tool == ToolMode.Erase)
+                    {
+                        asset.SetMetadata(activeLayerId, cx, cy, null);
+                    }
+
+                    EditorUtility.SetDirty(asset);
+                    _hoverDirty = true;
+                    Repaint();
+                    lastMousePos = e.mousePosition;
+                }
+
+                e.Use();
+                return;
+            }
+            else if (e.type == EventType.MouseUp && e.button == 0)
+            {
+                isDraggingPaint = false;
+                e.Use();
+                return;
+            }
+
+            // In meta mode, do absolutely nothing to tiles.
+            return;
+        }
+
+        // ===========================
+        // TILE MODE: ONLY TILES
+        // ===========================
+
+        // If we have a selected tile, enforce placement layer (for tile painting only).
         bool invalidPlacement = false;
         if (paintTileId > 0 && tileIdToLayerId.TryGetValue(paintTileId, out var reqLayer))
             invalidPlacement = (reqLayer != activeLayerId);
@@ -818,29 +1220,26 @@ public class StructureEditorWindow : EditorWindow
         if (e.type == EventType.MouseDown && e.button == 0)
         {
             GUI.FocusControl(null);
+            Undo.RecordObject(asset, "Paint Structure");
 
-            // Metadata tool: click selects metadata target (x,y,layerId)
-            if (tool == ToolMode.Metadata)
-            {
-                _metaTarget = new Vector3Int(cx, cy, activeLayerId);
-                string existing = asset.GetMetadata(activeLayerId, cx, cy);
-                _metaText = existing ?? string.Empty;
-                Repaint();
-                e.Use();
-                return;
-            }
-
-            // Normal painting tools
             isDraggingPaint = true;
             lastMousePos = e.mousePosition;
 
-            Undo.RecordObject(asset, "Paint Structure");
             if (tool == ToolMode.Picker)
+            {
+                // Eyedropper: sample tile ID, no metadata touched
                 paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
+            }
             else if (tool == ToolMode.Erase)
+            {
                 asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
+                _hoverDirty = true;
+            }
             else if (!invalidPlacement)
-                ApplyToolAt(activeLayerId, cx, cy);
+            {
+                ApplyToolAt(activeLayerId, cx, cy); // Brush / Fill
+                _hoverDirty = true;
+            }
 
             asset.EnsureTileArrays();
             EditorUtility.SetDirty(asset);
@@ -851,17 +1250,29 @@ public class StructureEditorWindow : EditorWindow
         {
             if ((e.mousePosition - lastMousePos).sqrMagnitude > 0.5f)
             {
+                Undo.RecordObject(asset, "Paint Structure");
+
                 if (tool == ToolMode.Erase)
+                {
                     asset.SetTileByLayerId(activeLayerId, cx, cy, 0);
+                    _hoverDirty = true;
+                }
                 else if (tool == ToolMode.Picker)
+                {
+                    // Optional: eyedropper while dragging
                     paintTileId = asset.GetTileByLayerId(activeLayerId, cx, cy);
-                else if (tool != ToolMode.Metadata && !invalidPlacement)
+                }
+                else if (!invalidPlacement)
+                {
                     ApplyToolAt(activeLayerId, cx, cy);
+                    _hoverDirty = true;
+                }
 
                 EditorUtility.SetDirty(asset);
                 Repaint();
                 lastMousePos = e.mousePosition;
             }
+
             e.Use();
         }
         else if (e.type == EventType.MouseUp && e.button == 0)
@@ -869,8 +1280,12 @@ public class StructureEditorWindow : EditorWindow
             isDraggingPaint = false;
             e.Use();
         }
+    }
 
 
+    private bool MetaSourceIsValid()
+    {
+        return _metaSource.x >= 0 && _metaSource.y >= 0 && _metaSource.z > 0;
     }
 
     private void ApplyToolAt(int layerId, int x, int y)
@@ -907,10 +1322,39 @@ public class StructureEditorWindow : EditorWindow
         }
     }
 
+    private static string NormMeta(string s)
+    {
+        return string.IsNullOrWhiteSpace(s) ? string.Empty : s.Trim();
+    }
+
+    private void FloodFillMetadata(int layerId, int sx, int sy, string targetRaw, string newRaw)
+    {
+        if ((uint)sx >= (uint)asset.width || (uint)sy >= (uint)asset.height) return;
+        string normTarget = NormMeta(targetRaw);
+        string normNew = NormMeta(newRaw);
+        if (normTarget == normNew) return;
+
+        var q = new Queue<Vector2Int>(256); q.Enqueue(new Vector2Int(sx, sy));
+        while (q.Count > 0)
+        {
+            var p = q.Dequeue(); int x = p.x, y = p.y;
+            if ((uint)x >= (uint)asset.width || (uint)y >= (uint)asset.height) continue;
+
+            string here = asset.GetMetadata(layerId, x, y);
+            if (NormMeta(here) != normTarget) continue;
+
+            asset.SetMetadata(layerId, x, y, newRaw);
+            q.Enqueue(new Vector2Int(x + 1, y)); q.Enqueue(new Vector2Int(x - 1, y)); q.Enqueue(new Vector2Int(x, y + 1)); q.Enqueue(new Vector2Int(x, y - 1));
+        }
+    }
+
     private void HandleShortcuts()
     {
         var e = Event.current;
         if (e.type != EventType.KeyDown) return;
+
+        bool typing = EditorGUIUtility.editingTextField || GUI.GetNameOfFocusedControl() == MetaTextControlName;
+        if (typing) return;
 
         switch (e.keyCode)
         {
@@ -931,15 +1375,82 @@ public class StructureEditorWindow : EditorWindow
                 Repaint();
                 break;
             case KeyCode.M:
-                tool = ToolMode.Metadata;
-                Repaint();
+                {
+                    bool newMetaMode = !_metaMode;
+                    if (newMetaMode != _metaMode)
+                    {
+                        _metaMode = newMetaMode;
+                        if (!_metaMode)
+                        {
+                            // Turn off selection visually + clear panel selection
+                            _metaTarget = new Vector3Int(-1, -1, -1);
+                            _metaSource = new Vector3Int(-1, -1, -1);
+                            _metaText = string.Empty;
+                            GUI.FocusControl(null);
+                        }
+                        Repaint();
+                    }
+                    break;
+                }
+            case KeyCode.Alpha1:
+            case KeyCode.Keypad1:
+                SetLayerByHotkeyIndex(0); // 1st (lowest id)
+                break;
+            case KeyCode.Alpha2:
+            case KeyCode.Keypad2:
+                SetLayerByHotkeyIndex(1);
+                break;
+            case KeyCode.Alpha3:
+            case KeyCode.Keypad3:
+                SetLayerByHotkeyIndex(2);
+                break;
+            case KeyCode.Alpha4:
+            case KeyCode.Keypad4:
+                SetLayerByHotkeyIndex(3);
+                break;
+            case KeyCode.Alpha5:
+            case KeyCode.Keypad5:
+                SetLayerByHotkeyIndex(4);
+                break;
+            case KeyCode.Alpha6:
+            case KeyCode.Keypad6:
+                SetLayerByHotkeyIndex(5);
+                break;
+            case KeyCode.Alpha7:
+            case KeyCode.Keypad7:
+                SetLayerByHotkeyIndex(6);
+                break;
+            case KeyCode.Alpha8:
+            case KeyCode.Keypad8:
+                SetLayerByHotkeyIndex(7);
+                break;
+            case KeyCode.Alpha9:
+            case KeyCode.Keypad9:
+                SetLayerByHotkeyIndex(8);
+                break;
+            case KeyCode.Alpha0:
+            case KeyCode.Keypad0:
+                SetLayerByHotkeyIndex(9); // 10th lowest id
                 break;
         }
     }
 
+    private void SetLayerByHotkeyIndex(int index)
+    {
+        if (currentLayerIds == null) return;
+        if (index < 0 || index >= currentLayerIds.Length) return;
+
+        activeLayerIndex = index;
+        Repaint();
+    }
 
     private (int x, int y, bool onGrid) MouseCell(Vector2 mouse, Vector2 origin, float cell)
-    { int x = Mathf.FloorToInt((mouse.x - origin.x) / cell); int y = Mathf.FloorToInt((mouse.y - origin.y) / cell); bool on = x >= 0 && x < asset.width && y >= 0 && y < asset.height; return (x, y, on); }
+    {
+        int x = Mathf.FloorToInt((mouse.x - origin.x) / cell);
+        int y = Mathf.FloorToInt((mouse.y - origin.y) / cell);
+        bool on = x >= 0 && x < asset.width && y >= 0 && y < asset.height;
+        return (x, y, on);
+    }
 
     private static void DrawSprite(Rect r, Sprite s, float a)
     {
@@ -952,7 +1463,12 @@ public class StructureEditorWindow : EditorWindow
     }
 
     private static void DrawColor(Rect r, Color c, float a)
-    { var cc = c; if (cc.a <= 0f) cc = new Color(0.6f, 0.6f, 0.6f, 1f); cc.a = a; EditorGUI.DrawRect(r, cc); }
+    {
+        var cc = c;
+        if (cc.a <= 0f) cc = new Color(0.6f, 0.6f, 0.6f, 1f);
+        cc.a = a;
+        EditorGUI.DrawRect(r, cc);
+    }
 
     // --- Maintenance helpers ---
     private void ClearUnknownLayers()
@@ -999,5 +1515,50 @@ public class StructureEditorWindow : EditorWindow
             }
         }
     }
+
+    private void BeginMetaTypingUndoIfNeeded()
+    {
+        if (_metaUndoArmed || asset == null) return;
+
+        _metaUndoArmed = true;
+        Undo.IncrementCurrentGroup();
+        _metaUndoGroup = Undo.GetCurrentGroup();
+        Undo.SetCurrentGroupName("Edit Metadata");
+        Undo.RecordObject(asset, "Edit Metadata");
+    }
+
+    private void CommitMetaIfDirty(bool force)
+    {
+        if (!_metaDirty || asset == null) return;
+        if (_metaTarget.x < 0 || _metaTarget.y < 0 || _metaTarget.z <= 0) { _metaDirty = false; return; }
+
+        double now = EditorApplication.timeSinceStartup;
+        if (!force && (now - _metaLastEditTime) < MetaCommitDelay) return;
+
+        // Commit: write-through to asset
+        string val = string.IsNullOrWhiteSpace(_metaText) ? null : _metaText;
+        asset.SetMetadata(_metaTarget.z, _metaTarget.x, _metaTarget.y, val);
+
+        EditorUtility.SetDirty(asset);
+        _hoverDirty = true;
+        _metaDirty = false;
+
+        // Close the undo group once we commit
+        if (_metaUndoArmed && _metaUndoGroup >= 0)
+        {
+            Undo.CollapseUndoOperations(_metaUndoGroup);
+            _metaUndoArmed = false;
+            _metaUndoGroup = -1;
+        }
+    }
+
+    private void CancelMetaTypingSession()
+    {
+        _metaDirty = false;
+        _metaUndoArmed = false;
+        _metaUndoGroup = -1;
+        _metaLastEditTime = -1;
+    }
+
 }
 #endif

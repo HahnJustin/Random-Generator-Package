@@ -9,8 +9,6 @@ using System.Linq;
 using System.Windows.Forms;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -141,11 +139,43 @@ namespace Dalichrome.RandomGenerator.Generators
             int W = structure.Width, H = structure.Height;
             int depth = TileGrid.depth;
 
+            // Which local cells should be skipped entirely?
+            HashSet<int2> skippedCells = new();
+
+            foreach (MetadataEntry entry in structure.GetMetaEnumerable())
+            {
+                if (entry.field != MetaKeyType.CHANCE)
+                    continue;
+
+                int chance = entry.value; // expected 0..100
+                int roll = random.NextInt(0, 100); // 0..99
+
+                // chance:20 => place if roll < 20, skip otherwise
+                if (roll >= chance)
+                    skippedCells.Add(new int2(entry.x, entry.y));
+            }
+
+            // Stamp metadata (except CHANCE), skipping cells
+            foreach (MetadataEntry entry in structure.GetMetaEnumerable())
+            {
+                if (entry.field == MetaKeyType.CHANCE)
+                    continue;
+
+                if (skippedCells.Contains(new int2(entry.x, entry.y)))
+                    continue;
+
+                entry.Shift(anchor, true);
+                TileGrid.AddData(entry);
+            }
+
+            // Stamp tiles, skipping cells
             for (int sy = 0; sy < H; sy++)
             {
                 for (int sx = 0; sx < W; sx++)
                 {
-                    //Places upside down due to the way structures are origined at the top left, tilemaps are origined at bottom right
+                    if (skippedCells.Contains(new int2(sx, sy)))
+                        continue;
+
                     int baseIdx = (sy * W + sx) * depth;
                     int2 point = new int2(anchor.x + sx, anchor.y + sy);
 
@@ -156,12 +186,6 @@ namespace Dalichrome.RandomGenerator.Generators
                         TileGrid.SetTileIdBypassLayer(point, z, tileId);
                     }
                 }
-            }
-
-            foreach (MetadataEntry entry in structure.GetMetaEnumerable())
-            {
-                entry.Shift(anchor, true);
-                TileGrid.AddData(entry);
             }
         }
 

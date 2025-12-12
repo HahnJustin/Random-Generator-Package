@@ -1,6 +1,7 @@
 using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -19,6 +20,10 @@ namespace Dalichrome.RandomGenerator.Core
         ITileMask TileMask { get; set; }
         bool IsIncludingTiles { get; }
         bool IsExcludingTiles { get; }
+
+        // Exposed Helpers
+        public int GetLayerIndexFromTileId(int id);
+        public int GetLayerIndexFromLayerId(int id);
 
         // ---------------- Tile / column primitives ----------------
 
@@ -58,6 +63,8 @@ namespace Dalichrome.RandomGenerator.Core
         List<MetaPair> GetAllDataWithColData(int3 pos);
         List<PositionValue> GetAllData(FixedString64Bytes fixedField);
         List<PositionValue> GetAllData(string field);
+
+        int RemoveAllAt(int3 pos);
 
         List<string> GetMetaFields();
 

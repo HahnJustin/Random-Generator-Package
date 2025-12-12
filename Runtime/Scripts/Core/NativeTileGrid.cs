@@ -1,3 +1,4 @@
+using Codice.Client.BaseCommands.BranchExplorer;
 using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections;
@@ -164,22 +165,6 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetLayerIndexFromTileId(int id)
-        {
-            if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
-                return index;
-            return -1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetLayerIndexFromLayerId(int id)
-        {
-            if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
-                return index;
-            return -1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetDefaultOccupanceFromLayerIndex(int layerIndex)
         {
             return bundle.layerIndexToDefaultOccupanceLookup[layerIndex];
@@ -254,6 +239,25 @@ namespace Dalichrome.RandomGenerator.Core
             if (!Masked) return true;
             return tileMask.CanModifyColumn(GetColumnNative(x, y));
         }
+
+        // Exposed Helpers
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetLayerIndexFromTileId(int id)
+        {
+            if (bundle.tileIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetLayerIndexFromLayerId(int id)
+        {
+            if (bundle.layerIdToLayerIndexLookup.TryGetValue(id, out int index))
+                return index;
+            return -1;
+        }
+
 
         // ---------------- ITileGrid primitives ----------------
 
@@ -350,13 +354,13 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int GetOccupied(int x, int y)
         {
-            var col = GetColumnNative(x, y);
+            int index = PositionToIndex(x,y);
 
             byte forceOccupied = 0;
             byte value = 0;
-            for (int z = 0; z < col.Length; z++)
+            for (int z = 0; z < depth; z++)
             {
-                int id = col[z];
+                int id = tiles[index + z];
                 if (id == 0)
                     continue;
 
@@ -453,6 +457,9 @@ namespace Dalichrome.RandomGenerator.Core
         public List<PositionValue> GetAllData(string field) =>
             metaData.GetAllData(field);
 
+        public int RemoveAllAt(int3 pos) =>
+            metaData.RemoveAllAt(pos);
+
         public List<string> GetMetaFields() => metaData.GetFields();
 
         // Masking
@@ -483,8 +490,9 @@ namespace Dalichrome.RandomGenerator.Core
             excludePositions.Add(pos);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsExcluding(int2 pos) =>
-            excludePositions.Contains(pos);
+            excludePositions.IsCreated && excludePositions.Contains(pos);
 
         public bool IsInsideMask(int x, int y) =>
             CanModifyColumn(x, y);
@@ -539,11 +547,37 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Bounds / restriction
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInBounds(int x, int y) =>
-            x >= 0 && x < width && y >= 0 && y < height;
+            (uint)x < (uint)width && (uint)y < (uint)height;
 
-        public bool IsRestricted(int x, int y) =>
-            !IsInBounds(x, y) || IsExcluding(new (x, y)) || !IsInRegion(x, y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsRestricted(int x, int y)
+        {
+            // cheapest checks first
+            if ((uint)x >= (uint)width || (uint)y >= (uint)height) return true;
+
+            // if no region, skip all region work
+            if (regionLimited)
+            {
+                // bounds check inlined
+                if (x < regionMin.x || y < regionMin.y || x > regionMax.x || y > regionMax.y) return true;
+
+                // if regionPositions is empty, treat as "nothing allowed" (or flip to "everything allowed" if you prefer)
+                if (!regionPositions.IsCreated || regionPositions.Count() == 0) return true;
+
+                if (!regionPositions.Contains(new int2(x, y))) return true;
+            }
+
+            // skip exclude check if unused
+            if (excludePositions.IsCreated && excludePositions.Count() > 0)
+            {
+                if (excludePositions.Contains(new int2(x, y))) return true;
+            }
+
+            return false;
+        }
+
 
         // Iteration / traversal
         public NativeArray<int> AsNativeArray() => tiles;
@@ -682,12 +716,12 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (!IsValid) return;
 
-            tiles.Dispose();
-            values.Dispose();
-            tileMask.Dispose();
-            metaData.Dispose();
-            excludePositions.Dispose();
-            regionPositions.Dispose();
+            if (tiles.IsCreated) tiles.Dispose();
+            if (values.IsCreated) values.Dispose();
+            if (tileMask.IsValid) tileMask.Dispose();
+            if (metaData.IsValid) metaData.Dispose();
+            if (excludePositions.IsCreated) excludePositions.Dispose();
+            if (regionPositions.IsCreated) regionPositions.Dispose();
 
             IsValid = false;
         }

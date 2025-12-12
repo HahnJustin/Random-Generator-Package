@@ -96,6 +96,13 @@ namespace Dalichrome.RandomGenerator.Core
         // For internal wiring when NativeTileGrid (struct) changes
         private void SetGridData(NativeTileGrid newData) => subgrid = newData;
 
+        // Exposed Helpers
+
+        public int GetLayerIndexFromTileId(int id) =>
+            subgrid.GetLayerIndexFromTileId(id);
+        public int GetLayerIndexFromLayerId(int id) =>
+            subgrid.GetLayerIndexFromTileId(id);
+
         // ---------------- Primitive tile / column ops ----------------
 
         public bool SetTileId(int x, int y, int id) =>
@@ -282,6 +289,10 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<PositionValue> GetAllData(string field) =>
             subgrid.GetAllData(field);
+
+        public int RemoveAllAt(int3 pos) => subgrid.RemoveAllAt(pos);
+
+        public int RemoveAllAt(int2 pos) => subgrid.RemoveAllAt(new int3(pos.x, pos.y, MetaData.ColumnZ));
 
         public List<string> GetMetaFields() => subgrid.GetMetaFields();
 

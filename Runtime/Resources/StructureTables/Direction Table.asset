@@ -10,13 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b09f8767313d9fb4a9330bcaf962b622, type: 3}
-  m_Name: Test Table
+  m_Name: Direction Table
   m_EditorClassIdentifier: 
-  uuid: c0516367476645f2bde5b0cfbff5b7ae
+  uuid: 34321347df5146c9b6ca5df0d3bb42be
   table:
-  - structure: {fileID: 11400000, guid: 647c9c83da0700948a69f0fb6f167fe5, type: 2}
-    weight: 5
-  - structure: {fileID: 11400000, guid: 2e8b78533628b5e4db785af7f5e769ec, type: 2}
-    weight: 20
-  - structure: {fileID: 11400000, guid: 4bad51aa743a30147b882b9282981e2e, type: 2}
-    weight: 5
+  - structure: {fileID: 11400000, guid: 369f6a70e70e4ce4498f4d9be2614746, type: 2}
+    weight: 7

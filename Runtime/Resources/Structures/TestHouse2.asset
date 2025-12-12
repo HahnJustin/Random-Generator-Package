@@ -46,3 +46,27 @@ MonoBehaviour:
     x: 0
     y: 5
     raw: fieldname:2
+  - layerId: 2500
+    x: 1
+    y: 6
+    raw: fieldname:2
+  - layerId: 2500
+    x: 6
+    y: 6
+    raw: fieldname:2
+  - layerId: 2500
+    x: 6
+    y: 5
+    raw: fieldname:2
+  - layerId: 2500
+    x: 7
+    y: 3
+    raw: fieldname:2
+  - layerId: 2500
+    x: 5
+    y: 0
+    raw: fieldname:2
+  - layerId: 2500
+    x: 1
+    y: 1
+    raw: fieldname:2
