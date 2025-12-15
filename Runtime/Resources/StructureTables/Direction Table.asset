@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uuid: 34321347df5146c9b6ca5df0d3bb42be
   table:
-  - structure: {fileID: 11400000, guid: 369f6a70e70e4ce4498f4d9be2614746, type: 2}
+  - structure: {fileID: 11400000, guid: 3bf331ea509523848bf0eb98ec839e0e, type: 2}
     weight: 7

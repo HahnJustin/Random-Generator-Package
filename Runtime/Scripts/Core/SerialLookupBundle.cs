@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
-using UnityEngine;
+using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator
 {
@@ -14,5 +14,7 @@ namespace Dalichrome.RandomGenerator
         [ReadOnly] public IReadOnlyDictionary<int, int> layerIdToLayerIndexLookup;
         [ReadOnly] public IReadOnlyDictionary<int, int> tileIdToTileKindLookup;
         [ReadOnly] public IReadOnlyList<int> layerIndexToDefaultOccupanceLookup;
+        [ReadOnly] public IReadOnlyDictionary<int, TablePointer> tileIdToTableLookup;
+        [ReadOnly] public IReadOnlyList<int2> tileTables;
     }
 }

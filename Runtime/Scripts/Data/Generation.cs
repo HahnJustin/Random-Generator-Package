@@ -17,7 +17,7 @@ namespace Dalichrome.RandomGenerator.Data
 
         public Generation(int width, int height, int depth, uint seed) : base()
         {
-            Grid = new(width, height, depth);
+            Grid = new(width, height, depth, seed);
             Seed = seed;
         }
 

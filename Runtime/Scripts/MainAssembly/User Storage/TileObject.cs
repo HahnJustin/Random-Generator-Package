@@ -17,21 +17,35 @@ namespace Dalichrome.RandomGenerator.UserData
     {
         [Header("Core Fields")]
         [SerializeField, TileTypeCollision] public int id;
-        [SerializeField, LayerDisplay] public int layer;
         [SerializeField] public TileKind tileKind = TileKind.Normal;
+#if ODIN_INSPECTOR
+        [HideIf("tileKind", TileKind.Table)]
+#endif
+        [SerializeField, LayerDisplay] public int layer;
 
         public override int GetId() => id;
 
         [Header("Generator UI Fields")]
         [SerializeField] public string tileName;
         [SerializeField] public Sprite menuSprite;
+#if ODIN_INSPECTOR
+        [HideIf("tileKind", TileKind.Table)]
+#endif
         [SerializeField] public Color color;
 
         [Header("Instance Spawning")]
 #if ODIN_INSPECTOR
         [InlineProperty, HideLabel]
+        [HideIf("tileKind", TileKind.Table)]
 #endif
         [SerializeField] public TileSpawn tileSpawn;
+
+#if ODIN_INSPECTOR
+        [ShowIf("tileKind", TileKind.Table)]
+#endif
+        [Header("Tile Table")]
+        [SerializeField] public List<TileTableEntry> table;
+
 
         [Header("Metadata Variants")]
 #if ODIN_INSPECTOR
@@ -39,6 +53,13 @@ namespace Dalichrome.RandomGenerator.UserData
                    DrawScrollView = false,
                    MinScrollViewHeight = 0,
                    ShowIndexLabels = true)]
+
+        [HideIf("tileKind", TileKind.Table)]
+#endif
+        public bool injectVarianceData = false;
+
+#if ODIN_INSPECTOR
+        [HideIf("tileKind", TileKind.Table)]
 #endif
         [SerializeField] public List<MetaDataTileSpawn> metaDataSpawnList;
 
@@ -62,6 +83,18 @@ namespace Dalichrome.RandomGenerator.UserData
             return tileSpawn;
         }
 
+        public List<int2> GetTableAsInt2()
+        {
+            if (tileKind != TileKind.Table) return new();
+
+            List<int2> intTable = new();
+            foreach (var pair in table)
+            {
+                intTable.Add(new(pair.tileId,pair.weight));
+            }
+            return intTable;
+        }
+
         // in TileObject
         internal void PrecompileMetaConditions()
         {
@@ -75,6 +108,5 @@ namespace Dalichrome.RandomGenerator.UserData
                     rule.condition.Precompile();
             }
         }
-
     }
 }

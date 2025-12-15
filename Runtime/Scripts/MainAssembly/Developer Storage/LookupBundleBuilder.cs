@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Mathematics;
 
 
 namespace Dalichrome.RandomGenerator
@@ -12,17 +13,22 @@ namespace Dalichrome.RandomGenerator
         private static NativeLookupBundle currentNativeBundle;
         private static SerialLookupBundle currentSerialBundle;
 
-        private static NativeParallelHashMap<int,int> ToNative(IReadOnlyDictionary<int,int> dict)
+        private static NativeParallelHashMap<int, T> ToNative<T>(
+            IReadOnlyDictionary<int, T> dict)
+            where T : unmanaged
         {
-            var map = new NativeParallelHashMap<int, int>(dict.Count, allocator);
-            foreach (var kv in dict) map.TryAdd(kv.Key, kv.Value);
+            var map = new NativeParallelHashMap<int, T>(dict.Count, allocator);
+            foreach (var kv in dict)
+                map.TryAdd(kv.Key, kv.Value);
             return map;
         }
 
-        private static NativeArray<int> ToNative(IReadOnlyList<int> list)
+        private static NativeArray<T> ToNative<T>(
+            IReadOnlyList<T> list)
+            where T : unmanaged
         {
-            var array = new NativeArray<int>(list.Count, allocator);
-            for (int i = 0; i < list.Count; i++) 
+            var array = new NativeArray<T>(list.Count, allocator, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < list.Count; i++)
                 array[i] = list[i];
             return array;
         }
@@ -37,6 +43,8 @@ namespace Dalichrome.RandomGenerator
                 layerIdToLayerIndexLookup = ToNative(TileLayerRegistry.LayerIdToZ),
                 tileIdToTileKindLookup = ToNative(TileObjectRegistry.TileKindByTileIdInt),
                 layerIndexToDefaultOccupanceLookup = ToNative(TileLayerRegistry.ZToDefaultOccupance),
+                tileIdToTableLookup = ToNative(TileObjectRegistry.TileIdToTablePointer),
+                tileTables = ToNative(TileObjectRegistry.TileTables),
                 valid = 1
             };
             return currentNativeBundle;
@@ -52,6 +60,8 @@ namespace Dalichrome.RandomGenerator
                 layerIdToLayerIndexLookup = TileLayerRegistry.LayerIdToZ,
                 tileIdToTileKindLookup = TileObjectRegistry.TileKindByTileIdInt,
                 layerIndexToDefaultOccupanceLookup = TileLayerRegistry.ZToDefaultOccupance,
+                tileIdToTableLookup = TileObjectRegistry.TileIdToTablePointer,
+                tileTables = TileObjectRegistry.TileTables,
                 valid = 1
             };
             return currentSerialBundle;

@@ -8,6 +8,7 @@ namespace Dalichrome.RandomGenerator.Core {
         Normal,
         Empty,
         ForceUnoccupied,
-        ForceOccupied
+        ForceOccupied,
+        Table
     }
 }

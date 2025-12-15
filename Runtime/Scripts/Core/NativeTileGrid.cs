@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -16,8 +17,12 @@ namespace Dalichrome.RandomGenerator.Core
         public readonly int height;
         public readonly int depth;
 
+        public readonly uint seed;
+
         private NativeArray<int> tiles;
         private NativeArray<int> values;
+
+        private Unity.Mathematics.Random random;
 
         // Mask Variables
         private bool masked;
@@ -66,11 +71,14 @@ namespace Dalichrome.RandomGenerator.Core
         public int2 Minimum => regionMin;
         public int2 Maximum => regionMax;
 
-        private NativeTileGrid(int width, int height, int depth, bool allocateCollections)
+        private NativeTileGrid(int width, int height, int depth, uint seed, bool allocateCollections)
         {
             this.width = width;
             this.height = height;
             this.depth = depth;
+
+            this.seed = seed;
+            random = new(seed);
 
             allocator = Allocator.Persistent;
 
@@ -108,14 +116,14 @@ namespace Dalichrome.RandomGenerator.Core
             IsValid = true;
         }
 
-        public NativeTileGrid(int width, int height, int layerDepth)
-            : this(width, height, layerDepth, true)
+        public NativeTileGrid(int width, int height, int layerDepth, uint seed)
+            : this(width, height, layerDepth, seed, true)
         {
         }
 
         public static NativeTileGrid DeepClone(NativeTileGrid other)
         {
-            NativeTileGrid grid = new(other.width, other.height, other.depth, false);
+            NativeTileGrid grid = new(other.width, other.height, other.depth, other.seed, false);
             Allocator allocator = Allocator.Persistent;
 
             // Tiles / values
@@ -240,6 +248,38 @@ namespace Dalichrome.RandomGenerator.Core
             return tileMask.CanModifyColumn(GetColumnNative(x, y));
         }
 
+        private bool HasTileTable(int id)
+        {
+            return bundle.tileIdToTableLookup.TryGetValue(id, out TablePointer item);
+        }
+
+        private int GetTileIdFromTileTable(int id, int x, int y)
+        {
+            TablePointer pointer = bundle.tileIdToTableLookup[id];
+
+            // Mix inputs into a well-distributed seed (prevents stripes)
+            uint s = (uint)math.hash(new int4(
+                (int)seed,
+                x * 73856093,
+                y * 19349663,
+                id * 83492791
+            ));
+            if (s == 0) s = 1;
+
+            var rng = new Unity.Mathematics.Random(s);
+            rng.NextUInt();
+            int roll = rng.NextInt(pointer.maxWeight); 
+
+            for (int i = 0; i < pointer.length; i++) 
+            {
+                int2 entry = bundle.tileTables[pointer.index + i];
+
+                if (roll < entry.y) return entry.x;
+                else roll -= entry.y;
+            }
+            return 0;
+        }
+
         // Exposed Helpers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -265,6 +305,8 @@ namespace Dalichrome.RandomGenerator.Core
         public bool SetTileId(int x, int y, int id)
         {
             if (IsRestricted(x, y) || !CanModifyColumn(x, y)) return false;
+
+            if (HasTileTable(id)) id = GetTileIdFromTileTable(id, x, y);
 
             // Overwrite ID as zero if id is empty
             if (GetEmptyFromTileId(id) == 1)

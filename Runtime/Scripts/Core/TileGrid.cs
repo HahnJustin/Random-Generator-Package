@@ -14,6 +14,7 @@ namespace Dalichrome.RandomGenerator.Core
         public readonly int height;
         public readonly int depth;
 
+        public readonly uint seed;
         public int2 Center =>
             new int2(
                 Mathf.Clamp(width / 2, 0, width),
@@ -72,13 +73,13 @@ namespace Dalichrome.RandomGenerator.Core
 
         // ---------------- ctor / cloning ----------------
 
-        public TileGrid(int width, int height, int depth)
+        public TileGrid(int width, int height, int depth, uint seed)
         {
             this.width = width;
             this.height = height;
             this.depth = depth;
 
-            subgrid = new NativeTileGrid(width, height, depth);
+            subgrid = new NativeTileGrid(width, height, depth, seed);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             allocationStack = Environment.StackTrace;
@@ -87,7 +88,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public static TileGrid DeepClone(TileGrid other)
         {
-            var grid = new TileGrid(other.width, other.height, other.depth);
+            var grid = new TileGrid(other.width, other.height, other.depth, other.seed);
             if (other.IsValid)
                 grid.subgrid = other.subgrid.DeepClone();
             return grid;

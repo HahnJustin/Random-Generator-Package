@@ -7,6 +7,8 @@ using UnityEngine.Tilemaps;
 using UnityEngine;
 using System.Linq;
 using Unity.Collections;
+using Unity.Mathematics;
+
 
 
 #if UNITY_EDITOR
@@ -30,6 +32,10 @@ namespace Dalichrome.RandomGenerator
         private static Dictionary<int, int> _tileIdToLayerZ;  // tileId -> z (compressed)
         private static Dictionary<int, int> _tileKindById;   // tileId -> tileKind
         private static HashSet<int> _tilesWithMetaVariants;
+        private static HashSet<int> _tilesThatNeedVarianceMetaData;
+
+        private static Dictionary<int, TablePointer> _tileIdToTablePointer;
+        private static List<int2> _tileTables;
 
         private static readonly Dictionary<int, TileBase> _tileBaseCache = new();
         private static readonly Dictionary<int, TileBase> _numberTileBaseCache = new();
@@ -50,6 +56,10 @@ namespace Dalichrome.RandomGenerator
                 _tileIdToLayerId = null;
                 _tileIdToLayerZ = null;
                 _tileKindById = null;
+                _tileIdToTablePointer = null;
+                _tileTables = null;
+                _tilesWithMetaVariants = null;
+                _tilesThatNeedVarianceMetaData = null;
                 _tileBaseCache.Clear();
                 _numberTileBaseCache.Clear();
             }
@@ -103,8 +113,8 @@ namespace Dalichrome.RandomGenerator
                 _allTiles = _byId.OrderBy(kv => kv.Key).Select(kv => kv.Value).ToArray();
 
                 // Build lightweight indexes
-                _byLayer = new Dictionary<int, List<TileObject>>();
-                _byKind = new Dictionary<TileKind, List<TileObject>>();
+                _byLayer = new();
+                _byKind = new();
 
                 foreach (var t in _allTiles)
                 {
@@ -121,6 +131,9 @@ namespace Dalichrome.RandomGenerator
 
                 _tileIdToLayerId = new Dictionary<int, int>(_allTiles.Length);
                 _tileIdToLayerZ = new Dictionary<int, int>(_allTiles.Length);
+                _tilesThatNeedVarianceMetaData = new();
+                _tileIdToTablePointer = new();
+                _tileTables = new();
 
                 // Ensure TileLayerRegistry is built so z lookups are ready
                 _ = TileLayerRegistry.AllLayerIds; // touches EnsureBuilt()
@@ -131,6 +144,28 @@ namespace Dalichrome.RandomGenerator
                 {
                     _tileIdToLayerId[t.id] = t.layer;
                     _tileIdToLayerZ[t.id] = TileLayerRegistry.GetLayerZ(t.layer, -1);
+                    if(t.injectVarianceData) _tilesThatNeedVarianceMetaData.Add(t.id);
+
+                    // Tile Table Creation
+                    if (t.tileKind == TileKind.Table && t.table.Count > 0)
+                    {
+                        int index = _tileTables.Count;
+                        int count = 0;
+                        int weight = 0;
+                        foreach (TileTableEntry entry in t.table)
+                        {
+                            if (entry.weight <= 0) continue;
+                            weight += entry.weight;
+                            _tileTables.Add(entry.Int2);
+                            count += 1;
+                        }
+                        _tileIdToTablePointer.Add(t.id, 
+                            new TablePointer { 
+                                index = index,
+                                length = count,
+                                maxWeight = weight
+                            });
+                    }
 
                     // NOTE: metaDataSpawnList lives on TileObject
                     if (t.metaDataSpawnList != null && t.metaDataSpawnList.Count > 0)
@@ -204,6 +239,16 @@ namespace Dalichrome.RandomGenerator
         public static IReadOnlyDictionary<int, int> TileKindByTileIdInt
         {
             get { EnsureBuilt(); return _tileKindById; }
+        }
+
+        public static IReadOnlyDictionary<int, TablePointer> TileIdToTablePointer
+        {
+            get { EnsureBuilt(); return _tileIdToTablePointer; }
+        }
+
+        public static IReadOnlyList<int2> TileTables
+        {
+            get { EnsureBuilt(); return _tileTables; }
         }
 
         // Getters
@@ -326,6 +371,12 @@ namespace Dalichrome.RandomGenerator
             var map = new NativeParallelHashMap<int, int>(_tileIdToLayerZ.Count, alloc);
             foreach (var kv in _tileIdToLayerZ) map.TryAdd(kv.Key, kv.Value);
             return map;
+        }
+
+        public static bool NeedMetaVariance(int tileId)
+        {
+            EnsureBuilt();
+            return _tilesThatNeedVarianceMetaData != null && _tilesThatNeedVarianceMetaData.Contains(tileId);
         }
 
         public static bool HasMetaVariants(int tileId)
