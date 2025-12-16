@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -172,6 +173,16 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetTileId(Vector2Int position, int layerId) =>
             GetTileId(position.x, position.y, layerId);
 
+        public int GetTileIdWithLayerIndex(int x, int y, int z)
+        {
+            return subgrid.GetTileIdWithLayerIndex(x, y, z);
+        }
+
+        public int GetTileIdWithLayerIndex(int3 pos)
+        {
+            return GetTileIdWithLayerIndex(pos.x, pos.y, pos.z);
+        }
+
         public int GetOccupied(int x, int y) =>
             subgrid.GetOccupied(x, y);
 
@@ -212,6 +223,12 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int x, int y, int layerZ, string field, int value) =>
             subgrid.AddData(x, y, layerZ, field, value);
+
+        public void AddData(int3 pos, FixedString64Bytes field, int value) =>
+       subgrid.AddData(pos.x, pos.y, pos.z, field, value);
+
+        public void AddData(int3 pos, string field, int value) =>
+            subgrid.AddData(pos.x, pos.y, pos.z, field, value);
 
         public void AddData(MetadataEntry entry) =>
             subgrid.AddData(entry);
@@ -471,6 +488,11 @@ namespace Dalichrome.RandomGenerator.Core
             {
                 subgrid.SetLookupBundle(bundle);
             }
+        }
+
+        public ILookupBundle GetLookupBundle()
+        {
+            return subgrid.GetLookupBundle();
         }
 
         public NativeTileGrid GetNative() =>

@@ -1,10 +1,11 @@
+using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Dalichrome.RandomGenerator.Random;
 using Unity.Collections;
 using Unity.Mathematics;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -217,6 +218,12 @@ namespace Dalichrome.RandomGenerator.Core
         {
             if (!IsInBounds(x, y)) return -1;
             return GetTileIdFromArrayLayerId(x, y, layerId);
+        }
+
+        public int GetTileIdWithLayerIndex(int x, int y, int z)
+        {
+            if (!IsInBounds(x, y)) return -1;
+            return GetTileIdFromArray(x, y, z);
         }
 
         public bool CopyColumn(int2 replacer, int2 replaced)
@@ -491,6 +498,11 @@ namespace Dalichrome.RandomGenerator.Core
         public void SetLookupBundle(ILookupBundle bundle)
         {
             this.bundle = (SerialLookupBundle)bundle;
+        }
+
+        public ILookupBundle GetLookupBundle()
+        {
+            return bundle;
         }
 
         public void SetAllTiles(IEnumerable<int> array)

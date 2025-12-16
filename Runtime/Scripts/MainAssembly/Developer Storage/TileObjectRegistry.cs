@@ -251,6 +251,11 @@ namespace Dalichrome.RandomGenerator
             get { EnsureBuilt(); return _tileTables; }
         }
 
+        public static HashSet<int> TilesThatNeedVarianceMetadata
+        {
+            get { EnsureBuilt(); return _tilesThatNeedVarianceMetaData; }
+        }
+
         // Getters
         public static bool TryGet(int tileId, out TileObject tile)
         {

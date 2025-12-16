@@ -342,6 +342,12 @@ namespace Dalichrome.RandomGenerator.Core
             return GetTileIdFromNativeArrayLayerId(x, y, layerId);
         }
 
+        public int GetTileIdWithLayerIndex(int x, int y, int z)
+        {
+            if (!IsInBounds(x, y)) return -1;
+            return GetTileIdFromNativeArray(x, y, z);
+        }
+
         // Copy Column
         public bool CopyColumn(int2 replacer, int2 replaced)
         {
@@ -715,6 +721,11 @@ namespace Dalichrome.RandomGenerator.Core
         public void SetLookupBundle(ILookupBundle bundle)
         {
             this.bundle = (NativeLookupBundle)bundle;
+        }
+
+        public ILookupBundle GetLookupBundle()
+        {
+            return bundle;
         }
 
         // Misc

@@ -286,8 +286,11 @@ namespace Dalichrome.RandomGenerator
             // Dispose used splitters since they store native data structs
             foreach (ISplitter splitter in usedSplitters) splitter.ParallelDispose();
 
+            Generation gen = (Generation)data;
+            gen = Finalizers.Finalize(gen);
+
             watch.Stop();
-            FinalizeGeneration((Generation)data, watch.ElapsedMilliseconds);
+            FinalizeGeneration(gen, watch.ElapsedMilliseconds);
         }
 
         public void GenerateCoroutine()
@@ -386,8 +389,11 @@ namespace Dalichrome.RandomGenerator
 
             foreach (var splitter in usedSplitters) splitter.ParallelDispose();
 
+            Generation gen = (Generation)data;
+            gen = Finalizers.Finalize(gen);
+
             watch.Stop();
-            FinalizeGeneration((Generation) data, watch.ElapsedMilliseconds);
+            FinalizeGeneration(gen, watch.ElapsedMilliseconds);
         }
 
 
@@ -465,8 +471,11 @@ namespace Dalichrome.RandomGenerator
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log($"[GridOpData #{data._id}] final data");
 #endif
+            // Run Finalizers
+            Generation gen = (Generation)data;
+            gen = Finalizers.Finalize(gen);
 
-            return (Generation)data;
+            return gen;
         }
 
         private void FinalizeGeneration(Generation data, long elapsedMs)

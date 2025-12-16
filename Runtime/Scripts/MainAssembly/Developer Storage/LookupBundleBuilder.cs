@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -33,6 +34,16 @@ namespace Dalichrome.RandomGenerator
             return array;
         }
 
+        private static NativeParallelHashSet<T> ToNative<T>(
+            HashSet<T> set)
+            where T : unmanaged, IEquatable<T>
+        {
+            var native = new NativeParallelHashSet<T>(set.Count, allocator);
+            foreach (var v in set)
+                native.Add(v);
+            return native;
+        }
+
         public static NativeLookupBundle GetNative()
         {
             if(currentNativeBundle.valid == 1) return currentNativeBundle;
@@ -43,6 +54,7 @@ namespace Dalichrome.RandomGenerator
                 layerIdToLayerIndexLookup = ToNative(TileLayerRegistry.LayerIdToZ),
                 tileIdToTileKindLookup = ToNative(TileObjectRegistry.TileKindByTileIdInt),
                 layerIndexToDefaultOccupanceLookup = ToNative(TileLayerRegistry.ZToDefaultOccupance),
+                tileIdToVarianceFinalizer = ToNative(TileObjectRegistry.TilesThatNeedVarianceMetadata),
                 tileIdToTableLookup = ToNative(TileObjectRegistry.TileIdToTablePointer),
                 tileTables = ToNative(TileObjectRegistry.TileTables),
                 valid = 1
@@ -64,6 +76,9 @@ namespace Dalichrome.RandomGenerator
                 tileTables = TileObjectRegistry.TileTables,
                 valid = 1
             };
+
+            currentSerialBundle.SetTileIdToVarianceFinalizer(TileObjectRegistry.TilesThatNeedVarianceMetadata);
+
             return currentSerialBundle;
         }
 

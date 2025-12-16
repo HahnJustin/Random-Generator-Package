@@ -39,6 +39,8 @@ namespace Dalichrome.RandomGenerator.Core
         bool ColumnContainsId(int x, int y, int id);
 
         int GetTileId(int x, int y, int layerId);
+        int GetTileIdWithLayerIndex(int x, int y, int z);
+
         int GetOccupied(int x, int y);
 
         bool SetTileValue(int x, int y, int value);
@@ -114,5 +116,6 @@ namespace Dalichrome.RandomGenerator.Core
         // ---------------- Layer lookup ----------------
 
         void SetLookupBundle(ILookupBundle bundle);
+        ILookupBundle GetLookupBundle();
     }
 }

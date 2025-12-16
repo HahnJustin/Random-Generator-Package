@@ -78,7 +78,7 @@ namespace Dalichrome.RandomGenerator.Generators
             // Generate Voronoi seeds from within the region
             List<int2> seeds = GenerateRandomSeeds(generation, random.NextInt(config.RegionMin, config.RegionMax), random);
 
-            // Initialize seed buckets
+            // Execute seed buckets
             Dictionary<int, List<int2>> regionBuckets = new();
             for (int i = 0; i < seeds.Count; i++)
                 regionBuckets[i] = new List<int2>();

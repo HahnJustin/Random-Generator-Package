@@ -14,6 +14,7 @@ namespace Dalichrome.RandomGenerator
         [ReadOnly] public NativeParallelHashMap<int, int> layerIdToLayerIndexLookup;
         [ReadOnly] public NativeParallelHashMap<int, int> tileIdToTileKindLookup;
         [ReadOnly] public NativeArray<int> layerIndexToDefaultOccupanceLookup;
+        [ReadOnly] public NativeParallelHashSet<int> tileIdToVarianceFinalizer;
         [ReadOnly] public NativeParallelHashMap<int, TablePointer> tileIdToTableLookup;
         [ReadOnly] public NativeArray<int2> tileTables;
 
@@ -23,6 +24,7 @@ namespace Dalichrome.RandomGenerator
             if (layerIdToLayerIndexLookup.IsCreated) layerIdToLayerIndexLookup.Dispose();
             if (tileIdToTileKindLookup.IsCreated) tileIdToTileKindLookup.Dispose();
             if (layerIndexToDefaultOccupanceLookup.IsCreated) layerIndexToDefaultOccupanceLookup.Dispose();
+            if (tileIdToVarianceFinalizer.IsCreated) tileIdToVarianceFinalizer.Dispose();
             if (tileIdToTableLookup.IsCreated) tileIdToTableLookup.Dispose();
             if (tileTables.IsCreated) tileTables.Dispose();
             valid = 0;

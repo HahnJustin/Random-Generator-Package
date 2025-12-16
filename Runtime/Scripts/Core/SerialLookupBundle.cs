@@ -16,5 +16,17 @@ namespace Dalichrome.RandomGenerator
         [ReadOnly] public IReadOnlyList<int> layerIndexToDefaultOccupanceLookup;
         [ReadOnly] public IReadOnlyDictionary<int, TablePointer> tileIdToTableLookup;
         [ReadOnly] public IReadOnlyList<int2> tileTables;
+
+        [ReadOnly] private HashSet<int> tileIdToVarianceFinalizer;
+
+        public void SetTileIdToVarianceFinalizer(HashSet<int> set)
+        {
+            tileIdToVarianceFinalizer = set;
+        }
+
+        public bool TileNeedsVariance(int tileId)
+        {
+            return tileIdToVarianceFinalizer.Contains(tileId);
+        }
     }
 }
