@@ -56,11 +56,14 @@ namespace Dalichrome.RandomGenerator.UserData
 
         [HideIf("tileKind", TileKind.Table)]
 #endif
+        [Tooltip("When enabled the metadata tag 'variance' gets added to all positions where this tile is automatically. \n" +
+            "The value ranges from 0 to 10000, and is chosen randomly.")]
         public bool injectVarianceData = false;
 
 #if ODIN_INSPECTOR
         [HideIf("tileKind", TileKind.Table)]
 #endif
+        [Tooltip("Defines different variants of the tile objects to spawn in depending on it's meta data")]
         [SerializeField] public List<MetaDataTileSpawn> metaDataSpawnList;
 
         /// <summary>

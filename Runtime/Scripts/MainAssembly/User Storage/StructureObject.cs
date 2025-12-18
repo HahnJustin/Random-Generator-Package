@@ -1,9 +1,11 @@
 // File: StructureObject.cs
+using Dalichrome.RandomGenerator.Configs;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using ReadOnlyAttribute = Dalichrome.RandomGenerator.Configs.ReadOnlyAttribute;
 
 namespace Dalichrome.RandomGenerator.UserData
 {
@@ -17,9 +19,16 @@ namespace Dalichrome.RandomGenerator.UserData
     [CreateAssetMenu(fileName = "NewStructure", menuName = "RandomGenerator/UserData/Structure", order = 1000)]
     public class StructureObject : ScriptableObject
     {
-        [Min(1)] public int width = 16;
-        [Min(1)] public int height = 16;
 
+        [Header("Dimensions")]
+        [ReadOnly, Min(1)] public int width = 16;
+        [ReadOnly, Min(1)] public int height = 16;
+
+        [Header("Mutation")]
+        [SerializeField] private bool rotatable = false;   // allow 0/90/180/270
+        [SerializeField] private bool flippable = false;  // allow flipX
+
+        [Header("Data")]
         // Registry snapshots for validation (do not edit by hand)
         [SerializeField] private int[] expectedLayerIds = Array.Empty<int>();
         [SerializeField] private int[] expectedPaletteIds = Array.Empty<int>();
@@ -47,6 +56,9 @@ namespace Dalichrome.RandomGenerator.UserData
         }
 
         [SerializeField] private List<UnparsedMetadataEntry> metadata = new(); // NEW
+
+        public bool Rotatable => rotatable;
+        public bool Flippable => flippable;
 
         public IReadOnlyList<LayerData> Layers => layers;
         public IReadOnlyList<int> ExpectedLayerIds => expectedLayerIds;

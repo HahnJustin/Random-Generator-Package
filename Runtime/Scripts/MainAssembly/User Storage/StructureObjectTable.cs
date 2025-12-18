@@ -41,7 +41,7 @@ namespace Dalichrome.RandomGenerator.UserData
                 // The array length is width * height * TileLayerRegistry.LayerCount (z-stacked).
                 var flat = so.ConvertToIntArray(); // already provided on StructureObject
                 var meta = so.ConvertMetadata();
-                var runtimeStruct = new Structure(flat, meta, so.width, so.height);
+                var runtimeStruct = new Structure(flat, meta, so.width, so.height, so.Flippable, so.Rotatable);
                 rows.Add(new StructureTable.Row(runtimeStruct, Math.Max(0, weight)));
             }
             return new StructureTable(DisplayName, rows);

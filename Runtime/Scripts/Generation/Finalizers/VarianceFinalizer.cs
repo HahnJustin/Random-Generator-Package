@@ -21,7 +21,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 int tileId = tileGrid.GetTileIdWithLayerIndex(position);
                 if (bundle.tileIdToVarianceFinalizer.Contains(tileId))
                 {
-                    tileGrid.AddData(position, MetaKeyType.VARIANCE, random.NextInt(1000));
+                    tileGrid.AddData(position, MetaKeyType.VARIANCE, random.NextInt(10000));
                 }
             }
 

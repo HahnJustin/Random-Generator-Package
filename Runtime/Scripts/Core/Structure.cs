@@ -19,12 +19,17 @@ namespace Dalichrome.RandomGenerator.Core
         public int Height { get; }
         public int Length => _tiles.Length;
 
-        public Structure(int[] tiles, MetadataEntry[] meta, int width, int height)
+        public bool Flippable { get; }
+        public bool Rotatable { get; }
+
+        public Structure(int[] tiles, MetadataEntry[] meta, int width, int height, bool flippable, bool rotatable)
         {
             _tiles = tiles ?? Array.Empty<int>();
             _meta = meta ?? Array.Empty<MetadataEntry>();
             Width = Math.Max(1, width);
             Height = Math.Max(1, height);
+            Flippable = flippable;
+            Rotatable = rotatable;
         }
 
         public int this[int index] => _tiles[index];

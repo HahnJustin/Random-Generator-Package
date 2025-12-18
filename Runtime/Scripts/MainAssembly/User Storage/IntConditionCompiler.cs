@@ -4,8 +4,14 @@ namespace Dalichrome.RandomGenerator.UserData
 {
     /// <summary>
     /// Compiles int-condition expressions into reusable AST nodes.
-    /// Grammar: literals, ranges (a-b), !, &, |, ().
-    /// Example: "1-3|7", "!(0-2)", "(3|7)&!10".
+    /// Grammar:
+    /// - Literals: "7" (equals)
+    /// - Ranges: "1-3"
+    /// - Prefix compares: ">5", ">=10", "<2", "<=9", "!=4"
+    /// - Unary not: "!(...)" or "!7" (negates the following node)
+    /// - And/Or: "&", "|"
+    /// - Grouping: "()"
+    /// Examples: "1-3|7", "!(0-2)", "(3|7)&!10", ">=5&!=9", "<=0|>10"
     /// </summary>
     public static class IntConditionCompiler
     {
@@ -29,6 +35,35 @@ namespace Dalichrome.RandomGenerator.UserData
             public readonly int Max;
             public RangeNode(int min, int max) { Min = min; Max = max; }
             public override bool Evaluate(int v) => v >= Min && v <= Max;
+        }
+
+        private enum CompareOp : byte
+        {
+            NotEqual,
+            Less,
+            LessOrEqual,
+            Greater,
+            GreaterOrEqual
+        }
+
+        private sealed class CompareNode : Node
+        {
+            public readonly CompareOp Op;
+            public readonly int Value;
+            public CompareNode(CompareOp op, int value) { Op = op; Value = value; }
+
+            public override bool Evaluate(int v)
+            {
+                return Op switch
+                {
+                    CompareOp.NotEqual => v != Value,
+                    CompareOp.Less => v < Value,
+                    CompareOp.LessOrEqual => v <= Value,
+                    CompareOp.Greater => v > Value,
+                    CompareOp.GreaterOrEqual => v >= Value,
+                    _ => false
+                };
+            }
         }
 
         private sealed class NotNode : Node
@@ -102,6 +137,17 @@ namespace Dalichrome.RandomGenerator.UserData
 
             private char Peek() => End ? '\0' : _text[_index];
 
+            private char PeekNext()
+            {
+                int j = _index + 1;
+                return (j >= 0 && j < _text.Length) ? _text[j] : '\0';
+            }
+
+            private void Expect(char c, string message)
+            {
+                if (!Match(c)) throw new FormatException(message);
+            }
+
             public Node ParseOr()
             {
                 Node left = ParseAnd();
@@ -137,27 +183,54 @@ namespace Dalichrome.RandomGenerator.UserData
             private Node ParseUnary()
             {
                 SkipWhitespace();
+
+                // Handle both unary NOT (!) and prefix "!="
                 if (Match('!'))
                 {
+                    // If immediately followed by '=', this is the "!=" operator (prefix)
+                    if (Match('='))
+                    {
+                        int rhs = ParseInt();
+                        return new CompareNode(CompareOp.NotEqual, rhs);
+                    }
+
                     Node child = ParseUnary();
                     return new NotNode(child);
                 }
+
                 return ParsePrimary();
             }
 
             private Node ParsePrimary()
             {
                 SkipWhitespace();
+
                 if (Match('('))
                 {
                     Node inner = ParseOr();
-                    if (!Match(')'))
-                        throw new FormatException("Missing closing ')' in int expression.");
+                    Expect(')', "Missing closing ')' in int expression.");
                     return inner;
                 }
 
+                // Prefix comparisons: <, <=, >, >=
+                char p = Peek();
+                if (p == '<' || p == '>')
+                {
+                    _index++; // consume < or >
+                    bool orEqual = Match('=');
+
+                    int rhs = ParseInt();
+
+                    if (p == '<')
+                        return new CompareNode(orEqual ? CompareOp.LessOrEqual : CompareOp.Less, rhs);
+                    else
+                        return new CompareNode(orEqual ? CompareOp.GreaterOrEqual : CompareOp.Greater, rhs);
+                }
+
+                // Literal or range (a-b)
                 int start = ParseInt();
                 SkipWhitespace();
+
                 if (Match('-'))
                 {
                     int end = ParseInt();
