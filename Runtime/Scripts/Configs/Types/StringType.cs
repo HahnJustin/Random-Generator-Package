@@ -68,5 +68,6 @@ public enum StringType
     Description_Filter_Distance,
     Tooltip_Layer_Button_Variable,
     Description_Generator_Fill,
-    Description_Generator_Structure
+    Description_Generator_Structure,
+    Description_Generator_MetaPerlin
 }

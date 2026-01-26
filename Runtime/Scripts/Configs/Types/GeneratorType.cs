@@ -23,6 +23,7 @@ namespace Dalichrome.RandomGenerator.Configs
         Guarantee_Spawn,
         Border,
         Fill,
-        Structure
+        Structure,
+        MetaPerlin
     }
 }
