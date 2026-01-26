@@ -98,7 +98,6 @@ namespace Dalichrome.RandomGenerator.UserData
             return intTable;
         }
 
-        // in TileObject
         internal void PrecompileMetaConditions()
         {
             if (metaDataSpawnList == null)
@@ -106,9 +105,9 @@ namespace Dalichrome.RandomGenerator.UserData
 
             for (int i = 0; i < metaDataSpawnList.Count; i++)
             {
-                var rule = metaDataSpawnList[i];
-                if (rule?.condition != null)
-                    rule.condition.Precompile();
+                MetaDataTileSpawn mdts = metaDataSpawnList[i];
+                if (mdts != null)
+                    mdts.EnsureCompiled();
             }
         }
     }

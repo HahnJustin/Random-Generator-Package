@@ -171,7 +171,7 @@ namespace Dalichrome.RandomGenerator
                     if (t.metaDataSpawnList != null && t.metaDataSpawnList.Count > 0)
                     {
                         _tilesWithMetaVariants.Add(t.id);
-                        t.PrecompileMetaConditions(); // from earlier step
+                        t.PrecompileMetaConditions();
                     }
                 }
 

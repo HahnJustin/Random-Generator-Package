@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dalichrome.RandomGenerator.Core;
-
+using Dalichrome.RandomGenerator.Utils;
 
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
@@ -29,9 +29,22 @@ namespace Dalichrome.RandomGenerator.UserData
 #endif
         public TileSpawn tileSpawn;
 
+        private bool _compiled = false;
+        private CompiledMetaCondition compiledCondition;
+
+        public void EnsureCompiled()
+        {
+            if (_compiled) return;
+
+            compiledCondition = MetaConditionCompiler.Compile(condition);
+            _compiled = true;
+        }
+
         public bool Matches(List<MetaPair> metaPairs)
         {
-            return condition != null && condition.Matches(metaPairs);
+            EnsureCompiled();
+
+            return compiledCondition != null && compiledCondition.Matches(metaPairs);
         }
     }
 }

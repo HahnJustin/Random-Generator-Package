@@ -1,6 +1,6 @@
 using System;
 
-namespace Dalichrome.RandomGenerator.UserData
+namespace Dalichrome.RandomGenerator.Utils
 {
     /// <summary>
     /// Compiles key-condition expressions into reusable AST nodes.
@@ -9,52 +9,47 @@ namespace Dalichrome.RandomGenerator.UserData
     /// </summary>
     public static class KeyConditionCompiler
     {
-        public abstract class Node
-        {
-            public abstract bool Evaluate(Func<string, bool> keySatisfied);
-        }
-
-        private sealed class KeyNode : Node
+        private sealed class KeyNode : KeyConditionNode
         {
             public readonly string Key;
             public KeyNode(string key) => Key = key;
-            public override bool Evaluate(Func<string, bool> keySatisfied)
+            internal override bool Evaluate(Func<string, bool> keySatisfied)
                 => keySatisfied(Key);
         }
 
-        private sealed class NotNode : Node
+        private sealed class NotNode : KeyConditionNode
         {
-            public readonly Node Child;
-            public NotNode(Node child) => Child = child;
-            public override bool Evaluate(Func<string, bool> keySatisfied)
+            public readonly KeyConditionNode Child;
+            public NotNode(KeyConditionNode child) => Child = child;
+            internal override bool Evaluate(Func<string, bool> keySatisfied)
                 => !Child.Evaluate(keySatisfied);
         }
 
-        private sealed class AndNode : Node
+        private sealed class AndNode : KeyConditionNode
         {
-            public readonly Node Left;
-            public readonly Node Right;
-            public AndNode(Node left, Node right) { Left = left; Right = right; }
-            public override bool Evaluate(Func<string, bool> keySatisfied)
+            public readonly KeyConditionNode Left;
+            public readonly KeyConditionNode Right;
+            public AndNode(KeyConditionNode left, KeyConditionNode right) { Left = left; Right = right; }
+            internal override bool Evaluate(Func<string, bool> keySatisfied)
                 => Left.Evaluate(keySatisfied) && Right.Evaluate(keySatisfied);
         }
 
-        private sealed class OrNode : Node
+        private sealed class OrNode : KeyConditionNode
         {
-            public readonly Node Left;
-            public readonly Node Right;
-            public OrNode(Node left, Node right) { Left = left; Right = right; }
-            public override bool Evaluate(Func<string, bool> keySatisfied)
+            public readonly KeyConditionNode Left;
+            public readonly KeyConditionNode Right;
+            public OrNode(KeyConditionNode left, KeyConditionNode right) { Left = left; Right = right; }
+            internal override bool Evaluate(Func<string, bool> keySatisfied)
                 => Left.Evaluate(keySatisfied) || Right.Evaluate(keySatisfied);
         }
 
-        public static Node Compile(string expr)
+        internal static KeyConditionNode Compile(string expr)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 return null;
 
             var parser = new Parser(expr.AsSpan());
-            Node root = parser.ParseOr();
+            KeyConditionNode root = parser.ParseOr();
             parser.SkipWhitespace();
             if (!parser.End)
                 throw new FormatException($"Unexpected trailing characters in key expression: '{expr}'");
@@ -92,15 +87,15 @@ namespace Dalichrome.RandomGenerator.UserData
 
             private char Peek() => End ? '\0' : _text[_index];
 
-            public Node ParseOr()
+            public KeyConditionNode ParseOr()
             {
-                Node left = ParseAnd();
+                KeyConditionNode left = ParseAnd();
                 while (true)
                 {
                     SkipWhitespace();
                     if (Match('|'))
                     {
-                        Node right = ParseAnd();
+                        KeyConditionNode right = ParseAnd();
                         left = new OrNode(left, right);
                     }
                     else break;
@@ -108,15 +103,15 @@ namespace Dalichrome.RandomGenerator.UserData
                 return left;
             }
 
-            private Node ParseAnd()
+            private KeyConditionNode ParseAnd()
             {
-                Node left = ParseUnary();
+                KeyConditionNode left = ParseUnary();
                 while (true)
                 {
                     SkipWhitespace();
                     if (Match('&'))
                     {
-                        Node right = ParseUnary();
+                        KeyConditionNode right = ParseUnary();
                         left = new AndNode(left, right);
                     }
                     else break;
@@ -124,23 +119,23 @@ namespace Dalichrome.RandomGenerator.UserData
                 return left;
             }
 
-            private Node ParseUnary()
+            private KeyConditionNode ParseUnary()
             {
                 SkipWhitespace();
                 if (Match('!'))
                 {
-                    Node child = ParseUnary();
+                    KeyConditionNode child = ParseUnary();
                     return new NotNode(child);
                 }
                 return ParsePrimary();
             }
 
-            private Node ParsePrimary()
+            private KeyConditionNode ParsePrimary()
             {
                 SkipWhitespace();
                 if (Match('('))
                 {
-                    Node inner = ParseOr();
+                    KeyConditionNode inner = ParseOr();
                     if (!Match(')'))
                         throw new FormatException("Missing closing ')' in key expression.");
                     return inner;

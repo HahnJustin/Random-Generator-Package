@@ -1,6 +1,6 @@
 using System;
 
-namespace Dalichrome.RandomGenerator.UserData
+namespace Dalichrome.RandomGenerator.Utils
 {
     /// <summary>
     /// Compiles int-condition expressions into reusable AST nodes.
@@ -17,24 +17,19 @@ namespace Dalichrome.RandomGenerator.UserData
     {
         // „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ AST NODES „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
 
-        public abstract class Node
-        {
-            public abstract bool Evaluate(int value);
-        }
-
-        private sealed class LiteralNode : Node
+        private sealed class LiteralNode : IntConditionNode
         {
             public readonly int Value;
             public LiteralNode(int value) => Value = value;
-            public override bool Evaluate(int v) => v == Value;
+            internal override bool Evaluate(int v) => v == Value;
         }
 
-        private sealed class RangeNode : Node
+        private sealed class RangeNode : IntConditionNode
         {
             public readonly int Min;
             public readonly int Max;
             public RangeNode(int min, int max) { Min = min; Max = max; }
-            public override bool Evaluate(int v) => v >= Min && v <= Max;
+            internal override bool Evaluate(int v) => v >= Min && v <= Max;
         }
 
         private enum CompareOp : byte
@@ -46,13 +41,13 @@ namespace Dalichrome.RandomGenerator.UserData
             GreaterOrEqual
         }
 
-        private sealed class CompareNode : Node
+        private sealed class CompareNode : IntConditionNode
         {
             public readonly CompareOp Op;
             public readonly int Value;
             public CompareNode(CompareOp op, int value) { Op = op; Value = value; }
 
-            public override bool Evaluate(int v)
+            internal override bool Evaluate(int v)
             {
                 return Op switch
                 {
@@ -66,38 +61,38 @@ namespace Dalichrome.RandomGenerator.UserData
             }
         }
 
-        private sealed class NotNode : Node
+        private sealed class NotNode : IntConditionNode
         {
-            public readonly Node Child;
-            public NotNode(Node child) => Child = child;
-            public override bool Evaluate(int v) => !Child.Evaluate(v);
+            public readonly IntConditionNode Child;
+            public NotNode(IntConditionNode child) => Child = child;
+            internal override bool Evaluate(int v) => !Child.Evaluate(v);
         }
 
-        private sealed class AndNode : Node
+        private sealed class AndNode : IntConditionNode
         {
-            public readonly Node Left;
-            public readonly Node Right;
-            public AndNode(Node left, Node right) { Left = left; Right = right; }
-            public override bool Evaluate(int v) => Left.Evaluate(v) && Right.Evaluate(v);
+            public readonly IntConditionNode Left;
+            public readonly IntConditionNode Right;
+            public AndNode(IntConditionNode left, IntConditionNode right) { Left = left; Right = right; }
+            internal override bool Evaluate(int v) => Left.Evaluate(v) && Right.Evaluate(v);
         }
 
-        private sealed class OrNode : Node
+        private sealed class OrNode : IntConditionNode
         {
-            public readonly Node Left;
-            public readonly Node Right;
-            public OrNode(Node left, Node right) { Left = left; Right = right; }
-            public override bool Evaluate(int v) => Left.Evaluate(v) || Right.Evaluate(v);
+            public readonly IntConditionNode Left;
+            public readonly IntConditionNode Right;
+            public OrNode(IntConditionNode left, IntConditionNode right) { Left = left; Right = right; }
+            internal override bool Evaluate(int v) => Left.Evaluate(v) || Right.Evaluate(v);
         }
 
         // „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ PUBLIC API „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
 
-        public static Node Compile(string expr)
+        internal static IntConditionNode Compile(string expr)
         {
             if (string.IsNullOrWhiteSpace(expr))
                 return null; // means "presence-only" or handled upstream
 
             var parser = new Parser(expr.AsSpan());
-            Node root = parser.ParseOr();
+            IntConditionNode root = parser.ParseOr();
             parser.SkipWhitespace();
             if (!parser.End)
                 throw new FormatException($"Unexpected trailing characters in int expression: '{expr}'");
@@ -148,15 +143,15 @@ namespace Dalichrome.RandomGenerator.UserData
                 if (!Match(c)) throw new FormatException(message);
             }
 
-            public Node ParseOr()
+            public IntConditionNode ParseOr()
             {
-                Node left = ParseAnd();
+                IntConditionNode left = ParseAnd();
                 while (true)
                 {
                     SkipWhitespace();
                     if (Match('|'))
                     {
-                        Node right = ParseAnd();
+                        IntConditionNode right = ParseAnd();
                         left = new OrNode(left, right);
                     }
                     else break;
@@ -164,15 +159,15 @@ namespace Dalichrome.RandomGenerator.UserData
                 return left;
             }
 
-            private Node ParseAnd()
+            private IntConditionNode ParseAnd()
             {
-                Node left = ParseUnary();
+                IntConditionNode left = ParseUnary();
                 while (true)
                 {
                     SkipWhitespace();
                     if (Match('&'))
                     {
-                        Node right = ParseUnary();
+                        IntConditionNode right = ParseUnary();
                         left = new AndNode(left, right);
                     }
                     else break;
@@ -180,7 +175,7 @@ namespace Dalichrome.RandomGenerator.UserData
                 return left;
             }
 
-            private Node ParseUnary()
+            private IntConditionNode ParseUnary()
             {
                 SkipWhitespace();
 
@@ -194,20 +189,20 @@ namespace Dalichrome.RandomGenerator.UserData
                         return new CompareNode(CompareOp.NotEqual, rhs);
                     }
 
-                    Node child = ParseUnary();
+                    IntConditionNode child = ParseUnary();
                     return new NotNode(child);
                 }
 
                 return ParsePrimary();
             }
 
-            private Node ParsePrimary()
+            private IntConditionNode ParsePrimary()
             {
                 SkipWhitespace();
 
                 if (Match('('))
                 {
-                    Node inner = ParseOr();
+                    IntConditionNode inner = ParseOr();
                     Expect(')', "Missing closing ')' in int expression.");
                     return inner;
                 }
