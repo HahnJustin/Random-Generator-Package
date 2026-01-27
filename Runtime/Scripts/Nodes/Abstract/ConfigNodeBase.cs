@@ -5,7 +5,6 @@ using XNode;
 
 namespace Dalichrome.RandomGenerator.Nodes
 {
-
     /// <summary>Node with an embedded managed-reference config object.</summary>
     public abstract class ConfigNodeBase<TCfg> : Node, IConfigNode
         where TCfg : AbstractConfig                        // ScriptableObject OR plain class

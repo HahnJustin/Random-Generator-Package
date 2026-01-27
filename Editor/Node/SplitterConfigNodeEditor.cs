@@ -8,7 +8,7 @@ using UnityEngine;
 public class SplitterConfigNodeEditor
     : ConfigNodeEditor<RegionSplitterNode, AbstractRegionSplitterConfig>
 {
-    public override int GetWidth() => 250;
+    public override int GetWidth() => 320;
 
 }
 #endif

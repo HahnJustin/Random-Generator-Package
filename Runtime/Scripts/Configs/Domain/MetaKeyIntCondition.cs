@@ -12,6 +12,7 @@ namespace Dalichrome.RandomGenerator.Configs
 #if ODIN_INSPECTOR
         [HorizontalGroup("Row", Width = 0.4f)]
         [LabelText("Key")]
+        [LabelWidth(20)]
 #endif
         public string key;
 

@@ -25,7 +25,7 @@ namespace Dalichrome.RandomGenerator.Generators
             RegionBounds bounds = generation.Grid.GetRegionBounds();
             RegionSplits regionSplits = new(generation);
 
-            floodFillUtil.SetFillPredicate(pos => conditionUtil.MatchMetaCondition(generation.Grid.GetAllDataWithColData(pos)));
+            floodFillUtil.SetFillPredicate(pos => conditionUtil.MatchMetaCondition(generation.Grid.GetAllData(pos)));
 
             int left = int.MaxValue;
             int bottom = int.MaxValue;

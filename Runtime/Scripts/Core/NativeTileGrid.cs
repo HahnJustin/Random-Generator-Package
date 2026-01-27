@@ -445,7 +445,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int x, int y, int layerZ, string field, int value)
         {
-            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return;
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ) || !CanModifyColumn(x, y)) return;
             metaData.AddData(new int3(x, y, layerZ), field, value);
         }
 
@@ -454,7 +454,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value)
         {
-            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return;
+            if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ) || !CanModifyColumn(x, y)) return;
             metaData.AddData(new int3(x, y, layerZ), fixedField, value);
         }
 
