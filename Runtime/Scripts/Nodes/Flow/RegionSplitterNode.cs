@@ -20,7 +20,7 @@ public class RegionSplitterNode
     /* … one ConditionalRegion out, connect everywhere you like */
     [Output(typeConstraint = TypeConstraint.Strict)] public ConditionalRegion Region;   // default = Multiple
 
-    public override System.Type ConfigBaseType => typeof(AbstractRegionSplitterConfig);
+    public override Type ConfigBaseType => typeof(AbstractRegionSplitterConfig);
 
     public override int PaletteSeed =>
         Config != null

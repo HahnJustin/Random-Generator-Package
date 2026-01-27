@@ -70,6 +70,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 PerlinSplitterConfig c => new PerlinSplitter(c, inputs),
                 MultiPerlinSplitterConfig c => new MultiPerlinSplitter(c, inputs),
                 UpscaleNoiseSplitterConfig c => new UpscaleNoiseSplitter(c, inputs),
+                MetaSplitterConfig c => new MetaSplitter(c, inputs),
                 _ => throw new ArgumentException($"Unknown splitter: {config.GetType().Name}")
             };
         }

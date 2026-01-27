@@ -675,7 +675,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         public IEnumerable<int2> GetRegionPositions()
         {
-            var na = regionPositions.ToNativeArray(Allocator.Temp);
+            var na = regionPositions.ToNativeArray(Allocator.Persistent);
             try
             {
                 var list = new List<int2>(na.Length);

@@ -34,7 +34,7 @@ namespace Dalichrome.RandomGenerator.Generators
 
             floodFillUtil.ResetVisited();
 
-            foreach (int2 pos in generation.Grid.GetRegionPositions())
+            foreach (int2 pos in generation.Grid.GetPositions())
             {
                 if (floodFillUtil.IsVisited(pos) || generation.Grid.IsRestricted(pos)) continue;
 
