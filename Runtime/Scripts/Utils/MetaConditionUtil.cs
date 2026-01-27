@@ -10,6 +10,8 @@ namespace Dalichrome.RandomGenerator.Utils
     {
         protected new IMetaConditionConfig config;
 
+        private CompiledMetaCondition compiledCondition;
+
         public bool DoInitialization { get; set; }
 
         public MetaConditionUtil(IMetaConditionConfig config) : base((AbstractConfig)config)
@@ -17,9 +19,22 @@ namespace Dalichrome.RandomGenerator.Utils
             this.config = config;
             DoInitialization = true;
         }
+
+        private void Compile()
+        {
+            compiledCondition = MetaConditionCompiler.Compile(config.MetaCondition);
+        }
+
         public void Initialize()
         {
-            //CreateDistanceMap();
+            Compile();
+        }
+
+        public bool MatchMetaCondition(List<MetaPair> metaPairs)
+        {
+            if (compiledCondition == null) return false;
+
+            return compiledCondition.Matches(metaPairs);
         }
     }
 }

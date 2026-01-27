@@ -302,6 +302,9 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllDataWithColData(int3 pos) =>
             subgrid.GetAllDataWithColData(pos);
 
+        public List<MetaPair> GetAllDataWithColData(int2 pos) =>
+            subgrid.GetAllDataWithColData(new int3(pos.x, pos.y, MetaData.ColumnZ));
+
         public List<PositionValue> GetAllData(FixedString64Bytes fixedField) =>
             subgrid.GetAllData(fixedField);
 

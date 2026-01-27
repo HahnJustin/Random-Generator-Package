@@ -12,6 +12,7 @@ namespace Dalichrome.RandomGenerator.Configs
         Proximity,
         Perlin,
         MultiPerlin,
-        UpscaleNoise
+        UpscaleNoise,
+        Meta
     }
 }

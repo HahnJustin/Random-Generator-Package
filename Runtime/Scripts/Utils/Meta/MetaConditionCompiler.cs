@@ -1,9 +1,5 @@
-using Dalichrome.RandomGenerator.Core;
-using Sirenix.OdinInspector;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+
+using Dalichrome.RandomGenerator.Configs;
 
 namespace Dalichrome.RandomGenerator.Utils
 {

@@ -1,4 +1,5 @@
 using Dalichrome.RandomGenerator.Core;
+using Dalichrome.RandomGenerator.Configs;
 using System;
 using System.Collections;
 using System.Collections.Generic;

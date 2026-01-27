@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public interface IMetaConditionConfig : IOccupanceConfig
+    public interface IMetaConditionConfig
     {
-        [SerializeField, DefaultValue(DistanceType.Cardinal)] public string Distance { get; set; }
-
-        [SerializeField, DefaultValue(false)] public bool FillOccupied { get; set; }
+        [SerializeField] public MetaCondition MetaCondition { get; set; }
     }
 }
