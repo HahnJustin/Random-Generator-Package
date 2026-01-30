@@ -70,5 +70,6 @@ public enum StringType
     Description_Generator_Fill,
     Description_Generator_Structure,
     Description_Generator_MetaPerlin,
-    Description_Splitter_Meta
+    Description_Splitter_Meta,
+    Description_Generator_MetaOperation
 }

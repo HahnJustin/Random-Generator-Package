@@ -32,6 +32,7 @@ namespace Dalichrome.RandomGenerator.Generators
                 FillConfig fillConfig => new FillGenerator(fillConfig),
                 StructureConfig structConfig => new StructureGenerator(structConfig),
                 MetaPerlinConfig metaPerlinConfig => new MetaPerlinGenerator(metaPerlinConfig),
+                MetaOperationConfig metaOperationConfig => new MetaOperationGenerator(metaOperationConfig),
                 _ => throw new ArgumentException($"Unknown generator config: {config.GetType().Name}")
             };
         }

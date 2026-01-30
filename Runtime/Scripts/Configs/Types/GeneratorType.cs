@@ -24,6 +24,7 @@ namespace Dalichrome.RandomGenerator.Configs
         Border,
         Fill,
         Structure,
-        MetaPerlin
+        MetaPerlin,
+        MetaOperation
     }
 }
