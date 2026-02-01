@@ -26,7 +26,7 @@ namespace Dalichrome.RandomGenerator.Utils
     /// </summary>
     public static class MetaFunctionCompiler
     {
-        private const int ColumnZ = -1;
+        public const int ColumnZ = -1;
 
         public static CompiledMetaFunction Compile(
             string expression,
@@ -45,12 +45,120 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!parser.End)
                 throw new FormatException($"Unexpected trailing characters in expression: '{expression}' at index {parser.Index}.");
 
-            // ✅ Optimization pass (constant folding + peephole)
+            // Optimization pass (constant folding + peephole)
             root = Optimize(root);
 
+            // Emit bytecode (stack VM)
+            MetaInstr[] code = EmitBytecode(root);
+            var program = new MetaBytecodeProgram(code);
+
             FixedString64Bytes outKey = (FixedString64Bytes)outputKey;
-            return new CompiledMetaFunction(outKey, outputZ, root);
+            return new CompiledMetaFunction(outKey, outputZ, program);
         }
+
+        // ============================================================
+        // Meta Byte Code
+        // ============================================================
+
+        private static MetaInstr[] EmitBytecode(MetaFunctionNode node)
+        {
+            var list = new System.Collections.Generic.List<MetaInstr>(64);
+            Emit(node, list);
+            return list.ToArray();
+        }
+
+        private static void Emit(MetaFunctionNode node, System.Collections.Generic.List<MetaInstr> outCode)
+        {
+            switch (node)
+            {
+                case ConstNode c:
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.PushConst, F = c.Value });
+                    return;
+
+                case VarNode v:
+                    // VarNode’s key is private; easiest is to expose it as internal readonly on VarNode
+                    // OR add a method on VarNode to return key. See note below.
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.LoadVar, Key = v.Key });
+                    return;
+
+                case NegateNode n:
+                    Emit(n.Child, outCode);
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.Neg });
+                    return;
+
+                case BinaryNode b:
+                    Emit(b.A, outCode);
+                    Emit(b.B, outCode);
+                    outCode.Add(new MetaInstr
+                    {
+                        Op = b.Op switch
+                        {
+                            BinOp.Add => MetaOpCode.Add,
+                            BinOp.Sub => MetaOpCode.Sub,
+                            BinOp.Mul => MetaOpCode.Mul,
+                            BinOp.Div => MetaOpCode.Div,
+                            _ => MetaOpCode.Add
+                        }
+                    });
+                    return;
+
+                case SampleConstOffsetNode s:
+                    outCode.Add(new MetaInstr
+                    {
+                        Op = MetaOpCode.SampleConst,
+                        Key = s.Key,
+                        Dx = (short)s.Dx,
+                        Dy = (short)s.Dy
+                    });
+                    return;
+
+                case SampleNode sd:
+                    Emit(sd.DxNode, outCode);
+                    Emit(sd.DyNode, outCode);
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.Sample, Key = sd.Key });
+                    return;
+
+                case FuncNode fn:
+                    // Emit args first (RPN)
+                    for (int i = 0; i < fn.Args.Length; i++)
+                        Emit(fn.Args[i], outCode);
+
+                    EmitFunc(fn, outCode);
+                    return;
+
+                default:
+                    throw new Exception("Unknown MetaFunctionNode type in Emit().");
+            }
+        }
+
+        private static void EmitFunc(FuncNode fn, System.Collections.Generic.List<MetaInstr> outCode)
+        {
+            switch (fn.Id)
+            {
+                case FuncId.Min: outCode.Add(new MetaInstr { Op = MetaOpCode.Min }); break;
+                case FuncId.Max: outCode.Add(new MetaInstr { Op = MetaOpCode.Max }); break;
+                case FuncId.Abs: outCode.Add(new MetaInstr { Op = MetaOpCode.Abs }); break;
+                case FuncId.Clamp: outCode.Add(new MetaInstr { Op = MetaOpCode.Clamp }); break;
+                case FuncId.Clamp01: outCode.Add(new MetaInstr { Op = MetaOpCode.Clamp01 }); break;
+                case FuncId.Lerp: outCode.Add(new MetaInstr { Op = MetaOpCode.Lerp }); break;
+                case FuncId.Smoothstep: outCode.Add(new MetaInstr { Op = MetaOpCode.Smoothstep }); break;
+                case FuncId.Remap: outCode.Add(new MetaInstr { Op = MetaOpCode.Remap }); break;
+                case FuncId.Sqrt: outCode.Add(new MetaInstr { Op = MetaOpCode.Sqrt }); break;
+                case FuncId.Pow: outCode.Add(new MetaInstr { Op = MetaOpCode.Pow }); break;
+
+                case FuncId.Rand01:
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.Rand01, Salt = fn.Salt });
+                    break;
+
+                case FuncId.RandRange:
+                    outCode.Add(new MetaInstr { Op = MetaOpCode.RandRange, Salt = fn.Salt });
+                    break;
+
+                default:
+                    throw new FormatException($"Unsupported func in VM emitter: {fn.Id}");
+            }
+        }
+
 
         // ============================================================
         // AST Nodes
@@ -68,6 +176,8 @@ namespace Dalichrome.RandomGenerator.Utils
         {
             private readonly FixedString64Bytes _key;
             private readonly int _z; // default ColumnZ, but could support other z later
+
+            internal FixedString64Bytes Key { get { return _key; } }
 
             public VarNode(FixedString64Bytes key, int z)
             {
@@ -131,6 +241,10 @@ namespace Dalichrome.RandomGenerator.Utils
             private readonly MetaFunctionNode _dx;
             private readonly MetaFunctionNode _dy;
 
+            internal FixedString64Bytes Key { get { return _key; } }
+            internal MetaFunctionNode DxNode { get { return _dx; } }
+            internal MetaFunctionNode DyNode { get { return _dy; } }
+
             public SampleNode(FixedString64Bytes key, int z, MetaFunctionNode dx, MetaFunctionNode dy)
             {
                 _key = key;
@@ -151,13 +265,17 @@ namespace Dalichrome.RandomGenerator.Utils
             }
         }
 
-        // ✅ Fast-path sample(key, constDx, constDy) (no per-tile dx/dy eval)
+        // Fast-path sample(key, constDx, constDy) (no per-tile dx/dy eval)
         private sealed class SampleConstOffsetNode : MetaFunctionNode
         {
             private readonly FixedString64Bytes _key;
             private readonly int _z;
             private readonly int _dx;
             private readonly int _dy;
+
+            internal FixedString64Bytes Key { get { return _key; } }
+            internal int Dx { get { return _dx; } }
+            internal int Dy { get { return _dy; } }
 
             public SampleConstOffsetNode(FixedString64Bytes key, int z, int dx, int dy)
             {

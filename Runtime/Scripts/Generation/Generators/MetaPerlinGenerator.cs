@@ -50,18 +50,11 @@ namespace Dalichrome.RandomGenerator.Generators
                         sample += distance * config.OvalScale / radius;
                     }
 
-                    // Match your PerlinGenerator behavior: only "apply" when under cutoff.
-                    if (sample < config.Cutoff)
-                    {
-                        // Normalize to 0..1 within the cutoff band, like your tile index logic does.
-                        float normalized = Mathf.Clamp01(sample / cutoff);
+                    float normalized = Mathf.Clamp01(sample / cutoff);
+                    int value = Mathf.Clamp(Mathf.RoundToInt(normalized * config.MaxValue), 0, config.MaxValue);
 
-                        int value = Mathf.RoundToInt(normalized * config.MaxValue);
-                        value = Mathf.Clamp(value, 0, config.MaxValue);
-
-                        int2 pos = new int2(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
-                        TileGrid.AddData(pos, field, value);
-                    }
+                    int2 pos = new int2((int)x, (int)y);
+                    TileGrid.AddData(pos, field, value);
                 }
             }
 
