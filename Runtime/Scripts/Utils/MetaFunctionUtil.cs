@@ -27,8 +27,8 @@ namespace Dalichrome.RandomGenerator.Utils
             try
             {
                 compiledFunc = MetaFunctionCompiler.Compile(
-                    config.MetaFunction.expression,
-                    config.MetaFunction.outputKey
+                    config.MetaFunction,
+                    tileGrid
                 );
             }
             catch (Exception ex)

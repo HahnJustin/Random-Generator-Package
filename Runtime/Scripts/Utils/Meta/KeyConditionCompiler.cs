@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Unity.Collections;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -54,6 +56,56 @@ namespace Dalichrome.RandomGenerator.Utils
             if (!parser.End)
                 throw new FormatException($"Unexpected trailing characters in key expression: '{expr}'");
             return root;
+        }
+
+        /// <summary>
+        /// Returns all key identifiers referenced by a key-condition expression.
+        /// Example: "!(water|height)&humidity" => ["water","height","humidity"]
+        /// </summary>
+        public static List<FixedString64Bytes> ExtractKeys(string expr)
+        {
+            if (string.IsNullOrWhiteSpace(expr))
+                return new List<FixedString64Bytes>(0);
+
+            KeyConditionNode root = Compile(expr);
+            if (root == null)
+                return new List<FixedString64Bytes>(0);
+
+            var set = new HashSet<FixedString64Bytes>();
+            CollectKeys(root, set);
+
+            return new List<FixedString64Bytes>(set);
+        }
+
+        private static void CollectKeys(KeyConditionNode node, HashSet<FixedString64Bytes> outKeys)
+        {
+            switch (node)
+            {
+                case null:
+                    return;
+
+                case KeyNode k:
+                    outKeys.Add(new FixedString64Bytes(k.Key));
+                    return;
+
+                case NotNode n:
+                    CollectKeys(n.Child, outKeys);
+                    return;
+
+                case AndNode a:
+                    CollectKeys(a.Left, outKeys);
+                    CollectKeys(a.Right, outKeys);
+                    return;
+
+                case OrNode o:
+                    CollectKeys(o.Left, outKeys);
+                    CollectKeys(o.Right, outKeys);
+                    return;
+
+                default:
+                    // If you add node types later, youÅfll want to handle them here.
+                    throw new Exception($"Unknown KeyConditionNode type: {node.GetType().Name}");
+            }
         }
 
         private ref struct Parser

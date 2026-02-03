@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Mathematics;
-using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Utils
 {
@@ -29,10 +31,13 @@ namespace Dalichrome.RandomGenerator.Utils
         public const int ColumnZ = -1;
 
         public static CompiledMetaFunction Compile(
-            string expression,
-            string outputKey,
+            MetaFunction metaFunction,
+            TileGrid grid,
             int outputZ = ColumnZ)
         {
+            string outputKey = metaFunction.outputKey;
+            string expression = metaFunction.expression;
+
             if (string.IsNullOrWhiteSpace(outputKey))
                 throw new ArgumentException("outputKey cannot be null/empty.", nameof(outputKey));
 
@@ -48,12 +53,84 @@ namespace Dalichrome.RandomGenerator.Utils
             // Optimization pass (constant folding + peephole)
             root = Optimize(root);
 
-            // Emit bytecode (stack VM)
             MetaInstr[] code = EmitBytecode(root);
+
+            // Bind hot indices using grid helper
+            BindHotIndices(code, grid);
+
             var program = new MetaBytecodeProgram(code);
 
             FixedString64Bytes outKey = (FixedString64Bytes)outputKey;
             return new CompiledMetaFunction(outKey, outputZ, program);
+        }
+
+        public static List<FixedString64Bytes> ExtractKeys(MetaFunction metaFunction)
+        {
+            string outputKey = metaFunction.outputKey;
+            string expression = metaFunction.expression;
+
+            if (string.IsNullOrWhiteSpace(expression))
+                return new List<FixedString64Bytes>(0);
+
+            var parser = new Parser(expression.AsSpan());
+            var root = parser.ParseExpression();
+            parser.SkipWhitespace();
+            if (!parser.End)
+                throw new FormatException($"Unexpected trailing characters in expression: '{expression}' at index {parser.Index}.");
+
+            // Run same optimize you do in Compile so sample(...) const nodes become SampleConstOffsetNode etc.
+            root = Optimize(root);
+
+            var set = new HashSet<FixedString64Bytes>();
+            CollectKeys(root, set);
+
+            if (!string.IsNullOrWhiteSpace(outputKey))
+                set.Add(new FixedString64Bytes(outputKey));
+
+            return new List<FixedString64Bytes>(set);
+        }
+
+        private static void CollectKeys(MetaFunctionNode node, HashSet<FixedString64Bytes> outKeys)
+        {
+            switch (node)
+            {
+                case null:
+                    return;
+
+                case ConstNode:
+                    return;
+
+                case VarNode v:
+                    outKeys.Add(v.Key);
+                    return;
+
+                case NegateNode n:
+                    CollectKeys(n.Child, outKeys);
+                    return;
+
+                case BinaryNode b:
+                    CollectKeys(b.A, outKeys);
+                    CollectKeys(b.B, outKeys);
+                    return;
+
+                case SampleConstOffsetNode s:
+                    outKeys.Add(s.Key);
+                    return;
+
+                case SampleNode s2:
+                    outKeys.Add(s2.Key);
+                    CollectKeys(s2.DxNode, outKeys);
+                    CollectKeys(s2.DyNode, outKeys);
+                    return;
+
+                case FuncNode f:
+                    for (int i = 0; i < f.Args.Length; i++)
+                        CollectKeys(f.Args[i], outKeys);
+                    return;
+
+                default:
+                    throw new Exception($"Unknown MetaFunctionNode type: {node.GetType().Name}");
+            }
         }
 
         // ============================================================
@@ -156,6 +233,28 @@ namespace Dalichrome.RandomGenerator.Utils
 
                 default:
                     throw new FormatException($"Unsupported func in VM emitter: {fn.Id}");
+            }
+        }
+
+        private static void BindHotIndices(MetaInstr[] code, TileGrid grid)
+        {
+            for (int i = 0; i < code.Length; i++)
+            {
+                ref MetaInstr ins = ref code[i];
+                ins.HotIndex = -1;
+
+                if (grid == null)
+                    continue;
+
+                // Only ops that read meta need binding
+                if (ins.Op == MetaOpCode.LoadVar ||
+                    ins.Op == MetaOpCode.Sample ||
+                    ins.Op == MetaOpCode.SampleConst)
+                {
+                    int idx = grid.GetMetaIndex(ins.Key);
+                    if (idx >= 0 && idx <= short.MaxValue)
+                        ins.HotIndex = (short)idx;
+                }
             }
         }
 

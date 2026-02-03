@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -215,6 +214,10 @@ namespace Dalichrome.RandomGenerator.Core
 
         // ---------------- Meta data primitives + sugar ----------------
 
+        public void InitializeMeta(List<FixedString64Bytes> hotMetaKeys) => subgrid.InitializeMeta(hotMetaKeys);
+
+        public int GetMetaIndex(FixedString64Bytes field) => subgrid.GetMetaIndex(field);
+
         public void AddDataLayerId(int x, int y, int layerId, string field, int value) =>
             subgrid.AddDataLayerId(x, y, layerId, field, value);
 
@@ -232,8 +235,6 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(MetadataEntry entry) =>
             subgrid.AddData(entry);
-
-        // sugar
         public void AddData(int2 pos, int layerZ, string field, int value) =>
             AddData(pos.x, pos.y, layerZ, field, value);
 
@@ -246,7 +247,6 @@ namespace Dalichrome.RandomGenerator.Core
         public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) =>
             subgrid.AddData(x, y, layerZ, fixedField, value);
 
-        // sugar
         public void AddData(int2 pos, int layerZ, FixedString64Bytes fixedField, int value) =>
             AddData(pos.x, pos.y, layerZ, fixedField, value);
 
@@ -255,6 +255,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(int2 pos, FixedString64Bytes fixedField, int value) =>
             AddData(pos.x, pos.y, MetaData.ColumnZ, fixedField, value);
+
+        public void AddData(int2 pos, int fieldIndex, int value) =>
+            subgrid.AddData(pos, fieldIndex, value);
 
         public int GetDataLayerId(int x, int y, int layerId, string field) =>
             subgrid.GetDataLayerId(x, y, layerId, field);
@@ -265,7 +268,6 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetData(int x, int y, int layerZ, string field) =>
             subgrid.GetData(x, y, layerZ, field);
 
-        // sugar
         public int GetData(int3 pos, string field) =>
             GetData(pos.x, pos.y, pos.z, field);
 
@@ -292,6 +294,9 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int GetData(int2 pos, FixedString64Bytes fixedField) =>
             GetData(pos.x, pos.y, MetaData.ColumnZ, fixedField);
+
+        public int GetData(int2 pos, int fieldIndex) =>
+            subgrid.GetData(pos, fieldIndex);
 
         public List<MetaPair> GetAllData(int3 pos) =>
             subgrid.GetAllData(pos);

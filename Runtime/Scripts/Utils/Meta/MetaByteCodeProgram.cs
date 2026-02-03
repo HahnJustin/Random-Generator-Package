@@ -28,14 +28,16 @@ namespace Dalichrome.RandomGenerator.Utils
     internal struct MetaInstr
     {
         public MetaOpCode Op;
-
-        // generic payload slots (used depending on Op)
         public float F;
+
         public FixedString64Bytes Key;
-        public short Dx;
-        public short Dy;
+        public short Dx, Dy;
         public int Salt;
+
+        // -1 = not hot, otherwise hot meta index
+        public short HotIndex;
     }
+
 
     /// <summary>
     /// Simple stack-based bytecode program.
@@ -68,8 +70,22 @@ namespace Dalichrome.RandomGenerator.Utils
                         break;
 
                     case MetaOpCode.LoadVar:
-                        stack[sp++] = grid.GetData(x, y, MetaFunctionCompiler.ColumnZ, ins.Key);
+                        
+                        float val;
+
+                        if (ins.HotIndex >= 0)
+                        {
+                            // needs an index-based getter (recommended signature below)
+                            val = grid.GetData(new int2(x,y), ins.HotIndex);
+                        }
+                        else
+                        {
+                            val = grid.GetData(x, y, MetaFunctionCompiler.ColumnZ, ins.Key);
+                        }
+
+                        stack[sp++] = val;
                         break;
+                        
 
                     case MetaOpCode.Add: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = a + b; } break;
                     case MetaOpCode.Sub: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = a - b; } break;

@@ -305,11 +305,15 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Meta stubs (no-op for serial grid for now)
+        public void InitializeMeta(List<FixedString64Bytes> hotMetaKeys) { }
+        public int GetMetaIndex(FixedString64Bytes metaKey) => 0;
+
         public void AddDataLayerId(int x, int y, int layerId, string field, int value) { }
         public void AddData(int x, int y, int layerZ, string field, int value) { }
         public void AddData(int x, int y, string field, int value) { }
         public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) { }
         public void AddData(int x, int y, FixedString64Bytes fixedField, int value) { }
+        public void AddData(int2 pos, int fieldIndex, int value) { }
         public void AddData(MetadataEntry entry) { }
 
         public int GetDataLayerId(int x, int y, int layerId, string field) => 0;
@@ -317,6 +321,7 @@ namespace Dalichrome.RandomGenerator.Core
         public int GetData(int x, int y, string field) => 0;
         public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) => 0;
         public int GetData(int x, int y, FixedString64Bytes fixedField) => 0;
+        public int GetData(int2 pos, int fieldIndex) => 0;
 
         public List<MetaPair> GetAllData(int3 pos) => new();
         public List<MetaPair> GetAllDataWithColData(int3 pos) => new();

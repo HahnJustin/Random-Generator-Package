@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
-    public class MetaOperationConfig : AbstractGeneratorConfig, IMetaFunctionConfig
+    public class MetaOperationConfig : AbstractGeneratorConfig, IMetaFunctionConfig, IMetaKeyConfig
     {
         public MetaOperationConfig()
         {
@@ -13,5 +13,7 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public MetaFunction MetaFunction { get { return _metaFunction; } set { _metaFunction = value; } }
         [SerializeField] private MetaFunction _metaFunction = default;
+
+        public string MetaKey { get { return _metaFunction.outputKey; } set { _metaFunction.outputKey = value; } }
     }
 }

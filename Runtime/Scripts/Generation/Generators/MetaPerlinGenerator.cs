@@ -13,48 +13,30 @@ namespace Dalichrome.RandomGenerator.Generators
 
         protected override Generation Enact(Generation input)
         {
-            int newNoise = random.NextInt(100000);
+            // Small float offsets keep noise stable & avoid precision weirdness
+            float offX = random.NextFloat(0f, 1000f);
+            float offY = random.NextFloat(0f, 1000f);
 
-            float xOrg = width / 2f;
-            float yOrg = height / 2f;
-            Vector2 origin = new(xOrg, yOrg);
-
-            // Cache field key once (fast + Burst-friendly storage type)
             FixedString64Bytes field = new FixedString64Bytes(config.MetaKey);
 
-            float cutoff = Mathf.Max(0.000001f, config.Cutoff); // avoid divide-by-zero
+            // Precompute to avoid divides in the inner loop
+            float invW = 1f / width;
+            float invH = 1f / height;
 
-            for (float y = 0.0f; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (float x = 0.0f; x < width; x++)
+                float ny = (y * invH) * config.Scale + offY;
+
+                for (int x = 0; x < width; x++)
                 {
-                    float xCoord = xOrg + x / width * config.Scale;
-                    float yCoord = yOrg + y / height * config.Scale;
+                    float nx = (x * invW) * config.Scale + offX;
 
-                    float sample = Mathf.PerlinNoise(xCoord + newNoise, yCoord + newNoise); // 0..1
+                    float sample = Mathf.PerlinNoise(nx, ny); // 0..1
 
-                    if (config.OvalFade)
-                    {
-                        Vector2 current = new Vector2(x, y);
-                        Vector2 direction = current - origin;
-                        float degree = Vector2.Angle(direction, Vector2.up);
+                    int value = Mathf.RoundToInt(sample * config.MaxValue);
+                    value = Mathf.Clamp(value, 0, config.MaxValue);
 
-                        float radius =
-                            (xOrg * yOrg) /
-                            Mathf.Sqrt(
-                                (Mathf.Pow(xOrg, 2) * Mathf.Pow(Mathf.Sin(degree), 2)) +
-                                (Mathf.Pow(yOrg, 2) * Mathf.Pow(Mathf.Cos(degree), 2))
-                            );
-
-                        float distance = Vector2.Distance(current, origin);
-                        sample += distance * config.OvalScale / radius;
-                    }
-
-                    float normalized = Mathf.Clamp01(sample / cutoff);
-                    int value = Mathf.Clamp(Mathf.RoundToInt(normalized * config.MaxValue), 0, config.MaxValue);
-
-                    int2 pos = new int2((int)x, (int)y);
-                    TileGrid.AddData(pos, field, value);
+                    TileGrid.AddData(new int2(x, y), field, value);
                 }
             }
 

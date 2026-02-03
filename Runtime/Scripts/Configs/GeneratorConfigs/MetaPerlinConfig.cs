@@ -1,13 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Dalichrome.RandomGenerator.Core;
 
 namespace Dalichrome.RandomGenerator.Configs
 {
     [Serializable]
-    public class MetaPerlinConfig : AbstractGeneratorConfig
+    public class MetaPerlinConfig : AbstractGeneratorConfig, IMetaKeyConfig
     {
         public MetaPerlinConfig()
         {
@@ -24,14 +21,5 @@ namespace Dalichrome.RandomGenerator.Configs
 
         public float Scale { get { return _scale; } set { _scale = value; } }
         [SerializeField] private float _scale = 5f;
-
-        public float Cutoff { get { return _cutoff; } set { _cutoff = value; } }
-        [SerializeField] private float _cutoff = 1f;
-
-        public bool OvalFade { get { return _ovalFade; } set { _ovalFade = value; } }
-        [SerializeField] private bool _ovalFade = false;
-
-        public float OvalScale { get { return _ovalScale; } set { _ovalScale = value; } }
-        [SerializeField] private float _ovalScale = 0.5f;
     }
 }

@@ -166,6 +166,8 @@ namespace Dalichrome.RandomGenerator
                 (node, input) => Task.FromResult(node.Operate(input))
             );
 
+            Finalizers.Finalize(result);
+
             watch.Stop();
             FinalizeGeneration(result, watch.ElapsedMilliseconds);
         }
@@ -396,7 +398,6 @@ namespace Dalichrome.RandomGenerator
             FinalizeGeneration(gen, watch.ElapsedMilliseconds);
         }
 
-
         private Generation RunGraphTraversalLoop(
             GeneratorGraph graph,
             AbstractGridOperationData data,
@@ -503,6 +504,7 @@ namespace Dalichrome.RandomGenerator
         {
             Generation generationInput = generationParameters.ToGeneration(TileLayerRegistry.LayerCount);
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
+            Initializers.Initialize(generationInput, Graph.GetConfigList());
             return generationInput;
         }
 
@@ -511,6 +513,7 @@ namespace Dalichrome.RandomGenerator
             Generation generationInput = generationParameters.ToGeneration(TileLayerRegistry.LayerCount);
             generationInput.Token = token;
             generationInput.SetLookupBundle(LookupBundleBuilder.GetNative());
+            Initializers.Initialize(generationInput, Graph.GetConfigList());
             return generationInput;
         }
 
@@ -518,6 +521,8 @@ namespace Dalichrome.RandomGenerator
         {
             Generation generationInfo = CreateGeneration(token);
             generationInfo.Seed = seed;
+            generationInfo.SetLookupBundle(LookupBundleBuilder.GetNative());
+            Initializers.Initialize(generationInfo, Graph.GetConfigList());
             return generationInfo;
         }
 

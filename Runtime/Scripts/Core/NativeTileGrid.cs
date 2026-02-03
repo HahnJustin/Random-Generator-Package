@@ -1,5 +1,3 @@
-using Codice.Client.BaseCommands.BranchExplorer;
-using Dalichrome.RandomGenerator.Random;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +5,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -440,6 +437,9 @@ namespace Dalichrome.RandomGenerator.Core
         }
 
         // Meta Data
+        public void InitializeMeta(List<FixedString64Bytes> hotMetaKeys) => metaData.Initialize(width, height, hotMetaKeys);
+        public int GetMetaIndex(FixedString64Bytes metaKey) => metaData.GetIndex(metaKey);
+
         public void AddDataLayerId(int x, int y, int layerId, string field, int value) =>
             AddData(x, y, GetLayerIndexFromLayerId(layerId), field, value);
 
@@ -463,6 +463,12 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void AddData(MetadataEntry entry) =>
             AddData(entry.GetShiftedX(), entry.GetShiftedY(), GetLayerIndexFromLayerId(entry.layerId), entry.field, entry.value);
+
+        public void AddData(int2 pos, int fieldIndex, int value)
+        {
+            if (!IsInBounds(pos.x, pos.y) || !CanModifyColumn(pos.x, pos.y)) return;
+            metaData.AddData(pos, fieldIndex, value);
+        }
 
         public int GetDataLayerId(int x, int y, int layerId, string field) =>
             GetData(x, y, GetLayerIndexFromLayerId(layerId), field);
@@ -492,6 +498,16 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int GetData(int x, int y, FixedString64Bytes fixedField) =>
             GetData(x, y, MetaData.ColumnZ, fixedField);
+
+        public int GetData(int2 pos, int fieldIndex)
+        {
+            if (!IsInBounds(pos.x, pos.y)) return 0;
+
+            if (metaData.TryGetData(pos, fieldIndex, out int val))
+                return val;
+
+            return 0;
+        }
 
         public List<MetaPair> GetAllData(int3 pos) =>
             metaData.GetAllData(pos);
