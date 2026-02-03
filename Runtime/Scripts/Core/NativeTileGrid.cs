@@ -19,8 +19,6 @@ namespace Dalichrome.RandomGenerator.Core
         private NativeArray<int> tiles;
         private NativeArray<int> values;
 
-        private Unity.Mathematics.Random random;
-
         // Mask Variables
         private bool masked;
         public bool Masked => masked;
@@ -75,7 +73,6 @@ namespace Dalichrome.RandomGenerator.Core
             this.depth = depth;
 
             this.seed = seed;
-            random = new(seed);
 
             allocator = Allocator.Persistent;
 

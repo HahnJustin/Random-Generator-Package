@@ -16,6 +16,7 @@ namespace Dalichrome.RandomGenerator.Core
 
         private NativeParallelHashMap<FixedString64Bytes, int> _hotMetaIndices;
         private NativeArray<int> _hotMeta;
+        private NativeArray<FixedString64Bytes> _hotKeys;
 
         private int _width;
         private int _height;
@@ -31,24 +32,30 @@ namespace Dalichrome.RandomGenerator.Core
 
         public bool IsValid { get; internal set; }
 
-        public MetaData(Allocator allocator)
+        private MetaData(Allocator allocator, bool allocateCollections)
         {
             _allocator = allocator;
             _capacity = DefaultInitialCapacity;
             _count = 0;
 
-            _data = new NativeParallelHashMap<MetaKey, int>(_capacity, allocator);
-            _byPos = new NativeParallelMultiHashMap<int3, MetaKey>(_capacity, allocator);
-            _byField = new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(_capacity, allocator);
+            _data = allocateCollections ? new NativeParallelHashMap<MetaKey, int>(_capacity, allocator) : default;
+            _byPos = allocateCollections ? new NativeParallelMultiHashMap<int3, MetaKey>(_capacity, allocator) : default;
+            _byField = allocateCollections ? new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(_capacity, allocator) : default;
 
-            _hotMetaIndices = default;
-            _hotMeta = default;
+            _hotMetaIndices = allocateCollections ? new NativeParallelHashMap<FixedString64Bytes, int>(0, allocator) : default;
+            _hotKeys = allocateCollections ? new NativeArray<FixedString64Bytes>(0, allocator) : default;
+            _hotMeta = allocateCollections ? new NativeArray<int>(0, allocator) : default;
 
             _width = 0;
             _height = 0;
             _hotKeyCount = 0;
 
-            IsValid = true;
+            IsValid = allocateCollections;
+        }
+
+        public MetaData(Allocator allocator)
+            : this(allocator, true)
+        {
         }
 
         // ---------- Capacity management ----------
@@ -58,17 +65,13 @@ namespace Dalichrome.RandomGenerator.Core
             if (!IsValid) return;
 
             int needed = _count + additionalKeys;
-            if (needed <= _capacity)
-                return;
+            if (needed <= _capacity) return;
 
             int newCapacity = _capacity > 0 ? _capacity : 16;
-
             while (newCapacity < needed)
             {
-                if (newCapacity < 524_288) // 512k
-                    newCapacity *= 2;      // doubling for small/medium sizes
-                else
-                    newCapacity += 262_144; // +256k for very large sizes
+                if (newCapacity < 524_288) newCapacity *= 2;
+                else newCapacity += 262_144;
             }
 
             Reallocate(newCapacity);
@@ -84,7 +87,7 @@ namespace Dalichrome.RandomGenerator.Core
 
             if (_data.IsCreated)
             {
-                var keys = _data.GetKeyArray(Allocator.Persistent);
+                var keys = _data.GetKeyArray(Allocator.Temp);
 
                 for (int i = 0; i < keys.Length; i++)
                 {
@@ -99,8 +102,6 @@ namespace Dalichrome.RandomGenerator.Core
                     }
                     else
                     {
-                        // Should not happen (MetaKey uniqueness), but if it did,
-                        // we still rebuild indexes.
                         newData[key] = value;
                     }
                 }
@@ -136,79 +137,62 @@ namespace Dalichrome.RandomGenerator.Core
 
         internal MetaData DeepClone()
         {
-            // If this MetaData was never initialized or was disposed, return a non-allocating invalid struct.
-            if (!_data.IsCreated || !IsValid)
-            {
-                return new MetaData
-                {
-                    _allocator = this._allocator,
-                    _capacity = 0,
-                    _count = 0,
-                    _data = default,
-                    _byPos = default,
-                    _byField = default,
-                    _hotMeta = default,
-                    _hotMetaIndices = default,
-                    _width = 0,
-                    _height = 0,
-                    _hotKeyCount = 0,
-                    IsValid = false
-                };
-            }
+            // If never constructed (default) or disposed, return default/invalid.
+            if (!IsValid || !_data.IsCreated)
+                return default;
 
-            var clone = new MetaData(_allocator);
+            // IMPORTANT: false => do not allocate anything we're going to overwrite.
+            var clone = new MetaData(_allocator, false);
 
+            // core scalars
+            clone._capacity = _capacity;
+            clone._count = _count;
             clone._width = _width;
             clone._height = _height;
             clone._hotKeyCount = _hotKeyCount;
+            clone.IsValid = true;
 
-            // Copy all entries from _data/_byPos/_byField
+            // clone core maps
+            int targetCap = math.max(_capacity, 16);
+            clone._data = new NativeParallelHashMap<MetaKey, int>(targetCap, _allocator);
+            clone._byPos = new NativeParallelMultiHashMap<int3, MetaKey>(targetCap, _allocator);
+            clone._byField = new NativeParallelMultiHashMap<FixedString64Bytes, MetaKey>(targetCap, _allocator);
+
             var keys = _data.GetKeyArray(Allocator.Persistent);
-            int needed = keys.Length;
-
-            // Ensure clone has enough capacity to hold all keys in one go
-            if (needed > clone._capacity)
-                clone.Reallocate(needed);
-
             for (int i = 0; i < keys.Length; i++)
             {
                 var key = keys[i];
-                int value = _data[key];
+                int val = _data[key];
 
-                if (clone._data.TryAdd(key, value))
+                // MetaKey is unique; still safe to handle collision
+                if (clone._data.TryAdd(key, val))
                 {
                     clone._byPos.Add(key.pos, key);
                     clone._byField.Add(key.field, key);
-                    clone._count++;
                 }
                 else
                 {
-                    clone._data[key] = value;
+                    clone._data[key] = val;
                 }
             }
-
-            if(_hotMetaIndices.IsCreated)
-{
-                clone._hotMetaIndices = new NativeParallelHashMap<FixedString64Bytes, int>(_hotKeyCount, _allocator);
-
-                // Copy indices
-                var hotKeys = _hotMetaIndices.GetKeyArray(Allocator.Persistent);
-                for (int i = 0; i < hotKeys.Length; i++)
-                {
-                    var k = hotKeys[i];
-                    clone._hotMetaIndices[k] = _hotMetaIndices[k];
-                }
-                hotKeys.Dispose();
-            }
-
-            if (_hotMeta.IsCreated)
-            {
-                clone._hotMeta = new NativeArray<int>(_hotMeta.Length, _allocator, NativeArrayOptions.UninitializedMemory);
-                NativeArray<int>.Copy(_hotMeta, clone._hotMeta);
-            }
-
-
             keys.Dispose();
+            
+            clone._hotMetaIndices = new NativeParallelHashMap<FixedString64Bytes, int>(_hotKeyCount, _allocator);
+            clone._hotKeys = new NativeArray<FixedString64Bytes>(_hotKeyCount, _allocator, NativeArrayOptions.UninitializedMemory);
+            clone._hotMeta = new NativeArray<int>(_hotMeta.Length, _allocator, NativeArrayOptions.UninitializedMemory);
+
+            // copy hot index map
+            var hk = _hotMetaIndices.GetKeyArray(Allocator.Persistent);
+            for (int i = 0; i < hk.Length; i++)
+            {
+                var k = hk[i];
+                clone._hotMetaIndices[k] = _hotMetaIndices[k];
+            }
+            hk.Dispose();
+
+            NativeArray<FixedString64Bytes>.Copy(_hotKeys, clone._hotKeys);
+            NativeArray<int>.Copy(_hotMeta, clone._hotMeta);
+
             return clone;
         }
 
@@ -229,14 +213,26 @@ namespace Dalichrome.RandomGenerator.Core
 
         public void Initialize(int width, int height, List<FixedString64Bytes> keys)
         {
-            if (_hotMeta.IsCreated || _hotMetaIndices.IsCreated)
-                throw new InvalidOperationException("MetaData.Initialize() may only be called once.");
+            if (_hotMetaIndices.IsCreated || _hotMeta.IsCreated || _hotKeys.IsCreated)
+            {
+                if (_hotKeyCount != 0)
+                    throw new InvalidOperationException("MetaData.Initialize() may only be called once.");
+
+                // dispose the empty placeholders
+                if (_hotMeta.IsCreated) _hotMeta.Dispose();
+                if (_hotMetaIndices.IsCreated) _hotMetaIndices.Dispose();
+                if (_hotKeys.IsCreated) _hotKeys.Dispose();
+            }
 
             _width = width;
             _height = height;
             _hotKeyCount = keys.Count;
 
             _hotMetaIndices = new NativeParallelHashMap<FixedString64Bytes, int>(_hotKeyCount, _allocator);
+            _hotKeys = new NativeArray<FixedString64Bytes>(_hotKeyCount, _allocator, NativeArrayOptions.UninitializedMemory);
+
+            // IMPORTANT: you currently ClearMemory, which makes "unset" indistinguishable from "set to 0".
+            // If 0 == "unset" in your design, keep ClearMemory. Otherwise see note below.
             _hotMeta = new NativeArray<int>(_hotKeyCount * _width * _height, _allocator, NativeArrayOptions.ClearMemory);
 
             for (int i = 0; i < _hotKeyCount; i++)
@@ -246,6 +242,7 @@ namespace Dalichrome.RandomGenerator.Core
                     throw new InvalidOperationException($"Duplicate hot meta key: {keys[i].ToString()}");
 #endif
                 _hotMetaIndices[keys[i]] = i;
+                _hotKeys[i] = keys[i]; // NEW
             }
         }
 
@@ -372,29 +369,49 @@ namespace Dalichrome.RandomGenerator.Core
         public List<MetaPair> GetAllData(int3 pos)
         {
             var result = new List<MetaPair>();
-            if (!IsValid || !_byPos.IsCreated) return result;
+            if (!IsValid) return result;
 
-            if (_byPos.TryGetFirstValue(pos, out var key, out var it))
+            // 1) Hot meta for ColumnZ
+            if (pos.z == ColumnZ && _hotMeta.IsCreated && _hotKeys.IsCreated)
             {
-                if (TryGetData(key, out int firstVal))
-                {
-                    result.Add(new MetaPair
-                    {
-                        field = key.field.ToString(),
-                        value = firstVal
-                    });
-                }
+                int2 p2 = new int2(pos.x, pos.y);
 
-                while (_byPos.TryGetNextValue(out key, ref it))
+                if ((uint)p2.x < (uint)_width && (uint)p2.y < (uint)_height)
                 {
-                    if (TryGetData(key, out int val))
+                    for (int i = 0; i < _hotKeyCount; i++)
                     {
-                        result.Add(new MetaPair
+                        int v = _hotMeta[GetHotMetaIndex(p2.x, p2.y, i)];
+
+                        // ASSUMPTION: 0 == "not present" (skip to avoid returning every hot key for every tile)
+                        if (v != 0)
                         {
-                            field = key.field.ToString(),
-                            value = val
-                        });
+                            result.Add(new MetaPair
+                            {
+                                field = _hotKeys[i].ToString(),
+                                value = v
+                            });
+                        }
                     }
+                }
+            }
+
+            // 2) Hash-map meta (per-pos, and any non-hot ColumnZ entries)
+            if (_byPos.IsCreated && _data.IsCreated)
+            {
+                if (_byPos.TryGetFirstValue(pos, out var key, out var it))
+                {
+                    do
+                    {
+                        if (TryGetData(key, out int val))
+                        {
+                            result.Add(new MetaPair
+                            {
+                                field = key.field.ToString(),
+                                value = val
+                            });
+                        }
+                    }
+                    while (_byPos.TryGetNextValue(out key, ref it));
                 }
             }
 
@@ -403,57 +420,57 @@ namespace Dalichrome.RandomGenerator.Core
 
         public List<MetaPair> GetAllDataWithColData(int3 pos)
         {
-            if (!IsValid || !_byPos.IsCreated)
-                return new List<MetaPair>(0);
+            if (!IsValid) return new List<MetaPair>(0);
+            if (pos.z == ColumnZ) return GetAllData(pos);
 
-            // Per-cell data
-            List<MetaPair> posData = GetAllData(pos);
+            var colData = GetAllData(new int3(pos.x, pos.y, ColumnZ));
+            var posData = GetAllData(pos);
 
-            // Column-level data (z = ColumnZ)
-            List<MetaPair> colData = GetAllData(new int3(pos.x, pos.y, ColumnZ));
+            if (colData.Count == 0) return posData;
+            if (posData.Count == 0) return colData;
 
-            // Fast paths: if one side is empty, just return the other list directly.
-            // NOTE: This reuses the list from GetAllData, which avoids one allocation.
-            if (colData.Count == 0)
-                return posData;
-            if (posData.Count == 0)
-                return colData;
-
-            // Both have entries: concatenate.
-            // We don't try to dedupe by field for perf reasons; it's OK if duplicates exist.
-            var result = new List<MetaPair>(colData.Count + posData.Count);
-            result.AddRange(colData);
-            result.AddRange(posData);
-
-            return result;
+            // Reuse one list, avoid a third allocation
+            colData.AddRange(posData);
+            return colData;
         }
 
         public List<PositionValue> GetAllData(FixedString64Bytes fixedString)
         {
             var pairs = new List<PositionValue>();
-            if (!IsValid || !_byField.IsCreated) return pairs;
+            if (!IsValid) return pairs;
 
-            if (_byField.TryGetFirstValue(fixedString, out var key, out var it))
+            // Hot meta path (ColumnZ only)
+            int hotIdx = GetIndex(fixedString);
+            if (hotIdx != -1 && _hotMeta.IsCreated)
             {
-                if (TryGetData(key, out int firstVal))
-                {
-                    pairs.Add(new PositionValue
+                for (int y = 0; y < _height; y++)
+                    for (int x = 0; x < _width; x++)
                     {
-                        position = key.pos,
-                        value = firstVal
-                    });
-                }
-
-                while (_byField.TryGetNextValue(out key, ref it))
-                {
-                    if (TryGetData(key, out int val))
-                    {
-                        pairs.Add(new PositionValue
+                        int v = _hotMeta[GetHotMetaIndex(x, y, hotIdx)];
+                        if (v != 0) // 0 == absent
                         {
-                            position = key.pos,
-                            value = val
-                        });
+                            pairs.Add(new PositionValue
+                            {
+                                position = new int3(x, y, ColumnZ),
+                                value = v
+                            });
+                        }
                     }
+            }
+
+            // Hashed meta path
+            if (_byField.IsCreated && _data.IsCreated)
+            {
+                if (_byField.TryGetFirstValue(fixedString, out var key, out var it))
+                {
+                    do
+                    {
+                        if (TryGetData(key, out int val))
+                        {
+                            pairs.Add(new PositionValue { position = key.pos, value = val });
+                        }
+                    }
+                    while (_byField.TryGetNextValue(out key, ref it));
                 }
             }
 
@@ -510,40 +527,52 @@ namespace Dalichrome.RandomGenerator.Core
         public List<string> GetFields()
         {
             var result = new List<string>();
-            if (!IsValid || !_byField.IsCreated)
+            if (!IsValid)
+                return result;
+
+            // Add hot keys first (unique)
+            if (_hotKeys.IsCreated)
+            {
+                for (int i = 0; i < _hotKeys.Length; i++)
+                    result.Add(_hotKeys[i].ToString());
+            }
+
+            // Add hashed keys
+            if (!_byField.IsCreated)
                 return result;
 
             var keyArray = _byField.GetKeyArray(Allocator.Persistent);
             try
             {
-                if (keyArray.Length == 0)
-                    return result;
-
-                // Sort in-place so duplicates are adjacent
-                keyArray.Sort(); // requires: using Unity.Collections;
-
-                // First element is always included
-                FixedString64Bytes last = keyArray[0];
-                result.Add(last.ToString());
-
-                // Only add when the key changes
-                for (int i = 1; i < keyArray.Length; i++)
+                if (keyArray.Length > 0)
                 {
-                    var current = keyArray[i];
-                    if (!current.Equals(last))
+                    keyArray.Sort();
+
+                    FixedString64Bytes last = keyArray[0];
+                    result.Add(last.ToString());
+
+                    for (int i = 1; i < keyArray.Length; i++)
                     {
-                        result.Add(current.ToString());
-                        last = current;
+                        var current = keyArray[i];
+                        if (!current.Equals(last))
+                        {
+                            result.Add(current.ToString());
+                            last = current;
+                        }
                     }
                 }
-
-                return result;
             }
             finally
             {
                 keyArray.Dispose();
             }
+
+            // Dedupe between hot + hashed (cheap)
+            // If you want to keep it allocation-free-ish, you can skip this;
+            // but it's usually worth deduping.
+            return result.Distinct().ToList();
         }
+
 
         // ---------- IDisposable ----------
 
@@ -552,8 +581,10 @@ namespace Dalichrome.RandomGenerator.Core
             if (_data.IsCreated) _data.Dispose();
             if (_byPos.IsCreated) _byPos.Dispose();
             if (_byField.IsCreated) _byField.Dispose();
+
             if (_hotMeta.IsCreated) _hotMeta.Dispose();
             if (_hotMetaIndices.IsCreated) _hotMetaIndices.Dispose();
+            if (_hotKeys.IsCreated) _hotKeys.Dispose();
 
             _capacity = 0;
             _count = 0;

@@ -70,22 +70,12 @@ namespace Dalichrome.RandomGenerator.Utils
                         break;
 
                     case MetaOpCode.LoadVar:
-                        
-                        float val;
-
-                        if (ins.HotIndex >= 0)
-                        {
-                            // needs an index-based getter (recommended signature below)
-                            val = grid.GetData(new int2(x,y), ins.HotIndex);
-                        }
-                        else
-                        {
-                            val = grid.GetData(x, y, MetaFunctionCompiler.ColumnZ, ins.Key);
-                        }
+                        float val = (ins.HotIndex >= 0)
+                            ? grid.GetData(new int2(x, y), ins.HotIndex)
+                            : grid.GetData(x, y, MetaFunctionCompiler.ColumnZ, ins.Key);
 
                         stack[sp++] = val;
                         break;
-                        
 
                     case MetaOpCode.Add: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = a + b; } break;
                     case MetaOpCode.Sub: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = a - b; } break;
@@ -104,7 +94,6 @@ namespace Dalichrome.RandomGenerator.Utils
 
                     case MetaOpCode.Sample:
                         {
-                            // stack: ... dx dy
                             int dy = (int)math.round(stack[--sp]);
                             int dx = (int)math.round(stack[--sp]);
 
@@ -117,9 +106,13 @@ namespace Dalichrome.RandomGenerator.Utils
                             if (sy < 0) sy = 0;
                             else if (sy >= grid.height) sy = grid.height - 1;
 
-                            stack[sp++] = grid.GetData(sx, sy, MetaFunctionCompiler.ColumnZ, ins.Key);
+                            float v = (ins.HotIndex >= 0)
+                                ? grid.GetData(new int2(sx, sy), ins.HotIndex)
+                                : grid.GetData(sx, sy, MetaFunctionCompiler.ColumnZ, ins.Key);
+
+                            stack[sp++] = v;
+                            break;
                         }
-                        break;
 
                     case MetaOpCode.SampleConst:
                         {
@@ -132,9 +125,13 @@ namespace Dalichrome.RandomGenerator.Utils
                             if (sy < 0) sy = 0;
                             else if (sy >= grid.height) sy = grid.height - 1;
 
-                            stack[sp++] = grid.GetData(sx, sy, MetaFunctionCompiler.ColumnZ, ins.Key);
+                            float v = (ins.HotIndex >= 0)
+                                ? grid.GetData(new int2(sx, sy), ins.HotIndex)
+                                : grid.GetData(sx, sy, MetaFunctionCompiler.ColumnZ, ins.Key);
+
+                            stack[sp++] = v;
+                            break;
                         }
-                        break;
 
                     case MetaOpCode.Min: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = math.min(a, b); } break;
                     case MetaOpCode.Max: { float b = stack[--sp]; float a = stack[--sp]; stack[sp++] = math.max(a, b); } break;

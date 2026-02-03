@@ -34,7 +34,7 @@ namespace Dalichrome.RandomGenerator.Generators
                     float sample = Mathf.PerlinNoise(nx, ny); // 0..1
 
                     int value = Mathf.RoundToInt(sample * config.MaxValue);
-                    value = Mathf.Clamp(value, 0, config.MaxValue);
+                    value = Mathf.Clamp(value, 1, config.MaxValue);
 
                     TileGrid.AddData(new int2(x, y), field, value);
                 }

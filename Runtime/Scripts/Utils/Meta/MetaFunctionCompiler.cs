@@ -235,16 +235,14 @@ namespace Dalichrome.RandomGenerator.Utils
                     throw new FormatException($"Unsupported func in VM emitter: {fn.Id}");
             }
         }
-
         private static void BindHotIndices(MetaInstr[] code, TileGrid grid)
         {
+            if (grid == null)
+                throw new ArgumentNullException(nameof(grid), "Force-hot compile requires a grid to bind hot indices.");
+
             for (int i = 0; i < code.Length; i++)
             {
                 ref MetaInstr ins = ref code[i];
-                ins.HotIndex = -1;
-
-                if (grid == null)
-                    continue;
 
                 // Only ops that read meta need binding
                 if (ins.Op == MetaOpCode.LoadVar ||
@@ -252,12 +250,22 @@ namespace Dalichrome.RandomGenerator.Utils
                     ins.Op == MetaOpCode.SampleConst)
                 {
                     int idx = grid.GetMetaIndex(ins.Key);
-                    if (idx >= 0 && idx <= short.MaxValue)
-                        ins.HotIndex = (short)idx;
+                    if ((uint)idx > short.MaxValue) // catches -1 and too-large
+                    {
+                        // Make this error message *actionable*
+                        throw new InvalidOperationException(
+                            $"Meta bytecode requires hot meta key '{ins.Key.ToString()}', but it was not initialized as hot. " +
+                            $"Ensure TileGrid.InitializeMeta(...) includes all keys from ExtractKeys() before Compile().");
+                    }
+
+                    ins.HotIndex = (short)idx;
+                }
+                else
+                {
+                    ins.HotIndex = -1; // irrelevant
                 }
             }
         }
-
 
         // ============================================================
         // AST Nodes
