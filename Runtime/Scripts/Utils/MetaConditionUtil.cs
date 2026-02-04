@@ -36,5 +36,12 @@ namespace Dalichrome.RandomGenerator.Utils
 
             return compiledCondition.Matches(metaPairs);
         }
+
+        public bool MatchMetaCondition(int x, int y)
+        {
+            if (compiledCondition == null) return false;
+
+            return compiledCondition.Matches(ref tileGrid, x, y);
+        }
     }
 }

@@ -429,7 +429,6 @@ namespace Dalichrome.RandomGenerator.Core
             if (colData.Count == 0) return posData;
             if (posData.Count == 0) return colData;
 
-            // Reuse one list, avoid a third allocation
             colData.AddRange(posData);
             return colData;
         }

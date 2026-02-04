@@ -1,5 +1,6 @@
 
 using Dalichrome.RandomGenerator.Configs;
+using Dalichrome.RandomGenerator.Core;
 using System.Collections.Generic;
 using Unity.Collections;
 
@@ -16,13 +17,39 @@ namespace Dalichrome.RandomGenerator.Utils
                 for (int i = 0; i < metaCondition.keyIntConditions.Count; i++)
                 {
                     var cond = metaCondition.keyIntConditions[i];
-                    if (string.IsNullOrEmpty(cond.key))
+                    if (string.IsNullOrEmpty(cond.key) || string.IsNullOrWhiteSpace(cond.intCondition))
+                        continue;
+
+                    compiled.AddIntCondition(cond.key, IntConditionCompiler.Compile(cond.intCondition));
+                }
+            }
+
+            // Compile the key expression (may be null = implicit AND mode)
+            KeyConditionNode keyNode = string.IsNullOrWhiteSpace(compiled.KeyCondition)
+                ? null
+                : KeyConditionCompiler.Compile(compiled.KeyCondition);
+            compiled.SetKeyCondition(keyNode);
+
+            return compiled;
+        }
+
+        public static CompiledMetaCondition Compile(MetaCondition metaCondition, TileGrid grid)
+        {
+            CompiledMetaCondition compiled = new(metaCondition);
+
+            if (metaCondition.keyIntConditions != null)
+            {
+                for (int i = 0; i < metaCondition.keyIntConditions.Count; i++)
+                {
+                    var cond = metaCondition.keyIntConditions[i];
+                    if (string.IsNullOrEmpty(cond.key) || string.IsNullOrWhiteSpace(cond.intCondition))
                         continue;
 
                     // Empty string = "presence only" ¨ store null
-                    if (string.IsNullOrWhiteSpace(cond.intCondition))
+                    int index = grid.GetMetaIndex(cond.key);
+                    if (index != -1)
                     {
-                        compiled.AddIntCondition(cond.key, null);
+                        compiled.AddIntCondition(index, IntConditionCompiler.Compile(cond.intCondition));
                     }
                     else
                     {

@@ -494,7 +494,6 @@ namespace Dalichrome.RandomGenerator
 
             LookupBundleBuilder.DisposeCachedNativeBundle();
             if (toSerialAfter) data.ToSerial();
-            tilemapInteractor?.CreateWithTilegrid(data.Grid);
             events.RaiseGenerationEnd(data);
 
             Debug.Log("Ended Generation of Graph " + Graph.name);

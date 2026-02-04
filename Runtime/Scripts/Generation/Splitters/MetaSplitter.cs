@@ -3,6 +3,7 @@ using Dalichrome.RandomGenerator.Core;
 using Dalichrome.RandomGenerator.Data;
 using Dalichrome.RandomGenerator.Utils;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using Unity.Mathematics;
 
 namespace Dalichrome.RandomGenerator.Generators
@@ -25,7 +26,7 @@ namespace Dalichrome.RandomGenerator.Generators
             RegionBounds bounds = generation.Grid.GetRegionBounds();
             RegionSplits regionSplits = new(generation);
 
-            floodFillUtil.SetFillPredicate(pos => conditionUtil.MatchMetaCondition(generation.Grid.GetAllData(pos)));
+            floodFillUtil.SetFillPredicate(pos => conditionUtil.MatchMetaCondition(pos.x, pos.y));
 
             int left = int.MaxValue;
             int bottom = int.MaxValue;

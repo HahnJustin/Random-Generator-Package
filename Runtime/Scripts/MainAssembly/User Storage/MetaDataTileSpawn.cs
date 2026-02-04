@@ -30,8 +30,8 @@ namespace Dalichrome.RandomGenerator.UserData
 #endif
         public TileSpawn tileSpawn;
 
-        private bool _compiled = false;
-        private CompiledMetaCondition compiledCondition;
+        [NonSerialized] private bool _compiled = false;
+        [NonSerialized] private CompiledMetaCondition compiledCondition;
 
         public void EnsureCompiled()
         {
