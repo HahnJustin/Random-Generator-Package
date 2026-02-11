@@ -437,70 +437,70 @@ namespace Dalichrome.RandomGenerator.Core
         public void InitializeMeta(List<FixedString64Bytes> hotMetaKeys) => metaData.Initialize(width, height, hotMetaKeys);
         public int GetMetaIndex(FixedString64Bytes metaKey) => metaData.GetIndex(metaKey);
 
-        public void AddDataLayerId(int x, int y, int layerId, string field, int value) =>
+        public void AddDataLayerId(int x, int y, int layerId, string field, float value) =>
             AddData(x, y, GetLayerIndexFromLayerId(layerId), field, value);
 
-        public void AddData(int x, int y, int layerZ, string field, int value)
+        public void AddData(int x, int y, int layerZ, string field, float value)
         {
             if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ) || !CanModifyColumn(x, y)) return;
             metaData.AddData(new int3(x, y, layerZ), field, value);
         }
 
-        public void AddData(int x, int y, string field, int value) =>
+        public void AddData(int x, int y, string field, float value) =>
             AddData(x, y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value)
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, float value)
         {
             if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ) || !CanModifyColumn(x, y)) return;
             metaData.AddData(new int3(x, y, layerZ), fixedField, value);
         }
 
-        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) =>
+        public void AddData(int x, int y, FixedString64Bytes fixedField, float value) =>
             AddData(x, y, MetaData.ColumnZ, fixedField, value);
 
         public void AddData(MetadataEntry entry) =>
             AddData(entry.GetShiftedX(), entry.GetShiftedY(), GetLayerIndexFromLayerId(entry.layerId), entry.field, entry.value);
 
-        public void AddData(int2 pos, int fieldIndex, int value)
+        public void AddData(int2 pos, int fieldIndex, float value)
         {
             if (!IsInBounds(pos.x, pos.y) || !CanModifyColumn(pos.x, pos.y)) return;
             metaData.AddData(pos, fieldIndex, value);
         }
 
-        public int GetDataLayerId(int x, int y, int layerId, string field) =>
+        public float GetDataLayerId(int x, int y, int layerId, string field) =>
             GetData(x, y, GetLayerIndexFromLayerId(layerId), field);
 
-        public int GetData(int x, int y, int layerZ, string field)
+        public float GetData(int x, int y, int layerZ, string field)
         {
             if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return 0;
 
-            if (metaData.TryGetData(new int3(x, y, layerZ), field, out int val))
+            if (metaData.TryGetData(new int3(x, y, layerZ), field, out float val))
                 return val;
 
             return 0;
         }
 
-        public int GetData(int x, int y, string field) =>
+        public float GetData(int x, int y, string field) =>
             GetData(x, y, MetaData.ColumnZ, field);
 
-        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField)
+        public float GetData(int x, int y, int layerZ, FixedString64Bytes fixedField)
         {
             if (!IsInBounds(x, y) || !ZInMetaBounds(layerZ)) return 0;
 
-            if (metaData.TryGetData(new int3(x, y, layerZ), fixedField, out int val))
+            if (metaData.TryGetData(new int3(x, y, layerZ), fixedField, out float val))
                 return val;
 
             return 0;
         }
 
-        public int GetData(int x, int y, FixedString64Bytes fixedField) =>
+        public float GetData(int x, int y, FixedString64Bytes fixedField) =>
             GetData(x, y, MetaData.ColumnZ, fixedField);
 
-        public int GetData(int2 pos, int fieldIndex)
+        public float GetData(int2 pos, int fieldIndex)
         {
             if (!IsInBounds(pos.x, pos.y)) return 0;
 
-            if (metaData.TryGetData(pos, fieldIndex, out int val))
+            if (metaData.TryGetData(pos, fieldIndex, out float val))
                 return val;
 
             return 0;

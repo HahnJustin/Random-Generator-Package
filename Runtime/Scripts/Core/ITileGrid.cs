@@ -53,18 +53,18 @@ namespace Dalichrome.RandomGenerator.Core
         void InitializeMeta(List<FixedString64Bytes> hotMetaKeys);
         int GetMetaIndex(FixedString64Bytes metaKey);
 
-        void AddDataLayerId(int x, int y, int layerId, string field, int value);
+        void AddDataLayerId(int x, int y, int layerId, string field, float value);
 
-        void AddData(int x, int y, int layerZ, string field, int value);
-        void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value);
-        void AddData(int2 pos, int fieldIndex, int value);
+        void AddData(int x, int y, int layerZ, string field, float value);
+        void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, float value);
+        void AddData(int2 pos, int fieldIndex, float value);
         void AddData(MetadataEntry entry);
 
-        int GetDataLayerId(int x, int y, int layerId, string field);
+        float GetDataLayerId(int x, int y, int layerId, string field);
 
-        int GetData(int x, int y, int layerZ, string field);
-        int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField);
-        int GetData(int2 pos, int fieldIndex);
+        float GetData(int x, int y, int layerZ, string field);
+        float GetData(int x, int y, int layerZ, FixedString64Bytes fixedField);
+        float GetData(int2 pos, int fieldIndex);
 
         List<MetaPair> GetAllData(int3 pos);
         List<MetaPair> GetAllDataWithColData(int3 pos);

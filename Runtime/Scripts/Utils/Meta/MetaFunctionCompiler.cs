@@ -295,7 +295,7 @@ namespace Dalichrome.RandomGenerator.Utils
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal override float Eval(ref TileGrid grid, int x, int y)
             {
-                int v = grid.GetData(x, y, _z, _key);
+                float v = grid.GetData(x, y, _z, _key);
                 return v;
             }
         }
@@ -398,7 +398,6 @@ namespace Dalichrome.RandomGenerator.Utils
                 int sx = x + _dx;
                 int sy = y + _dy;
 
-                // inline clamp (tiny, but this is hot)
                 if (sx < 0) sx = 0;
                 else if (sx >= grid.width) sx = grid.width - 1;
 

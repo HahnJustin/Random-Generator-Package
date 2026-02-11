@@ -17,14 +17,14 @@ namespace Dalichrome.RandomGenerator.Utils
         public string KeyCondition { get { return _keyCondition; } }
 
         private KeyConditionNode keyNode;
-        private Dictionary<string, IntConditionNode> keyToIntNode;
-        private Dictionary<int, IntConditionNode> keyIndexToIntNode;
+        private Dictionary<string, FloatConditionNode> keyToFloatNode;
+        private Dictionary<int, FloatConditionNode> keyIndexToFloatNode;
 
         public CompiledMetaCondition(MetaCondition condition)
         {
             _keyCondition = condition.keyCondition;
-            keyToIntNode = new();
-            keyIndexToIntNode = new();
+            keyToFloatNode = new();
+            keyIndexToFloatNode = new();
         }
 
         internal void SetKeyCondition(KeyConditionNode node)
@@ -32,20 +32,20 @@ namespace Dalichrome.RandomGenerator.Utils
             keyNode = node;
         }
 
-        internal void AddIntCondition(string key, IntConditionNode node)
+        internal void AddFloatCondition(string key, FloatConditionNode node)
         {
-            keyToIntNode.Add(key, node);
+            keyToFloatNode.Add(key, node);
         }
 
-        internal void AddIntCondition(int keyIndex, IntConditionNode node)
+        internal void AddFloatCondition(int keyIndex, FloatConditionNode node)
         {
-            keyIndexToIntNode.Add(keyIndex, node);
+            keyIndexToFloatNode.Add(keyIndex, node);
         }
 
         public bool Matches(List<MetaPair> metaPairs)
         {
             // local helper for value lookup
-            bool TryGet(string key, out int value)
+            bool TryGet(string key, out float value)
             {
                 if (metaPairs != null)
                 {
@@ -66,15 +66,15 @@ namespace Dalichrome.RandomGenerator.Utils
             // 1) No keyCondition Å® implicit AND of all keyIntConditions
             if (keyNode == null)
             {
-                if (keyToIntNode == null || keyToIntNode.Count == 0)
+                if (keyToFloatNode == null || keyToFloatNode.Count == 0)
                     return true; // no conditions at all
 
-                foreach (var kvp in keyToIntNode)
+                foreach (var kvp in keyToFloatNode)
                 {
                     string keyName = kvp.Key;
                     var node = kvp.Value; // may be null Å® presence-only
 
-                    if (!TryGet(keyName, out int value))
+                    if (!TryGet(keyName, out float value))
                         return false;
 
                     if (!node.Evaluate(value))
@@ -87,11 +87,11 @@ namespace Dalichrome.RandomGenerator.Utils
             // 2) keyCondition present Å® use AST, per-key int ASTs
             bool KeySatisfied(string keyName)
             {
-                if (!TryGet(keyName, out int value))
+                if (!TryGet(keyName, out float value))
                     return false;
 
-                if (keyToIntNode == null ||
-                    !keyToIntNode.TryGetValue(keyName, out var node) ||
+                if (keyToFloatNode == null ||
+                    !keyToFloatNode.TryGetValue(keyName, out var node) ||
                     node == null)
                     return true; // presence-only
 
@@ -112,28 +112,26 @@ namespace Dalichrome.RandomGenerator.Utils
 
             if (keyNode == null)
             {
-                if (keyIndexToIntNode.Count == 0 && keyToIntNode.Count == 0)
+                if (keyIndexToFloatNode.Count == 0 && keyToFloatNode.Count == 0)
                     return true;
 
-                foreach (var kvp in keyIndexToIntNode)
+                foreach (var kvp in keyIndexToFloatNode)
                 {
                     int keyIndex = kvp.Key;
                     var node = kvp.Value; // may be null Å® presence-only
 
-                    int value = g.GetData(pos, keyIndex);
+                    float value = g.GetData(pos, keyIndex);
 
-                    if (value == 0) return false;          // absent (your convention)
                     if (node != null && !node.Evaluate(value)) return false;
                 }
 
-                foreach (var kvp in keyToIntNode)
+                foreach (var kvp in keyToFloatNode)
                 {
                     string key = kvp.Key;
                     var node = kvp.Value; // may be null Å® presence-only
 
-                    int value = g.GetData(pos, key);
+                    float value = g.GetData(pos, key);
 
-                    if (value == 0) return false;          // absent
                     if (node != null && !node.Evaluate(value)) return false;
                 }
 
@@ -146,18 +144,17 @@ namespace Dalichrome.RandomGenerator.Utils
                 int keyIndex = g.GetMetaIndex((FixedString64Bytes)keyName);
                 if (keyIndex != -1)
                 {
-                    int value = g.GetData(pos, keyIndex);
-                    if (value == 0) return false; // absent
+                    float value = g.GetData(pos, keyIndex);
 
                     // Prefer index-bound node if present
-                    if (keyIndexToIntNode != null &&
-                        keyIndexToIntNode.TryGetValue(keyIndex, out var idxNode) &&
+                    if (keyIndexToFloatNode != null &&
+                        keyIndexToFloatNode.TryGetValue(keyIndex, out var idxNode) &&
                         idxNode != null)
                         return idxNode.Evaluate(value);
 
                     // Optional fallback to string-bound node if present
-                    if (keyToIntNode != null &&
-                        keyToIntNode.TryGetValue(keyName, out var strNode) &&
+                    if (keyToFloatNode != null &&
+                        keyToFloatNode.TryGetValue(keyName, out var strNode) &&
                         strNode != null)
                         return strNode.Evaluate(value);
 
@@ -165,11 +162,11 @@ namespace Dalichrome.RandomGenerator.Utils
                 }
 
                 // Fallback to string lookup
-                int v2 = g.GetData(pos, keyName);
+                float v2 = g.GetData(pos, keyName);
                 if (v2 == 0) return false; // absent
 
-                if (keyToIntNode != null &&
-                    keyToIntNode.TryGetValue(keyName, out var node) &&
+                if (keyToFloatNode != null &&
+                    keyToFloatNode.TryGetValue(keyName, out var node) &&
                     node != null)
                     return node.Evaluate(v2);
 

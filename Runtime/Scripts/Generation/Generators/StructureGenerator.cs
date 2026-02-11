@@ -272,8 +272,8 @@ namespace Dalichrome.RandomGenerator.Generators
 
                 int2 dst = t.DstFromSrc(new int2(entry.x, entry.y), srcW, srcH);
 
-                int chance = entry.value; // 0..100
-                int roll = random.NextInt(0, 100);
+                float chance = entry.value;
+                float roll = random.NextFloat();
 
                 if (roll >= chance)
                     skippedCells.Add(dst);
@@ -326,10 +326,10 @@ namespace Dalichrome.RandomGenerator.Generators
             }
         }
 
-        private static int TransformDirection(int dirDegrees, int rotDegreesCW, bool flipX)
+        private static int TransformDirection(float dirDegrees, int rotDegreesCW, bool flipX)
         {
             // Normalize to [0,360)
-            int d = dirDegrees % 360;
+            float d = dirDegrees % 360;
             if (d < 0) d += 360;
 
             // Quantize to 0/90/180/270 (round to nearest)

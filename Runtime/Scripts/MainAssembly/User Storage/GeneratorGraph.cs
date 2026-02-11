@@ -12,52 +12,269 @@ namespace Dalichrome.RandomGenerator
     [CreateAssetMenu]
     public class GeneratorGraph : NodeGraph
     {
+        private ConfigGraphNode _cachedRoot;
+        [NonSerialized] private bool _cacheValid;
+        [NonSerialized] private List<AbstractConfig> _cachedConfigsOnPath;
+
         public ConfigGraphNode ToConfigGraphRoot()
         {
+            // Use cache if already built
+            //if (_cacheValid && _cachedRoot != null)
+            //    return _cachedRoot;
+
             Node startNode = FindStartNode();
             if (startNode == null)
             {
                 Debug.LogError("No start node found.");
+                _cacheValid = false;
+                _cachedRoot = null;
+                _cachedConfigsOnPath = new List<AbstractConfig>(0);
                 return null;
             }
 
-            var nodeMap = new Dictionary<Node, ConfigGraphNode>();
-            var queue = new Queue<Node>();
-            var visited = new HashSet<Node>();
+            // ------------------------------------------------------------
+            // 1) Compute nodes reachable from Start (topology only)
+            // ------------------------------------------------------------
+            var reachable = new HashSet<Node>();
+            var q = new Queue<Node>();
+            q.Enqueue(startNode);
+            reachable.Add(startNode);
 
-            queue.Enqueue(startNode);
-            visited.Add(startNode);
-
-            while (queue.Count > 0)
+            while (q.Count > 0)
             {
-                Node current = queue.Dequeue();
-
-                var role = GetNodeRole(current);
-                var config = (current as IConfigNode)?.Config;
-                var currentGraphNode = GetOrCreate(current, nodeMap, role, config);
-
-                foreach (NodePort output in current.Outputs)
+                var cur = q.Dequeue();
+                foreach (var nxt in Outgoing(cur))
                 {
-                    foreach (var connection in output.GetConnections())
-                    {
-                        Node target = connection.node;
-                        var targetRole = GetNodeRole(target);
-                        var targetConfig = (target as IConfigNode)?.Config;
-                        var childGraphNode = GetOrCreate(target, nodeMap, targetRole, targetConfig);
-
-                        currentGraphNode.Children.Add(childGraphNode);
-                        childGraphNode.Parents.Add(currentGraphNode);
-
-                        if (visited.Add(target))
-                            queue.Enqueue(target);
-                    }
+                    if (nxt == null) continue;
+                    if (reachable.Add(nxt))
+                        q.Enqueue(nxt);
                 }
             }
 
-            FinalizeGraph(nodeMap[startNode]);
+            // ------------------------------------------------------------
+            // 2) Compute nodes that can reach an End (reverse BFS, topology only)
+            // ------------------------------------------------------------
+            var rev = BuildReverseAdjacency(reachable);
 
-            return nodeMap[startNode];
+            var canReachEnd = new HashSet<Node>();
+            var rq = new Queue<Node>();
+
+            foreach (var n in reachable)
+            {
+                if (GetNodeRole(n) == NodeRole.End)
+                {
+                    canReachEnd.Add(n);
+                    rq.Enqueue(n);
+                }
+            }
+
+            while (rq.Count > 0)
+            {
+                var cur = rq.Dequeue();
+                if (!rev.TryGetValue(cur, out var parents)) continue;
+
+                for (int i = 0; i < parents.Count; i++)
+                {
+                    var p = parents[i];
+                    if (p == null) continue;
+
+                    if (canReachEnd.Add(p))
+                        rq.Enqueue(p);
+                }
+            }
+
+            // Intersection = nodes on some Start->...->End path
+            var onPath = new HashSet<Node>();
+            foreach (var n in reachable)
+                if (canReachEnd.Contains(n))
+                    onPath.Add(n);
+
+            if (!onPath.Contains(startNode))
+            {
+                Debug.LogError("Start node is not on a Start->End path (no valid End reachable).");
+                _cacheValid = false;
+                _cachedRoot = null;
+                _cachedConfigsOnPath = new List<AbstractConfig>(0);
+                return null;
+            }
+
+            // ------------------------------------------------------------
+            // 3) Build runtime ConfigGraph:
+            //    - Materialize Start/End always
+            //    - Materialize config nodes only if Enabled
+            //    - Bypass disabled config nodes when wiring edges
+            // ------------------------------------------------------------
+            var nodeMap = new Dictionary<Node, ConfigGraphNode>(onPath.Count);
+
+            bool Materialize(Node n)
+            {
+                var role = GetNodeRole(n);
+                if (role == NodeRole.Start || role == NodeRole.End) return true;
+
+                if (n is IConfigNode icn && icn.Config != null)
+                    return icn.Config.Enabled;
+
+                // Non-config nodes: keep them (safe default).
+                // If you want ALL non-config nodes to be pass-through, change to: return false;
+                return true;
+            }
+
+            // Create runtime nodes
+            foreach (var n in onPath)
+            {
+                if (!Materialize(n)) continue;
+
+                var role = GetNodeRole(n);
+                var cfg = (n as IConfigNode)?.Config;
+                GetOrCreate(n, nodeMap, role, cfg);
+            }
+
+            // Wire runtime edges with bypassing
+            foreach (var src in onPath)
+            {
+                if (!Materialize(src)) continue;
+                if (!nodeMap.TryGetValue(src, out var srcCg)) continue;
+
+                foreach (var dst in NextMaterializedOnPath(src, onPath, Materialize))
+                {
+                    if (!nodeMap.TryGetValue(dst, out var dstCg)) continue;
+
+                    srcCg.Children.Add(dstCg);
+                    dstCg.Parents.Add(srcCg);
+                }
+            }
+
+            if (!nodeMap.TryGetValue(startNode, out var root))
+            {
+                Debug.LogError("Failed to build runtime root from Start (unexpected).");
+                _cacheValid = false;
+                _cachedRoot = null;
+                _cachedConfigsOnPath = new List<AbstractConfig>(0);
+                return null;
+            }
+
+            // Cache enabled configs on path (in graph order isn’t guaranteed; use later traversal if you need ordering)
+            _cachedConfigsOnPath = new List<AbstractConfig>();
+            foreach (var n in onPath)
+            {
+                if (n is IConfigNode icn && icn.Config != null && icn.Config.Enabled)
+                    _cachedConfigsOnPath.Add(icn.Config);
+            }
+
+            // Finalize (ops, collapse logic filters, sorting)
+            FinalizeGraph(root);
+
+            _cachedRoot = root;
+            _cacheValid = true;
+            return _cachedRoot;
         }
+
+        public List<AbstractConfig> GetConfigList()
+        {
+            if (!_cacheValid || _cachedRoot == null)
+                ToConfigGraphRoot();
+
+            return _cachedConfigsOnPath ?? new List<AbstractConfig>(0);
+        }
+
+        public int GetNodeCount()
+        {
+            var root = ToConfigGraphRoot();
+            if (root == null) return 0;
+
+            int count = 0;
+            var visited = new HashSet<ConfigGraphNode>();
+            var q = new Queue<ConfigGraphNode>();
+            q.Enqueue(root);
+
+            while (q.Count > 0)
+            {
+                var cur = q.Dequeue();
+                if (!visited.Add(cur)) continue;
+
+                // Count configs only (and only enabled ones)
+                if (cur.Config != null && cur.Config.Enabled)
+                    count++;
+
+                for (int i = 0; i < cur.Children.Count; i++)
+                    q.Enqueue(cur.Children[i]);
+            }
+
+            return count;
+        }
+
+        // ----------------- Wiring helpers (kept minimal) -----------------
+
+        private IEnumerable<Node> Outgoing(Node n)
+        {
+            foreach (var output in n.Outputs)
+                foreach (var c in output.GetConnections())
+                    if (c?.node != null)
+                        yield return c.node;
+        }
+
+        /// <summary>
+        /// Returns the "next" materialized nodes reachable from src by walking forward through
+        /// non-materialized nodes (disabled configs), but stopping at the first materialized nodes.
+        /// Restricted to nodes in onPath.
+        /// </summary>
+        private IEnumerable<Node> NextMaterializedOnPath(Node src, HashSet<Node> onPath, Func<Node, bool> materialize)
+        {
+            var seen = new HashSet<Node>();
+            var q = new Queue<Node>();
+
+            foreach (var o in Outgoing(src))
+            {
+                if (o == null) continue;
+                if (!onPath.Contains(o)) continue;
+                q.Enqueue(o);
+            }
+
+            while (q.Count > 0)
+            {
+                var n = q.Dequeue();
+                if (n == null) continue;
+                if (!onPath.Contains(n)) continue;
+                if (!seen.Add(n)) continue;
+
+                if (materialize(n))
+                {
+                    yield return n;
+                    continue; // stop at first hop
+                }
+
+                // bypass disabled config node
+                foreach (var o in Outgoing(n))
+                {
+                    if (o == null) continue;
+                    if (!onPath.Contains(o)) continue;
+                    q.Enqueue(o);
+                }
+            }
+        }
+
+        private Dictionary<Node, List<Node>> BuildReverseAdjacency(HashSet<Node> restrictTo)
+        {
+            var rev = new Dictionary<Node, List<Node>>(restrictTo.Count);
+            foreach (var src in restrictTo)
+            {
+                foreach (var dst in Outgoing(src))
+                {
+                    if (dst == null) continue;
+                    if (!restrictTo.Contains(dst)) continue;
+
+                    if (!rev.TryGetValue(dst, out var parents))
+                    {
+                        parents = new List<Node>(2);
+                        rev[dst] = parents;
+                    }
+                    parents.Add(src);
+                }
+            }
+            return rev;
+        }
+
+        // ----------------- Your existing helpers -----------------
 
         private ConfigGraphNode GetOrCreate(Node node, Dictionary<Node, ConfigGraphNode> map, NodeRole role, AbstractConfig config)
         {
@@ -67,12 +284,6 @@ namespace Dalichrome.RandomGenerator
                 map[node] = configGraphNode;
                 if (node is IConfigNode iconfigNode)
                     configGraphNode.Priority = iconfigNode.Priority;
-
-                // Populate with runtime structure table
-                if (config is IStructureConfig structConfig && !string.IsNullOrEmpty(structConfig.StructureTableId))
-                {
-                    structConfig.StructureTable = StructureTableRegistry.GetRuntime(structConfig.StructureTableId);
-                }
             }
             return configGraphNode;
         }
@@ -94,7 +305,6 @@ namespace Dalichrome.RandomGenerator
             return NodeRole.NA;
         }
 
-        // Adds Operations to Nodes, Collapses Logic Filters, Orders Node Relatives by Priority
         private void FinalizeGraph(ConfigGraphNode root)
         {
             var queue = new Queue<ConfigGraphNode>();
@@ -107,7 +317,6 @@ namespace Dalichrome.RandomGenerator
             {
                 var node = queue.Dequeue();
 
-                //Order by Priority
                 node.Parents.Sort();
                 node.Children.Sort();
 
@@ -140,31 +349,22 @@ namespace Dalichrome.RandomGenerator
 
                         node.Operation = OperationFactory.CreateLogicFilter((AbstractLogicFilterConfig)node.Config, parentFilters);
 
-                        HashSet<ConfigGraphNode> newParents = new();
-                        HashSet<ConfigGraphNode> oldParents = new();
                         if (node.Parents == null) break;
                         for (int i = node.Parents.Count - 1; i >= 0; i--)
                         {
                             var parent = node.Parents[i];
                             if (parent.Role == NodeRole.Filter || parent.Role == NodeRole.LogicFilter)
                             {
-                                oldParents.Add(parent);
                                 node.Parents.Remove(parent);
                                 if (parent.Parents == null) continue;
                                 foreach (var grandParent in parent.Parents)
                                 {
                                     grandParent.Children.Remove(parent);
-                                    newParents.Add(grandParent);
+                                    grandParent.Children.Add(node);
+                                    node.Parents.Add(grandParent);
                                 }
                             }
                         }
-
-                        foreach (var newParent in newParents)
-                        {
-                            newParent.Children.Add(node);
-                        }
-
-                        node.Parents.AddRange(newParents);
                         break;
                 }
 
@@ -174,39 +374,6 @@ namespace Dalichrome.RandomGenerator
                         queue.Enqueue(child);
                 }
             }
-        }
-
-        public int GetNodeCount()
-        {
-            var root = ToConfigGraphRoot();
-            if (root == null) return 0;
-
-            int count = 0;
-            var visited = new HashSet<ConfigGraphNode>();
-            var queue = new Queue<ConfigGraphNode>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                if (!visited.Add(current)) continue;
-
-                if (current.Config != null)
-                    count++;
-
-                foreach (var child in current.Children)
-                    queue.Enqueue(child);
-            }
-
-            return count;
-        }
-
-        public List<AbstractConfig> GetConfigList()
-        {
-            return nodes
-                .OfType<IConfigNode>()
-                .Select(configNode => configNode.Config)
-                .ToList();
         }
 
         public GeneratorGraph Clone(bool duplicateConfigs = true)
@@ -266,7 +433,6 @@ namespace Dalichrome.RandomGenerator
 
             return newGraph;
         }
-
 
         private static AbstractConfig DeepCopyConfig(AbstractConfig source)
         {

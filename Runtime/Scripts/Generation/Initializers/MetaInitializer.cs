@@ -17,9 +17,10 @@ namespace Dalichrome.RandomGenerator.Generators
             for (int i = configs.Count - 1; i >= 0; i--) 
             {
                 AbstractConfig config = configs[i];
-                if (config is not IMetaKeyConfig &&
+                if ((config is not IMetaKeyConfig &&
                     config is not IMetaFunctionConfig &&
-                    config is not IMetaConditionConfig)
+                    config is not IMetaConditionConfig) ||
+                    !config.Enabled)
                     configs.RemoveAt(i);
                 else { containsHotMeta = true; }
             }

@@ -9,7 +9,7 @@ public struct MetadataEntry
     public int x;
     public int y;
     public FixedString64Bytes field;
-    public int value;
+    public float value;
     public int shiftX;
     public int shiftY;
     public bool inverseY;

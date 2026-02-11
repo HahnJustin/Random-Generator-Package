@@ -17,26 +17,21 @@ namespace Dalichrome.RandomGenerator.Generators
             float offX = random.NextFloat(0f, 1000f);
             float offY = random.NextFloat(0f, 1000f);
 
-            FixedString64Bytes field = new FixedString64Bytes(config.MetaKey);
+            FixedString64Bytes field = new (config.MetaKey);
 
             // Precompute to avoid divides in the inner loop
-            float invW = 1f / width;
-            float invH = 1f / height;
+            float xMult = config.ScaleWithMapSize ? 1f / width : 0.01f;
+            float yMult = config.ScaleWithMapSize ? 1f / height : 0.01f;
 
             for (int y = 0; y < height; y++)
             {
-                float ny = (y * invH) * config.Scale + offY;
+                float ny = (y * yMult) * config.Scale + offY;
 
                 for (int x = 0; x < width; x++)
                 {
-                    float nx = (x * invW) * config.Scale + offX;
+                    float nx = (x * xMult) * config.Scale + offX;
 
-                    float sample = Mathf.PerlinNoise(nx, ny); // 0..1
-
-                    int value = Mathf.RoundToInt(sample * config.MaxValue);
-                    value = Mathf.Clamp(value, 1, config.MaxValue);
-
-                    TileGrid.AddData(new int2(x, y), field, value);
+                    TileGrid.AddData(new int2(x, y), field, Mathf.PerlinNoise(nx, ny));
                 }
             }
 

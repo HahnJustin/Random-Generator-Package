@@ -218,84 +218,84 @@ namespace Dalichrome.RandomGenerator.Core
 
         public int GetMetaIndex(FixedString64Bytes field) => subgrid.GetMetaIndex(field);
 
-        public void AddDataLayerId(int x, int y, int layerId, string field, int value) =>
+        public void AddDataLayerId(int x, int y, int layerId, string field, float value) =>
             subgrid.AddDataLayerId(x, y, layerId, field, value);
 
-        public void AddDataLayerId(int2 pos, int layerId, string field, int value) =>
+        public void AddDataLayerId(int2 pos, int layerId, string field, float value) =>
             AddDataLayerId(pos.x, pos.y, layerId, field, value);
 
-        public void AddData(int x, int y, int layerZ, string field, int value) =>
+        public void AddData(int x, int y, int layerZ, string field, float value) =>
             subgrid.AddData(x, y, layerZ, field, value);
 
-        public void AddData(int3 pos, FixedString64Bytes field, int value) =>
+        public void AddData(int3 pos, FixedString64Bytes field, float value) =>
        subgrid.AddData(pos.x, pos.y, pos.z, field, value);
 
-        public void AddData(int3 pos, string field, int value) =>
+        public void AddData(int3 pos, string field, float value) =>
             subgrid.AddData(pos.x, pos.y, pos.z, field, value);
 
         public void AddData(MetadataEntry entry) =>
             subgrid.AddData(entry);
-        public void AddData(int2 pos, int layerZ, string field, int value) =>
+        public void AddData(int2 pos, int layerZ, string field, float value) =>
             AddData(pos.x, pos.y, layerZ, field, value);
 
-        public void AddData(int x, int y, string field, int value) =>
+        public void AddData(int x, int y, string field, float value) =>
             AddData(x, y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int2 pos, string field, int value) =>
+        public void AddData(int2 pos, string field, float value) =>
             AddData(pos.x, pos.y, MetaData.ColumnZ, field, value);
 
-        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) =>
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, float value) =>
             subgrid.AddData(x, y, layerZ, fixedField, value);
 
-        public void AddData(int2 pos, int layerZ, FixedString64Bytes fixedField, int value) =>
+        public void AddData(int2 pos, int layerZ, FixedString64Bytes fixedField, float value) =>
             AddData(pos.x, pos.y, layerZ, fixedField, value);
 
-        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) =>
+        public void AddData(int x, int y, FixedString64Bytes fixedField, float value) =>
             AddData(x, y, MetaData.ColumnZ, fixedField, value);
 
-        public void AddData(int2 pos, FixedString64Bytes fixedField, int value) =>
+        public void AddData(int2 pos, FixedString64Bytes fixedField, float value) =>
             AddData(pos.x, pos.y, MetaData.ColumnZ, fixedField, value);
 
-        public void AddData(int2 pos, int fieldIndex, int value) =>
+        public void AddData(int2 pos, int fieldIndex, float value) =>
             subgrid.AddData(pos, fieldIndex, value);
 
-        public int GetDataLayerId(int x, int y, int layerId, string field) =>
+        public float GetDataLayerId(int x, int y, int layerId, string field) =>
             subgrid.GetDataLayerId(x, y, layerId, field);
 
-        public int GetDataLayerId(int2 pos, int layerId, string field) =>
+        public float GetDataLayerId(int2 pos, int layerId, string field) =>
             GetDataLayerId(pos.x, pos.y, layerId, field);
 
-        public int GetData(int x, int y, int layerZ, string field) =>
+        public float GetData(int x, int y, int layerZ, string field) =>
             subgrid.GetData(x, y, layerZ, field);
 
-        public int GetData(int3 pos, string field) =>
+        public float GetData(int3 pos, string field) =>
             GetData(pos.x, pos.y, pos.z, field);
 
-        public int GetData(int2 pos, int layerZ, string field) =>
+        public float GetData(int2 pos, int layerZ, string field) =>
             GetData(pos.x, pos.y, layerZ, field);
 
-        public int GetData(int x, int y, string field) =>
+        public float GetData(int x, int y, string field) =>
             GetData(x, y, MetaData.ColumnZ, field);
 
-        public int GetData(int2 pos, string field) =>
+        public float GetData(int2 pos, string field) =>
             GetData(pos.x, pos.y, MetaData.ColumnZ, field);
 
-        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) =>
+        public float GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) =>
             subgrid.GetData(x, y, layerZ, fixedField);
 
-        public int GetData(int3 pos, FixedString64Bytes fixedField) =>
+        public float GetData(int3 pos, FixedString64Bytes fixedField) =>
             GetData(pos.x, pos.y, pos.z, fixedField);
 
-        public int GetData(int2 pos, int layerZ, FixedString64Bytes fixedField) =>
+        public float GetData(int2 pos, int layerZ, FixedString64Bytes fixedField) =>
             GetData(pos.x, pos.y, layerZ, fixedField);
 
-        public int GetData(int x, int y, FixedString64Bytes fixedField) =>
+        public float GetData(int x, int y, FixedString64Bytes fixedField) =>
             GetData(x, y, MetaData.ColumnZ, fixedField);
 
-        public int GetData(int2 pos, FixedString64Bytes fixedField) =>
+        public float GetData(int2 pos, FixedString64Bytes fixedField) =>
             GetData(pos.x, pos.y, MetaData.ColumnZ, fixedField);
 
-        public int GetData(int2 pos, int fieldIndex) =>
+        public float GetData(int2 pos, int fieldIndex) =>
             subgrid.GetData(pos, fieldIndex);
 
         public List<MetaPair> GetAllData(int3 pos) =>

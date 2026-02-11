@@ -16,10 +16,10 @@ namespace Dalichrome.RandomGenerator.Configs
         public string MetaKey { get { return _metaKey; } set { _metaKey = value; } }
         [SerializeField] private string _metaKey = "temperature";
 
-        public int MaxValue { get { return _maxValue; } set { _maxValue = value; } }
-        [SerializeField] private int _maxValue = 100;
-
         public float Scale { get { return _scale; } set { _scale = value; } }
         [SerializeField] private float _scale = 5f;
+
+        public bool ScaleWithMapSize { get { return _scaleWithMapSize; } set { _scaleWithMapSize = value; } }
+        [SerializeField] private bool _scaleWithMapSize = false;
     }
 }

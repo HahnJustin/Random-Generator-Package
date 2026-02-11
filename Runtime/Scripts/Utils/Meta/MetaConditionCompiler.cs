@@ -20,7 +20,7 @@ namespace Dalichrome.RandomGenerator.Utils
                     if (string.IsNullOrEmpty(cond.key) || string.IsNullOrWhiteSpace(cond.intCondition))
                         continue;
 
-                    compiled.AddIntCondition(cond.key, IntConditionCompiler.Compile(cond.intCondition));
+                    compiled.AddFloatCondition(cond.key, FloatConditionCompiler.Compile(cond.intCondition));
                 }
             }
 
@@ -49,11 +49,11 @@ namespace Dalichrome.RandomGenerator.Utils
                     int index = grid.GetMetaIndex(cond.key);
                     if (index != -1)
                     {
-                        compiled.AddIntCondition(index, IntConditionCompiler.Compile(cond.intCondition));
+                        compiled.AddFloatCondition(index, FloatConditionCompiler.Compile(cond.intCondition));
                     }
                     else
                     {
-                        compiled.AddIntCondition(cond.key, IntConditionCompiler.Compile(cond.intCondition));
+                        compiled.AddFloatCondition(cond.key, FloatConditionCompiler.Compile(cond.intCondition));
                     }
                 }
             }

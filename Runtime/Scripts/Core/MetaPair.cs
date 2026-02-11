@@ -7,6 +7,6 @@ namespace Dalichrome.RandomGenerator.Core
     public struct MetaPair
     {
         public string field;
-        public int value;
+        public float value;
     }
 }

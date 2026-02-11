@@ -127,7 +127,7 @@ namespace Dalichrome.RandomGenerator.UserData
                 // Flip Y to match runtime / TileGrid convention
                 int flippedY = height - 1 - m.y;
 
-                // Example raw: "field:1, other:2"
+                // Example raw: "field:1, other:2"  (now supports floats)
                 var segments = m.raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var seg in segments)
                 {
@@ -136,6 +136,30 @@ namespace Dalichrome.RandomGenerator.UserData
                         continue;
 
                     int colonIndex = trimmed.IndexOf(':');
+
+                    // Optional presence-only support:
+                    // "wet" => wet:1
+                    // If you DON'T want this, delete this block and keep requiring "key:value".
+                    if (colonIndex < 0)
+                    {
+                        string keyOnly = trimmed.Trim();
+                        if (string.IsNullOrEmpty(keyOnly))
+                            continue;
+
+                        if (keyOnly.Length > 64)
+                            keyOnly = keyOnly.Substring(0, 64);
+
+                        result.Add(new MetadataEntry
+                        {
+                            layerId = m.layerId,
+                            x = m.x,
+                            y = flippedY,
+                            field = new FixedString64Bytes(keyOnly),
+                            value = 1f
+                        });
+                        continue;
+                    }
+
                     if (colonIndex <= 0 || colonIndex >= trimmed.Length - 1)
                         continue; // no proper "field:value"
 
@@ -145,23 +169,23 @@ namespace Dalichrome.RandomGenerator.UserData
                     if (string.IsNullOrEmpty(keyStr))
                         continue;
 
-                    if (!int.TryParse(valStr, out int value))
-                        continue; // ignore non-int values for now
+                    // Float parse (InvariantCulture so "0.25" always works)
+                    if (!float.TryParse(valStr, System.Globalization.NumberStyles.Float,
+                                        System.Globalization.CultureInfo.InvariantCulture, out float value))
+                        continue; // ignore non-float values
 
                     // Optional: truncate overly long keys to avoid FixedString overflow
                     if (keyStr.Length > 64)
                         keyStr = keyStr.Substring(0, 64);
 
-                    var entry = new MetadataEntry
+                    result.Add(new MetadataEntry
                     {
                         layerId = m.layerId,
                         x = m.x,
                         y = flippedY,
                         field = new FixedString64Bytes(keyStr),
                         value = value
-                    };
-
-                    result.Add(entry);
+                    });
                 }
             }
 

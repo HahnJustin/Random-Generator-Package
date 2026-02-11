@@ -21,16 +21,15 @@ namespace Dalichrome.RandomGenerator.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Evaluate(ref TileGrid grid, int x, int y)
+        public float Evaluate(ref TileGrid grid, int x, int y)
         {
-            float v = _program.Eval(ref grid, x, y);
-            return (int)math.round(v);
+            return _program.Eval(ref grid, x, y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Run(ref TileGrid grid, int x, int y)
         {
-            int v = Evaluate(ref grid, x, y);
+            float v = Evaluate(ref grid, x, y);
             grid.AddData(x, y, OutputZ, OutputKey, v);
         }
     }

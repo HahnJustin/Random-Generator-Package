@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Dalichrome.RandomGenerator.Core
 {
@@ -308,20 +307,20 @@ namespace Dalichrome.RandomGenerator.Core
         public void InitializeMeta(List<FixedString64Bytes> hotMetaKeys) { }
         public int GetMetaIndex(FixedString64Bytes metaKey) => 0;
 
-        public void AddDataLayerId(int x, int y, int layerId, string field, int value) { }
-        public void AddData(int x, int y, int layerZ, string field, int value) { }
-        public void AddData(int x, int y, string field, int value) { }
-        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, int value) { }
-        public void AddData(int x, int y, FixedString64Bytes fixedField, int value) { }
-        public void AddData(int2 pos, int fieldIndex, int value) { }
+        public void AddDataLayerId(int x, int y, int layerId, string field, float value) { }
+        public void AddData(int x, int y, int layerZ, string field, float value) { }
+        public void AddData(int x, int y, string field, float value) { }
+        public void AddData(int x, int y, int layerZ, FixedString64Bytes fixedField, float value) { }
+        public void AddData(int x, int y, FixedString64Bytes fixedField, float value) { }
+        public void AddData(int2 pos, int fieldIndex, float value) { }
         public void AddData(MetadataEntry entry) { }
 
-        public int GetDataLayerId(int x, int y, int layerId, string field) => 0;
-        public int GetData(int x, int y, int layerZ, string field) => 0;
-        public int GetData(int x, int y, string field) => 0;
-        public int GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) => 0;
-        public int GetData(int x, int y, FixedString64Bytes fixedField) => 0;
-        public int GetData(int2 pos, int fieldIndex) => 0;
+        public float GetDataLayerId(int x, int y, int layerId, string field) => 0;
+        public float GetData(int x, int y, int layerZ, string field) => 0;
+        public float GetData(int x, int y, string field) => 0;
+        public float GetData(int x, int y, int layerZ, FixedString64Bytes fixedField) => 0;
+        public float GetData(int x, int y, FixedString64Bytes fixedField) => 0;
+        public float GetData(int2 pos, int fieldIndex) => 0;
 
         public List<MetaPair> GetAllData(int3 pos) => new();
         public List<MetaPair> GetAllDataWithColData(int3 pos) => new();
