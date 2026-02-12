@@ -233,12 +233,24 @@ namespace Dalichrome.RandomGenerator.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint HashTile(uint seed, int x, int y, int salt)
         {
-            return (uint)math.hash(new int4(
-                (int)seed,
-                x * 73856093,
-                y * 19349663,
-                salt * 83492791
-            ));
+            unchecked
+            {
+                uint h =
+                    seed * 0x9E3779B9u ^
+                    (uint)x * 0x85EBCA77u ^
+                    (uint)y * 0xC2B2AE3Du ^
+                    (uint)salt * 0x27D4EB2Fu;
+
+                // Avalanche (Murmur-ish finalizer)
+                h ^= h >> 16;
+                h *= 0x7FEB352Du;
+                h ^= h >> 15;
+                h *= 0x846CA68Bu;
+                h ^= h >> 16;
+
+                return h;
+            }
         }
+
     }
 }

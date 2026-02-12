@@ -28,6 +28,8 @@ namespace Dalichrome.RandomGenerator.Generators
             var job = new FillJob
             {
                 readGrid = readGrid,
+                hotMetaIndex = TileGrid.GetMetaIndex(config.MetaKey),
+                useMetaKey = config.UseMetaProbability,
                 writeGrid = nativeGrid,
                 fillIds = tileIds
             };

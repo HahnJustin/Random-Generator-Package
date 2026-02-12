@@ -38,7 +38,7 @@ namespace Dalichrome.RandomGenerator
         private static List<int2> _tileTables;
 
         private static readonly Dictionary<int, TileBase> _tileBaseCache = new();
-        private static readonly Dictionary<int, TileBase> _numberTileBaseCache = new();
+        private static readonly Dictionary<string, TileBase> _numberTileBaseCache = new();
 
         private static NumberSpriteDatabase _numberSpriteDB;
 
@@ -391,9 +391,11 @@ namespace Dalichrome.RandomGenerator
         }
 
         // Number Tiles - TODO: Move elsewhere
-        public static TileBase GetNumberTileBase(int number)
+        public static TileBase GetNumberTileBase(float number)
         {
-            if (_numberTileBaseCache.TryGetValue(number, out var tb))
+            string numberString = FloatToString(number);
+
+            if (_numberTileBaseCache.TryGetValue(numberString, out var tb))
                 return tb;
 
             if (_numberSpriteDB == null)
@@ -402,9 +404,26 @@ namespace Dalichrome.RandomGenerator
                 return null;
             }
 
-            tb = CreateNumberTileBase(number, _numberSpriteDB);
-            _numberTileBaseCache[number] = tb;
+            tb = CreateNumberTileBase(numberString, _numberSpriteDB);
+            _numberTileBaseCache[numberString] = tb;
             return tb;
+        }
+
+        private static string FloatToString(float value)
+        {
+            // Round to 2 decimals first
+            float rounded = MathF.Round(value, 2, MidpointRounding.AwayFromZero);
+
+            // Convert without forcing trailing zeros
+            string s = rounded.ToString("0.##");
+
+            // Remove leading zero for decimals (0.x -> .x)
+            if (s.StartsWith("0."))
+                s = s.Substring(1);
+            else if (s.StartsWith("-0."))
+                s = "-" + s.Substring(2);
+
+            return s;
         }
 
         /// <summary>
@@ -478,7 +497,7 @@ namespace Dalichrome.RandomGenerator
             return tile;
         }
 
-        private static TileBase CreateNumberTileBase(int number, NumberSpriteDatabase db)
+        private static TileBase CreateNumberTileBase(string numberString, NumberSpriteDatabase db)
         {
             const int W = 16, H = 16;
             var tex = new Texture2D(W, H, TextureFormat.RGBA32, false)
@@ -492,7 +511,7 @@ namespace Dalichrome.RandomGenerator
 
             int xOff = 0, yOff = H;
 
-            foreach (char ch in number.ToString())
+            foreach (char ch in numberString)
             {
                 var src = db.GetValue(ch)?.GetTexture();
                 if (!src) continue;

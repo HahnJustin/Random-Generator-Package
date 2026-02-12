@@ -327,6 +327,27 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: numbers_11
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 1
+        width: 3
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb963a64ea15c09408042b508106265b
+      internalID: -1575197471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -342,6 +363,7 @@ TextureImporter:
       numbers_0: 2120600629
       numbers_1: 2015962056
       numbers_10: -2080456616
+      numbers_11: -1575197471
       numbers_2: 1001208542
       numbers_3: -1127375429
       numbers_4: -50616829

@@ -189,11 +189,22 @@ namespace Dalichrome.RandomGenerator
             if (!generationParameters.IsSeeded || generationParameters.Seed == 0) generationParameters.Seed = GetRandomSeed();
 
             Debug.Log($"==== Starting Async Generation via Graph '{Graph.name}' and seed {generationParameters.Seed}");
-            AbstractGridOperationData data = CreateGeneration(token);
             events.RaiseGenerationStart(generationParameters);
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
+
+            AbstractGridOperationData data = default;
+            try
+            {
+                data = CreateGeneration();
+            }
+            catch (Exception ex)
+            {
+                events.RaiseGenerationError(ex.ToString());
+                GenerationCleanup(data);
+                return;
+            }
 
             ConfigGraphNode current = Graph.ToConfigGraphRoot();
             bool forwards = true;
@@ -311,8 +322,19 @@ namespace Dalichrome.RandomGenerator
                 generationParameters.Seed = GetRandomSeed();
 
             Debug.Log($"==== Starting Coroutine Generation via Graph '{Graph.name}' and seed {generationParameters.Seed}");
-            AbstractGridOperationData data = CreateGeneration();
+
             events.RaiseGenerationStart(generationParameters);
+            AbstractGridOperationData data = default;
+            try
+            {
+                data = CreateGeneration();
+            }
+            catch (Exception ex)
+            {
+                events.RaiseGenerationError($"Coroutine Generation Error: {ex}");
+                data?.Dispose();
+                yield break;
+            }
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();

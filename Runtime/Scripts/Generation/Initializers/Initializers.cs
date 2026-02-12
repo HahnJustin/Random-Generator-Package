@@ -1,6 +1,8 @@
 using Dalichrome.RandomGenerator.Configs;
 using Dalichrome.RandomGenerator.Data;
 using System.Collections.Generic;
+using UnityEditor.Graphs;
+using UnityEngine;
 
 namespace Dalichrome.RandomGenerator.Generators
 {
@@ -16,6 +18,7 @@ namespace Dalichrome.RandomGenerator.Generators
         {
             foreach (AbstractInitializer init in All)
             {
+                Debug.Log($"Initializing {init.GetType().Name}");
                 generation = init.Execute(generation, configs);
             }
             return generation;
